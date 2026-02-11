@@ -36,7 +36,7 @@ Il museo è rappresentato da un file di configurazione e un insieme di visite di
 Al navigator si può accedere come guida o come visitatore. La guida dispone di un sistema di sincronizzazione e di una chiave di accesso da dare ai visitatori. Nel caso di una visita formativa, si può somministrare un quiz a risposta multipla ai visitatori. 
 
 ## Visite: l'oggetto item
-La visita è una raccolta di dati del museo e della mostra (locazione, costo del biglietto, posizione dei servizi del museo, etc.) e una sequenza ordinata di *item*.
+La visita è una raccolta di dati del museo e della mostra (locazione, costo del biglietto, posizione dei servizi del museo ed eventuale test a risposta multipla) e una sequenza ordinata di *item*.
 Gli item sono dei dati strutturati, che identificano una tappa della visita e forniscono tutto quello che si sa sull'oggetto della tappa. Sono visualizzati a schermo e letti via sintesi vocale.
 
 Hanno dei campi obbligatori quali:
@@ -63,9 +63,10 @@ Le varie funzioni includono:
 L'interazione con l'utente avviene via tasti o via comandi vocali.
 I comandi vocali fanno parte di un *vocabolario libero* che viene mappato da un LLM ai comandi predefiniti.
 
-Il sistema ha due modalità:
+Il sistema ha tre modalità:
 - *libre* per gli utenti singoli, senza guida. In questa modalità sono disponibili tutte le funzionalità di navigator.
-- *guided* per gli utenti in gruppo o con una guida. È disponibile solo l'interazione attraverso sintesi vocale. 
+- *guided* per gli utenti in gruppo o con una guida. È disponibile solo l'interazione attraverso sintesi vocale.
+- *master* per le guide. Permette di fornire una chiave d'accesso se la visita selezionata è pubblica o privata con chiave d'accesso. Si può vedere una lista degli utenti collegati alla visita e le loro interzioni vocali con l'app. Si può fornire il test a risposta multipla presente nella visita.
 
 Le varie funzioni includono:
 - [ ] Presentazione visiva dell'item.
@@ -76,4 +77,4 @@ Le varie funzioni includono:
 
 # Tecnologie utilizzate
 Navigator e Marketplace sono applicazioni client-side costruite con JavaScript, collegate a processi server-side locali in Node.JS. Utilizzano come database NoSQL MongoDB.
-Navigator utilizza il framework Vue.Js mentre Marketplace non utilizza alcun framework e si basa su vanilla JavaScript.
+Navigator utilizza il framework Vue.Js mentre Marketplace potrebbe usare Alpine o basarsi su vanilla JavaScript.
