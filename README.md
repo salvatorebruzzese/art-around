@@ -28,8 +28,12 @@ L'editor mostra tutte le visite create.
 
 Ogni visita può essere modificata nell'editor se si è i creatori della visita o creando una copia da modificare, oppure se ne può creare una da zero.
 
+I metadati delle visite mantengono anche lo stato di pubblicazione (pubblico, privato con chiave d'accesso, privato), la licenza di utilizzo della visita e informazioni sulle vendite.
+
 ## Il Navigator
 Il museo è rappresentato da un file di configurazione e un insieme di visite disponibili. Navigator gestisce anche il [sistema di navigazione](#il-sistema-di-navigazione).
+
+Al navigator si può accedere come guida o come visitatore. La guida dispone di un sistema di sincronizzazione e di una chiave di accesso da dare ai visitatori. Nel caso di una visita formativa, si può somministrare un quiz a risposta multipla ai visitatori. 
 
 ## Visite: l'oggetto item
 La visita è una raccolta di dati del museo e della mostra (locazione, costo del biglietto, posizione dei servizi del museo, etc.) e una sequenza ordinata di *item*.
@@ -38,12 +42,11 @@ Gli item sono dei dati strutturati, che identificano una tappa della visita e fo
 Hanno dei campi obbligatori quali:
 - Una stringa alfanumerica come identificativo.
 - Un intero positivo per la lunghezza in secondi della spiegazione.
-- Un membro di un enumerazione per i livello del linguaggio utilizzato (semplice, normale, avanzato).
+- Un membro di un enumerazione per il livello del linguaggio utilizzato (semplice, normale, avanzato) e una stringa di spiegazione dell'opera.
 - Una stringa o un item per l'autore dell'opera.
 - Una stringa per la licenza d'uso.
 
 Hanno dei campi facoltativi:
-- Una stringa di spiegazione dell'opera per ogni livello di linguaggio.
 - Un'immagine dell'oggetto.
 - La data di creazione dell'opera.
 - Lo stile dell'opera.
@@ -60,12 +63,16 @@ Le varie funzioni includono:
 L'interazione con l'utente avviene via tasti o via comandi vocali.
 I comandi vocali fanno parte di un *vocabolario libero* che viene mappato da un LLM ai comandi predefiniti.
 
+Il sistema ha due modalità:
+- *libre* per gli utenti singoli, senza guida. In questa modalità sono disponibili tutte le funzionalità di navigator.
+- *guided* per gli utenti in gruppo o con una guida. È disponibile solo l'interazione attraverso sintesi vocale. 
 
 Le varie funzioni includono:
 - [ ] Presentazione visiva dell'item.
 - [ ] Lettura attraverso sintesi vocale dei campi associati all'item.
 - [ ] Interazione vocale tramite vocabolario libero per chiedere più informazioni sull'oggetto o informazioni sui servizi del museo.
-- [ ] È
+- [ ] La visualizzazione opzionale di una planimetria del museo con le relative posizioni degli item.
+- [ ] Una funzione nella planimetria che permetta di teletrasportarsi da un'opera all'altra. In questo caso la visita riprende dall'opera selezionata.
 
 # Tecnologie utilizzate
 Navigator e Marketplace sono applicazioni client-side costruite con JavaScript, collegate a processi server-side locali in Node.JS. Utilizzano come database NoSQL MongoDB.
