@@ -1,5 +1,5 @@
 # Art around
-Un'applicazione web full-stack e responsive per gestire le visite ai musei, sviluppata come progetto del corso Tecnologie Web A.A. 2025/2026 dell'Università di Bologna.
+Un'applicazione web full-stack e responsive per gestire le visite ai musei, sviluppata come progetto del corso Tecnologie Web A.A. 2025/2026 dell'Università di Bologna.
 
 # UI e UX
 Il progetto segue i principi del goal-oriented design, adattando la visita dell'utente in quattro dimensioni diverse:
@@ -11,43 +11,61 @@ Il progetto segue i principi del goal-oriented design, adattando la visita dell'
 La UI verrà progettata in un'applicazione di web design basata su componenti chiamata [Penpot](https://penpot.app).
 
 # Architettura
-L'applicazione si divide in due moduli essenziali: Navigator e Marketplace.
-  
-Navigator è pensato per essere utilizzato da cellulare durante la visita al museo. Viene utilizzato con degli auricolari e permette di analizzare nel dettaglio un oggetto della mostra, con la possibilità di chiedere spiegazioni sullo stile, sul periodo o su ogni informazione *registrata* sull'oggetto e l'artista. Navigator si adatta all'utente secondo i principi di cui sopra, utilizzando sintetizzatori vocali e modelli di intelligenza artificiale per adattare i chiarimenti sull'oggetto all'utente. Il museo è rappresentato da un file di configurazione e un insieme di visite disponibili. Navigator gestisce anche il [sistema di navigazione](#il-sistema-di-navigazione).
+L'applicazione si divide in due moduli essenziali: Marketplace e Navigator.
 
-Marketplace è il modulo utilizzato per la creazione delle visite visualizzate da Navigator, nonché per la pubblicazione, catalogazione e vendita delle visite ai musei. Marketplace è pensato per essere utilizzato al computer in modo totalmente generico rispetto al museo o la visita specifica. L'utente seleziona un museo tra quelli disponibili e vede tutte le visite disponibili, con la possibilità di di vederle e modificarle se gratuite, o comprarle se private.
+Marketplace è il modulo utilizzato per la creazione, pubblicazione, catalogazione e vendita delle visite. Marketplace è pensato per essere utilizzato al computer in modo totalmente generico rispetto al museo o la visita specifica. L'utente seleziona un museo tra quelli disponibili e vede tutte le visite disponibili, con la possibilità di sceglierle, modificarle o comprarle.
 
-Sia Navigator che Marketplace sono responsive e quindi devono adattarsi alla risoluzione del monitor dell'utente.
+Navigator è pensato per essere utilizzato da cellulare e auricolari durante la visita al museo. Permette di analizzare nel dettaglio un oggetto della mostra, con la possibilità di chiedere spiegazioni audio sui campi dell'item. Navigator si adatta all'utente secondo i [principi sopracitati](#ui-e-ux), utilizzando sintetizzatori vocali e modelli di intelligenza artificiale per adattare all'utente i chiarimenti sull'oggetto.
+
+Sia Marketplace che Navigator sono responsive e quindi devono adattarsi alla risoluzione del monitor dell'utente.
+
+## Il Marketplace
+Il Marketplace è diviso tra un catalogo e un editor.
+Il museo viene scelto con un pannello di scelta multipla all'accesso.
+Viene caricato sempre il catalogo inizialmente, e in alto si ha una barra dove cambiare tra editor e marketplace.
+Il catalogo mostra o le visite pubblicate relative al museo, o l'insieme di contenuti ([item](#visite-loggetto-item)) presenti in tutte le visite del museo.
+L'editor mostra tutte le visite create.
+
+Ogni visita può essere modificata nell'editor se si è i creatori della visita o creando una copia da modificare, oppure se ne può creare una da zero.
+
+## Il Navigator
+Il museo è rappresentato da un file di configurazione e un insieme di visite disponibili. Navigator gestisce anche il [sistema di navigazione](#il-sistema-di-navigazione).
 
 ## Visite: l'oggetto item
-La visita è una raccolta di dati del museo e della visita (locazione, costo del biglietto, posizionamento delle opere, etc.) e una sequenza ordinata di *item*.
-Gli item sono dei dati strutturati, che identificano una tappa della visita e forniscono tutto quello che si sa sull'oggetto della tappa. Gli item sono visualizzati a schermo e letti via sintesi vocale.
+La visita è una raccolta di dati del museo e della mostra (locazione, costo del biglietto, posizione dei servizi del museo, etc.) e una sequenza ordinata di *item*.
+Gli item sono dei dati strutturati, che identificano una tappa della visita e forniscono tutto quello che si sa sull'oggetto della tappa. Sono visualizzati a schermo e letti via sintesi vocale.
 
 Hanno dei campi obbligatori quali:
+- Una stringa alfanumerica come identificativo.
 - Un intero positivo per la lunghezza in secondi della spiegazione.
-- Un membro di un enumerazione per il livello del linguaggio utilizzato (semplice, normale, avanzato).
+- Un membro di un enumerazione per i livello del linguaggio utilizzato (semplice, normale, avanzato).
 - Una stringa o un item per l'autore dell'opera.
 - Una stringa per la licenza d'uso.
 
 Hanno dei campi facoltativi:
+- Una stringa di spiegazione dell'opera per ogni livello di linguaggio.
 - Un'immagine dell'oggetto.
-- Data di creazione dell'opera.
+- La data di creazione dell'opera.
+- Lo stile dell'opera.
 
 ## Il sistema di navigazione 
-Il sistema di navigazione gestisce due aspetti correlati: l'avanzamento della visita e la geolocalizzazione dell'utente rispetto alle opere.
+Il sistema di navigazione gestisce due aspetti correlati: l'avanzamento della visita e la geolocalizzazione dell'utente rispetto alle opere. Il sistema non è visibile dall'utente, ma lo si può utilizzare attraverso il [sistema di interazione](#il-sistema-di-interazione-con-lutente).
 
 Le varie funzioni includono:
 - [ ] Gestione della sequenza di item (andare avanti e indietro nella visita).
-- [ ] Posizionamento degli item in una griglia bidimensionale.
-- [ ] Lista completa della posizione di tutti i servizi del museo (accoglienza, servizi igienici) ed eventuali problemi di accessibilità (ostacoli come scale sprovviste di rampe, descrizioni di oggetti senza braille).
-
-Il modulo di navigazione funziona a stretto contatto con il modulo di interazione con l'utente.
+- [ ] Posizionamento degli item nella planimetria del museo.
+- [ ] Lista completa della posizione di tutti i servizi del museo (accoglienza, servizi igienici) ed eventuali problemi di accessibilità (scale sprovviste di rampe, descrizioni di oggetti senza braille, etc.).
 
 ## Il sistema di interazione con l'utente
+L'interazione con l'utente avviene via tasti o via comandi vocali.
+I comandi vocali fanno parte di un *vocabolario libero* che viene mappato da un LLM ai comandi predefiniti.
+
+
 Le varie funzioni includono:
 - [ ] Presentazione visiva dell'item.
 - [ ] Lettura attraverso sintesi vocale dei campi associati all'item.
 - [ ] Interazione vocale tramite vocabolario libero per chiedere più informazioni sull'oggetto o informazioni sui servizi del museo.
+- [ ] È
 
 # Tecnologie utilizzate
 Navigator e Marketplace sono applicazioni client-side costruite con JavaScript, collegate a processi server-side locali in Node.JS. Utilizzano come database NoSQL MongoDB.
