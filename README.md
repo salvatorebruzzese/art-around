@@ -53,13 +53,19 @@ Navigator gestisce anche il [sistema di navigazione](#il-sistema-di-navigazione)
 La visita è una raccolta di dati del museo e della mostra (locazione, costo del biglietto, posizione dei servizi del museo ed eventuale test a risposta multipla) e una sequenza ordinata di *item*.
 Gli item sono dei dati strutturati, che identificano una tappa della visita e forniscono tutto quello che si sa sull'oggetto della tappa. Sono visualizzati a schermo e letti via sintesi vocale.
 
-Ogni item ha dei campi obbligatori:
+L'item inizia come un'interfaccia base con questi campi:
 - Un nome.
 - Un UUID come identificativo (generato automaticamente).
-- Un membro di un'enumerazione per la tipologia di item (opera, autore, stile, evento, tecnica, altro)
+- Un membro di un'enumerazione per la tipologia di item (opera, autore, stile, tecnica, altro)
 - Lista di oggetti `spiegazione`¹.
 - Una stringa per l'autore dell'item.
 - Una stringa per la licenza d'uso dell'item.
+
+Le interfacce vengono poi implementate per ogni tipologia di item:
+- `autore` aggiunge la data di nascita, di morte e la biografia.
+- `tecnica` aggiunge gli esponenti principali, gli strumenti essenziali della tecnica e una spiegazione.
+- `stile` aggiunge uno o più riferimenti `autore` come esponenti principali, un periodo storico e una spiegazione dello stile.
+- `opera` aggiunge riferimenti a uno o più item `autore`, un rif. a un item `stile` e un rif. a un item `tecnica`, un periodo di creazione ed eventualmente un'immagine.
 
 ---
 ¹ record composto da un membro di un'enumerazione per indicare la presenza di un livello di linguaggio specifico (semplice, normale, avanzato), una stringa per spiegazione dell'opera e un naturale per la durata della spiegazione in secondi.
