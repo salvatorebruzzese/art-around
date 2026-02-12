@@ -56,7 +56,7 @@ Gli item sono dei dati strutturati, che identificano una tappa della visita e fo
 L'item inizia come un'interfaccia base con questi campi:
 - Un nome.
 - Un UUID come identificativo (generato automaticamente).
-- Un membro di un'enumerazione per la tipologia di item (opera, autore, stile, tecnica, altro)
+- Un membro di un'enumerazione per la tipologia di item (autore, stile, tecnica, opera, altro)
 - Lista di oggetti `spiegazione`¹.
 - Una stringa per l'autore dell'item.
 - Una stringa per la licenza d'uso dell'item.
@@ -66,6 +66,8 @@ Le interfacce vengono poi implementate per ogni tipologia di item:
 - `tecnica` aggiunge gli esponenti principali, gli strumenti essenziali della tecnica e una spiegazione.
 - `stile` aggiunge uno o più riferimenti `autore` come esponenti principali, un periodo storico e una spiegazione dello stile.
 - `opera` aggiunge riferimenti a uno o più item `autore`, un rif. a un item `stile` e un rif. a un item `tecnica`, un periodo di creazione ed eventualmente un'immagine.
+
+Le stringhe delle date sono standardizzate secondo lo standard ISO-8601.
 
 ---
 ¹ record composto da un membro di un'enumerazione per indicare la presenza di un livello di linguaggio specifico (semplice, normale, avanzato), una stringa per spiegazione dell'opera e un naturale per la durata della spiegazione in secondi.
@@ -78,6 +80,8 @@ Le varie funzioni includono:
 - [ ] Posizionamento degli item nella planimetria del museo.
 - [ ] Lista completa della posizione di tutti i servizi del museo (accoglienza, servizi igienici)
 - [ ] Descrizione completa dell'accessibilità del museo (scale sprovviste di rampe, descrizioni di oggetti senza braille, etc.).
+- [ ] Una funzione nella planimetria che permetta di teletrasportarsi da un'opera all'altra. In questo caso la visita riprende dall'opera selezionata.
+- [ ] Una funzione per scannerizzare un codice QR di un'opera e selezionarla nella visita.
 
 ## Il sistema di interazione con l'utente
 L'interazione con l'utente avviene via tasti o via comandi vocali.
@@ -86,14 +90,13 @@ I comandi vocali fanno parte di un *vocabolario aperto* che viene mappato da un 
 Il sistema ha tre modalità:
 - *libre* per gli utenti singoli, senza guida. In questa modalità sono disponibili tutte le funzionalità di navigator.
 - *guided* per gli utenti in gruppo o con una guida. È disponibile solo l'interazione attraverso sintesi vocale.
-- *master* per le guide. Permette di fornire una chiave d'accesso per la visita selezionata. Si può vedere una lista degli utenti collegati alla visita e le loro interzioni vocali con l'app. Si può fornire il test a risposta multipla associato alla visita.
+- *master* per le guide. Permette di fornire una chiave d'accesso per la visita selezionata. Si può vedere una lista degli utenti collegati alla visita e le loro interazioni vocali con l'app. Si può fornire il test a risposta multipla associato alla visita.
 
 Le varie funzioni includono:
 - [ ] Presentazione visiva dell'item.
 - [ ] Lettura attraverso sintesi vocale dei campi associati all'item.
 - [ ] Interazione vocale tramite vocabolario libero per chiedere più informazioni sull'oggetto o informazioni sui servizi del museo.
 - [ ] La visualizzazione opzionale di una planimetria del museo con le relative posizioni degli item.
-- [ ] Una funzione nella planimetria che permetta di teletrasportarsi da un'opera all'altra. In questo caso la visita riprende dall'opera selezionata.
 
 ## I comandi predefiniti
 I comandi predefiniti sono tutte le domande disponibili per l'item. Il numero di domande è fisso ed è correlato a un singolo campo dell'item.
@@ -107,7 +110,7 @@ La lista dei comandi, così come sono visti internamente dal sistema di interazi
 - `semplifica` passa al livello precedente disponibile del linguaggio.
 - `uscita` fornisce un'indicazione assoluta sulla posizione dell'uscita della mostra.
 - `bagno` fornisce un'indicazione assoluta sulla posizione dei servizi igienici della struttura.
-- 
+- `reception` fornisce un'indicazione assoluta sulla posizione della reception della struttura.
 
 # Tecnologie utilizzate
 Navigator e Marketplace sono applicazioni client-side costruite con JavaScript, collegate a processi server-side locali in Node.JS. Utilizzano come database NoSQL MongoDB.
