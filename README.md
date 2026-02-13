@@ -22,7 +22,7 @@ Il progetto segue i principi del goal-oriented design, adattando la visita dell'
 
 La UI verrà progettata in un'applicazione di web design basata su componenti chiamata [Penpot](https://penpot.app).
 
-L'applicazione utilizzerà WAI-ARIA per rispettare lo standard WCAG 2.2.
+L'applicazione utilizzerà WAI‑ARIA per rispettare il livello AA dello standard WCAG 2.2. Una buona parte del rispetto dello standard verrà controllata attraverso la [checklist del Project A11Y](https://www.a11yproject.com/checklist/).
 
 # Architettura
 L'applicazione si divide in due moduli essenziali: Marketplace e Navigator.
@@ -130,6 +130,12 @@ La lista dei comandi, così come sono visti internamente dal sistema di interazi
 - `posizioneReception` fornisce un'indicazione assoluta sulla posizione della reception della struttura.
 
 ## Il sistema di creazione visite
+Il progetto richiede la possibilità di creare nuove visite per il museo attraverso l'intelligenza artificiale.
+La funzione principale del sistema di creazione visite è la capacità di fornire a un LLM i campi autore, nome e spiegazione di tutti gli item del museo e ritornare una sequenza ordinata di UUID. La sequenza viene poi raggruppata in una visita con i metadati del museo.
+
+La creazione della visita avviene solo nel caso in cui l'utente fornisca un vincolo agli oggetti nella visita. Per fare questo, viene inserita una finestra di input che permetta di specificare secondo quale criterio bisogna selezionare gli item.
+
+Ottenuta la lista di item, la funzione `componi` prende la lista di output, per ogni UUID controlla l'appartenenza al museo e ritorna una visita con i metadati del museo e una nuova sequenza ordinata di item.
 
 # Tecnologie utilizzate
 Navigator e Marketplace sono applicazioni client-side costruite con JavaScript, collegate a processi locali in Node.js. Utilizzano come database NoSQL MongoDB.
