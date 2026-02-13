@@ -1,6 +1,18 @@
 # Art around
 Un'applicazione web full-stack e responsive per gestire le visite ai musei, sviluppata come progetto del corso Tecnologie Web A.A. 2025/2026 dell'Università di Bologna.
 
+- [Art around](#art-around)
+- [UI e UX](#ui-e-ux)
+- [Architettura](#architettura)
+  - [Il Marketplace](#il-marketplace)
+  - [Il Navigator](#il-navigator)
+  - [Visite: l'oggetto item](#visite-loggetto-item)
+  - [Il sistema di navigazione](#il-sistema-di-navigazione)
+  - [Il sistema di interazione con l'utente](#il-sistema-di-interazione-con-lutente)
+  - [I comandi predefiniti](#i-comandi-predefiniti)
+  - [Il sistema di creazione visite](#il-sistema-di-creazione-visite)
+- [Tecnologie utilizzate](#tecnologie-utilizzate)
+
 # UI e UX
 Il progetto segue i principi del goal-oriented design, adattando la visita dell'utente in quattro dimensioni diverse:
 - Interessi individuali (specifici dell'utente, e.g. l'esposizione di maggiore interesse).
@@ -53,7 +65,7 @@ Navigator gestisce anche il [sistema di navigazione](#il-sistema-di-navigazione)
 La visita è una raccolta di dati del museo e della mostra (locazione, costo del biglietto, posizione dei servizi del museo ed eventuale test a risposta multipla) e una sequenza ordinata di *item*.
 Gli item sono dei dati strutturati, che identificano una tappa della visita e forniscono tutto quello che si sa sull'oggetto della tappa. Sono visualizzati a schermo e letti via sintesi vocale.
 
-L'item inizia come un'interfaccia base con questi campi:
+L'item inizia come una classe astratta con questi campi:
 - Un nome.
 - Un UUID come identificativo (generato automaticamente).
 - Un membro di un'enumerazione per la tipologia di item (autore, stile, tecnica, opera, altro)
@@ -61,11 +73,11 @@ L'item inizia come un'interfaccia base con questi campi:
 - Una stringa per l'autore dell'item.
 - Una stringa per la licenza d'uso dell'item.
 
-Le interfacce vengono poi implementate per ogni tipologia di item:
+La classe viene poi implementata per ogni tipologia di item:
 - `autore` aggiunge la data di nascita, di morte e la biografia.
 - `tecnica` aggiunge gli esponenti principali, gli strumenti essenziali della tecnica e una spiegazione.
 - `stile` aggiunge uno o più riferimenti `autore` come esponenti principali, un periodo storico e una spiegazione dello stile.
-- `opera` aggiunge riferimenti a uno o più item `autore`, un rif. a un item `stile` e un rif. a un item `tecnica`, un periodo di creazione ed eventualmente un'immagine.
+- `opera` aggiunge riferimenti a uno o più item `autore`, un rif. a un item `stile` e un rif. a un item `tecnica`, un rif. alla posizione dell'opera nella planimetria, un periodo di creazione ed eventualmente un'immagine.
 
 Le stringhe delle date sono standardizzate secondo lo standard ISO-8601.
 
@@ -82,6 +94,8 @@ Le varie funzioni includono:
 - [ ] Descrizione completa dell'accessibilità del museo (scale sprovviste di rampe, descrizioni di oggetti senza braille, etc.).
 - [ ] Una funzione nella planimetria che permetta di teletrasportarsi da un'opera all'altra. In questo caso la visita riprende dall'opera selezionata.
 - [ ] Una funzione per scannerizzare un codice QR di un'opera e selezionarla nella visita.
+- [ ] Caricare il posizionamento dell'opera nella planimetria.
+- [ ] Pre-caricare dal database i contenuti dell'opera più vicina (se questa coincide con quella della visita).
 
 ## Il sistema di interazione con l'utente
 L'interazione con l'utente avviene via tasti o via comandi vocali.
@@ -95,23 +109,32 @@ Il sistema ha tre modalità:
 Le varie funzioni includono:
 - [ ] Presentazione visiva dell'item.
 - [ ] Lettura attraverso sintesi vocale dei campi associati all'item.
+- [ ] Traduzione nella lingua del browser (la proprietà `navigator.language`) di tutte le informazioni che l'utente può leggere o sentire nell'applicazione.
 - [ ] Interazione vocale tramite vocabolario libero per chiedere più informazioni sull'oggetto o informazioni sui servizi del museo.
 - [ ] La visualizzazione opzionale di una planimetria del museo con le relative posizioni degli item.
 
 ## I comandi predefiniti
-I comandi predefiniti sono tutte le domande disponibili per l'item. Il numero di domande è fisso ed è correlato a un singolo campo dell'item.
+I comandi predefiniti sono tutte le domande che l'utente può chiedere in qualunque momento a navigator. Il numero di domande è fisso e alcune fanno riferimento alla visita e altre all'item attualmente visibile.
 
 La lista dei comandi, così come sono visti internamente dal sistema di interazione con l'utente, è la seguente:
 - `avanti` va all'opera successiva nella visita.
 - `indietro` va all'opera precedente nella visita.
-- `autore` dà le informazioni nel campo autore per le opere di tipo opera.
-- `stile` dà le informazioni nel campo stile per le opere di tipo opera.
-- `complica` passa al livello successivo disponibile del linguaggio.
-- `semplifica` passa al livello precedente disponibile del linguaggio.
-- `uscita` fornisce un'indicazione assoluta sulla posizione dell'uscita della mostra.
-- `bagno` fornisce un'indicazione assoluta sulla posizione dei servizi igienici della struttura.
-- `reception` fornisce un'indicazione assoluta sulla posizione della reception della struttura.
+- `autoreOpera` dà le informazioni nel campo autore per le opere di tipo opera.
+- `stileOpera` dà le informazioni nel campo stile per le opere di tipo opera.
+- `complicaSpiegazione` passa al livello successivo disponibile del linguaggio.
+- `semplificaSpiegazione` passa al livello precedente disponibile del linguaggio.
+- `entrataMostra` fornisce un'indicazione assoluta sulla posizione dell'entrata della mostra.
+- `uscitaMostra` fornisce un'indicazione assoluta sulla posizione dell'uscita della mostra.
+- `posizioneOpera` fornisce un'indicazione assoluta sulla poszione dell'opera nella mostra.
+- `posizioneBagno` fornisce un'indicazione assoluta sulla posizione dei servizi igienici della struttura.
+- `posizioneReception` fornisce un'indicazione assoluta sulla posizione della reception della struttura.
+
+## Il sistema di creazione visite
 
 # Tecnologie utilizzate
-Navigator e Marketplace sono applicazioni client-side costruite con JavaScript, collegate a processi server-side locali in Node.JS. Utilizzano come database NoSQL MongoDB.
-Navigator utilizza il framework Vue.Js mentre Marketplace potrebbe usare Alpine o basarsi su vanilla JavaScript.
+Navigator e Marketplace sono applicazioni client-side costruite con JavaScript, collegate a processi locali in Node.JS. Utilizzano come database NoSQL MongoDB.
+
+Sia per Navigator che per Marketplace utilizzeremo Tailwind (per personalizzazione grafica massima).
+
+Navigator è realizzata o in React (grande ecosistema) o in Vue (binding bi-direzionale).
+Marketplace è realizzata in Alpine (per la logica client-side) + HTMX (per l'aggiornamento AJAX della pagina) + WebComponents (per creare degli elementi riutilizzabili — da vedere meglio).
