@@ -125,14 +125,14 @@ La lista dei comandi, così come sono visti internamente dal sistema di interazi
 - `semplificaSpiegazione` passa al livello precedente disponibile del linguaggio.
 - `entrataMostra` fornisce un'indicazione assoluta sulla posizione dell'entrata della mostra.
 - `uscitaMostra` fornisce un'indicazione assoluta sulla posizione dell'uscita della mostra.
-- `posizioneOpera` fornisce un'indicazione assoluta sulla poszione dell'opera nella mostra.
+- `posizioneOpera` fornisce un'indicazione assoluta sulla posizione dell'opera nella mostra.
 - `posizioneBagno` fornisce un'indicazione assoluta sulla posizione dei servizi igienici della struttura.
 - `posizioneReception` fornisce un'indicazione assoluta sulla posizione della reception della struttura.
 
 ## Il sistema di creazione visite
 
 # Tecnologie utilizzate
-Navigator e Marketplace sono applicazioni client-side costruite con JavaScript, collegate a processi locali in Node.JS. Utilizzano come database NoSQL MongoDB.
+Navigator e Marketplace sono applicazioni client-side costruite con JavaScript, collegate a processi locali in Node.js. Utilizzano come database NoSQL MongoDB.
 
 Sia per Navigator che per Marketplace utilizzeremo Tailwind (per personalizzazione grafica massima).
 
