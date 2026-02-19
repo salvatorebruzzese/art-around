@@ -22,7 +22,7 @@ Il progetto segue i principi del goal-oriented design, adattando la visita dell'
 
 La UI verrà progettata in un'applicazione di web design basata su componenti chiamata [Penpot](https://penpot.app).
 
-L'applicazione utilizzerà WAI‑ARIA per rispettare il livello AA dello standard WCAG 2.2. Una buona parte del rispetto dello standard verrà controllata attraverso la [checklist del Project A11Y](https://www.a11yproject.com/checklist/).
+L'applicazione utilizzerà WAI‑ARIA per rispettare (non completamente) il livello AA dello standard WCAG 2.2. Una buona parte del rispetto allo standard verrà controllata attraverso la [checklist del Project A11Y](https://www.a11yproject.com/checklist/).
 
 # Architettura
 L'applicazione si divide in due moduli essenziali: Marketplace e Navigator.
@@ -44,6 +44,8 @@ Ogni visita può essere modificata nell'editor se si è i creatori della visita 
 
 I metadati delle visite mantengono anche lo stato di pubblicazione (pubblico, privato), la licenza di utilizzo della visita e informazioni sulle vendite.
 
+Durante la creazione della visita non si usano LLM, ma il [sistema di interazione](#il-sistema-di-interazione-con-lutente) permette di adattare la lingua e i contenuti all'utente.
+
 ## Il Navigator
 Il museo è rappresentato da un file di configurazione e un insieme di visite disponibili.
 
@@ -56,6 +58,9 @@ Per andare avanti l'utente deve rispondere a quattro domande:
 - "Sei qui per interesse personale, professionale o formativo?"
 - "Sei uno studente?"
 - "C'è qualcosa che vorresti approfondire con questa visita?"
+
+Sia la finestra di benvenuto che le domande saranno tradotte attraverso un LLM nella lingua del browser.
+Le risposte alle domande profilano l'utente a grandi linee, permettendo di personalizzare i contenuti.
 
 Le risposte alle domande profilano l'utente a grandi linee, permettendo di personalizzare i contenuti grazie agli LLM.
 
@@ -139,8 +144,11 @@ Ottenuta la lista di item, la funzione `componi` prende la lista di output, per 
 
 # Tecnologie utilizzate
 Navigator e Marketplace sono applicazioni client-side costruite con JavaScript, collegate a processi locali in Node.js. Utilizzano come database NoSQL MongoDB.
+Le query al database vengono gestite attraverso delle API REST che seguono lo standard OPENAPI.
 
 Sia per Navigator che per Marketplace utilizzeremo Tailwind (per personalizzazione grafica massima).
 
-Navigator è realizzata o in React (grande ecosistema) o in Vue (binding bi-direzionale).
-Marketplace è realizzata in Alpine (per la logica client-side) + HTMX (per l'aggiornamento AJAX della pagina) + WebComponents (per creare degli elementi riutilizzabili — da vedere meglio).
+Per strutturare i dati in output dagli LLM, utilizzeremo la libreria TypeScript [instructor-js](https://github.com/567-labs/instructor-js)
+
+Navigator è realizzata in Vue.
+Marketplace è realizzata in JavaScript e WebComponents.
