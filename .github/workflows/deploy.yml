@@ -17,4 +17,6 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: 22
           script: |
-            cd /home/web/site242556/html && git pull 
+            cd /home/web/site242556/html
+            git fetch origin main
+            git pull origin main
