@@ -1,0 +1,57 @@
+﻿<!doctype html>
+<!--
+File: index.html
+Author: Fabio Vitali
+Version: 1.0 
+Last change on: 25 February 2021
+
+
+Copyright (c) 2021 by Fabio Vitali
+
+   Permission to use, copy, modify, and/or distribute this software for any
+   purpose with or without fee is hereby granted, provided that the above
+   copyright notice and this permission notice appear in all copies.
+
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+   WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+   MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+   SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+   WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
+   OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+   CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Company</title>
+
+	<link href="//cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+
+    <link href="/css/styles.css" type="text/css" rel="stylesheet">
+  </head>
+  <body class="text-center">
+    
+	<main class="form-signin">
+		<img class="mb-4" src="/img/company.png" alt="Company Logo">
+		<h1 class="h3 mb-3 fw-normal">Welcome to your new site</h1>
+		<p>Site '{{site}}' is hosted at address: {{host}}</p>
+		
+		<div class="text-start w-50 mx-auto">
+			<h2>Some links</h2>
+			<ul>
+				<li><a href="docs/hw.html">Hello world as a static file</a></li>
+				<li><a href="/hw">Hello world as a node.js service</a></li>
+				<li><a href="/hwhb">Hello world as a handlebar service</a></li>
+				<li><a href="/info">Information about the connection</a></li>
+				<li><a href="docs/form.html">An example form (GET & POST)</a></li>
+				<li><a href="/docs/search.html">Search data on MongoDB</a></li>
+				<li><a href="/docs/create.html">Create data on MongoDB</a></li>
+				<li><a href="https://logsite.tw.cs.unibo.it/get.php?site={{site}}&file=lasterr">Last error</a></li>
+				<li><a href="https://logsite.tw.cs.unibo.it/get.php?site={{site}}&file=lastout">Last log</a></li>
+			</ul>
+		</div>
+	</main>
+  </body>
+</html>

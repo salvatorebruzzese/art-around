@@ -1,0 +1,83 @@
+﻿<!doctype html>
+<!--
+File: mongoose.html
+Author: Fabio Vitali
+Version: 1.0 
+Last change on: 5 May 2023
+
+
+Copyright (c) 2023 by Fabio Vitali
+
+   Permission to use, copy, modify, and/or distribute this software for any
+   purpose with or without fee is hereby granted, provided that the above
+   copyright notice and this permission notice appear in all copies.
+
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+   WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+   MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+   SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+   WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
+   OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+   CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+-->
+
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link href="//cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet"
+		integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+
+	<title>Info</title>
+</head>
+
+<body class="p-3">
+	<nav class="navbar navbar-dark bg-dark">
+		<a class="navbar-brand" href="/">
+			<img src="/img/company.png" height="30" class="d-inline-block align-top" alt="">
+			<span class="visually-hidden">Company</a>
+		</a>
+	</nav>
+	<div class="bg-light p-5 rounded-lg mb-5">
+		<h1 class="display-4 text-center">Query on MongoDB: {{query}}</h1>
+	</div>
+	<table class="table table-striped">
+		<thead>
+			<tr>
+				<th>Country</th><th>City</th>
+			</tr>
+		</thead>
+		<tbody>
+			{{#each result}}
+			<tr>
+				<td>{{this.country}}</td><td>{{this.city}}</td>
+			</tr>
+			{{/each}}
+			{{#unless result}}
+			<tr>
+				<td colspan="2" style="text-align:center;"><i>No results found</i></td>
+			</tr>
+			{{/unless}}
+		</tbody>
+	</table>
+        <div class="card w-75 mx-auto mt-2">
+               <div class="card-header">
+                    <a href="#" class="text-decoration-none link-warning" data-bs-toggle="collapse" data-bs-target="#debugcard">Debug Info</a>
+               </div>
+               <div class="card-body collapse mark small"  id="debugcard">
+                     <ol class="font-monospace m-1" id="debug"> 
+		          {{#each debug}}<li>{{this}}</li>{{/each}}
+                     </ol>
+                </div>
+        </div>
+
+	<p><a href="javascript:history.back()">Go back</a></p>
+	<script src="//cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"
+		integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0"
+		crossorigin="anonymous"></script>
+</body>
+
+</html>
