@@ -17,4 +17,4 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: 22
           script: |
-            cd ~/web/html && git pull
+            echo "helo!" && pwd
