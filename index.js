@@ -44,30 +44,7 @@ app.use('/api', apiRouter);
 
 /* --- Root landing page --- */
 app.get('/', (req, res) => {
-res.send(`<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Art Around</title>
-  <style>
-    body { font-family: sans-serif; max-width: 600px; margin: 4rem auto; padding: 0 1rem; }
-    h1 { font-size: 2rem; margin-bottom: 0.25rem; }
-    p { color: #555; }
-    nav { margin-top: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; }
-    a { font-size: 1.1rem; color: #2563eb; text-decoration: underline; }
-  </style>
-</head>
-<body>
-  <h1>Art Around</h1>
-  <p>Un'applicazione web full-stack e responsive per gestire le visite ai musei.</p>
-  <nav>
-    <a href="/marketplace">Marketplace</a>
-    <a href="/navigator">Navigator</a>
-    <a href="/api">API</a>
-  </nav>
-</body>
-</html>`);
+  res.sendFile(path.join(global.rootDir, 'index.html'));
 });
 
 
