@@ -1,11 +1,18 @@
 {
+  "name": "art-around",
+  "private": true,
+  "scripts": {
+    "start": "node index.js",
+    "build:marketplace": "cd marketplace && npm run build",
+    "build:navigator": "cd navigator && npm run build",
+    "build": "npm run build:marketplace && npm run build:navigator",
+    "install:all": "npm install && cd marketplace && npm install && cd ../navigator && npm install"
+  },
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.18.0",
     "handlebars": "^4.7.7",
     "mongodb": "^4.5.0",
-    "mongoose": "^7.1.0",
-    "npm": "^9.6.6",
-    "tpl": "^0.3.0"
+    "mongoose": "^7.1.0"
   }
 }
