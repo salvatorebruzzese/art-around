@@ -17,7 +17,7 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm run install:all
 
       - name: Build frontends
         run: npm run build
@@ -54,4 +54,4 @@ jobs:
           port: 22
           script: |
             cd /home/web/site242556/html
-            npm ci --omit=dev
+            /usr/local/node/bin/npm ci --omit=dev
