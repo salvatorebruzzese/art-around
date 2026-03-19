@@ -17,7 +17,7 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm run install:all
+        run: npm run ci
 
       - name: Build frontends
         run: npm run build
@@ -54,5 +54,4 @@ jobs:
           port: 22
           script: |
             cd /home/web/site242556/html
-            npm install --omit=dev
-            pm2 restart art-around || pm2 start index.js --name art-around
+            npm ci --omit=dev
