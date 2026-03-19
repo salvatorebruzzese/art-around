@@ -54,4 +54,4 @@ jobs:
           port: 22
           script: |
             cd /home/web/site242556/html
-            npm ci --omit=dev
+            /usr/local/node/bin/npm ci --omit=dev
