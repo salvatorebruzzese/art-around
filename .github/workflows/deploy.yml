@@ -1,16 +1,52 @@
-name: Deploy su server SSH
+name: Build and Deploy
+
 on:
   push:
     branches:
       - main     # deploy solo su push nel branch main
+
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v0.1.10
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm run ci
+
+      - name: Build frontends
+        run: npm run build
+
+      - name: Setup SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      - name: Add server to known hosts
+        run: ssh-keyscan -H "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Sync files to server
+        run: |
+          rsync -az --delete-after \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='node_modules/' \
+            --exclude='marketplace/node_modules/' \
+            --exclude='navigator/node_modules/' \
+            --exclude='marketplace/src/' \
+            --exclude='navigator/src/' \
+            --exclude='README.md' \
+            --exclude='logs/' \
+            --exclude='uploads/' \
+            . "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/web/site242556/html/"
+
+      - name: Install production deps and restart server
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
@@ -18,5 +54,4 @@ jobs:
           port: 22
           script: |
             cd /home/web/site242556/html
-            git fetch origin main
-            git pull origin main
+            npm ci --omit=dev
