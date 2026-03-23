@@ -56,9 +56,9 @@ app.get('/', (req, res) => {
 /*                            */
 /* ========================== */
 
-app.listen(8000, function () {
-global.startDate = new Date();
-console.log(`App listening on port 8000 started ${global.startDate.toLocaleString()}`);
+app.listen(8000, () => {
+  global.startDate = new Date();
+  console.log(`App listening on port 8000 started ${global.startDate.toLocaleString()}`);
 });
 
 
