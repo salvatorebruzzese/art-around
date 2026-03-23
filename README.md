@@ -35,8 +35,8 @@ Sia Marketplace che Navigator sono responsive e quindi devono adattarsi alla ris
 
 ## Il Marketplace
 Il Marketplace è diviso tra un catalogo e un editor.
-Il museo viene scelto con un pannello di scelta multipla all'accesso.
-Viene caricato sempre il catalogo inizialmente, e in alto si ha una barra dove cambiare tra editor e marketplace.
+Il museo viene scelto con un pannello di scelta multipla.
+Viene caricato sempre il catalogo inizialmente, e si ha una barra dove cambiare tra editor e marketplace.
 Il catalogo mostra o le visite pubblicate relative al museo, o l'insieme di contenuti ([item](#visite-loggetto-item)) presenti in tutte le visite del museo.
 L'editor mostra tutte le visite create.
 
@@ -61,8 +61,6 @@ Per andare avanti l'utente deve rispondere a quattro domande:
 
 Sia la finestra di benvenuto che le domande saranno tradotte attraverso un LLM nella lingua del browser.
 Le risposte alle domande profilano l'utente a grandi linee, permettendo di personalizzare i contenuti.
-
-Le risposte alle domande profilano l'utente a grandi linee, permettendo di personalizzare i contenuti grazie agli LLM.
 
 Navigator gestisce anche il [sistema di navigazione](#il-sistema-di-navigazione).
 
