@@ -22,6 +22,12 @@ jobs:
       - name: Build frontends
         run: npm run build
 
+      - name: Create .env file
+        run: |
+          echo "USR=${{ secrets.MONGO_USR }}" >> .env
+          echo "PWD=${{ secrets.MONGO_PWD }}" >> .env
+          echo "SITE=${{ secrets.MONGO_SITE }}" >> .env
+
       - name: Setup SSH agent
         uses: webfactory/ssh-agent@v0.9.0
         with:

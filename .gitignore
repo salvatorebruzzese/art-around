@@ -1,6 +1,7 @@
 .DS_Store
 .idea
 *.log
+.env
 tmp/
 node_modules/
 marketplace/dist/

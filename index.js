@@ -10,7 +10,7 @@ global.startDate = null;
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const apiRouter = require('./api/routes/index.js');
+const apiRouter = require('./api/index.js');
 
 
 
@@ -48,6 +48,46 @@ app.get('/', (req, res) => {
 });
 
 
+/* ========================== */
+/*           MONGO            */
+/* ========================== */
+
+require('dotenv').config(); // Load .env
+// Controlla se esistono
+const requiredEnv = ['MONGO_USR', 'MONGO_PWD', 'MONGO_SITE'];
+const missing = requiredEnv.filter(envVar => !process.env[envVar]);
+if (missing.length > 0) {
+  console.error(`Error: Missing required environment variable(s): ${missing.join(', ')}`);
+}
+
+const mongo_credentials = {
+  user: process.env.MONGO_USR,
+  pwd: process.env.MONGO_PWD,
+  site: process.env.MONGO_SITE
+};
+
+// How to use:
+// const mongouri = `mongodb://${credentials.user}:${credentials.pwd}@${credentials.site}?writeConcern=majority`;
+
+
+async function testMongoConnection() {
+    const { MongoClient } = require('mongodb');
+    const mongouri = `mongodb://${mongo_credentials.user}:${mongo_credentials.pwd}@${mongo_credentials.site}?writeConcern=majority`;
+    const client = new MongoClient(mongouri, { useUnifiedTopology: true });
+
+    try {
+        await client.connect();
+        const databasesList = await client.db().admin().listDatabases();
+        console.log('MongoDB connection successful!');
+        console.log('Databases:', databasesList.databases.map(db => db.name));
+    } catch (err) {
+        console.error('MongoDB connection failed:', err);
+    } finally {
+        await client.close();
+    }
+}
+
+testMongoConnection();
 
 
 /* ========================== */

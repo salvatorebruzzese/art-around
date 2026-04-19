@@ -150,3 +150,35 @@ Per strutturare i dati in output dagli LLM, utilizzeremo la libreria TypeScript 
 
 Navigator è realizzata in Vue.
 Marketplace è realizzata in JavaScript e WebComponents.
+## Mongo
+Per avviare un instanza locale di `mongodb` sulla propria macchina:
+``` sh
+docker run --name mongodb -p 27017:27017 \
+-e MONGO_INITDB_ROOT_USERNAME=user \
+-e MONGO_INITDB_ROOT_PASSWORD=pass \
+-d mongodb/mongodb-community-server:latest 
+
+docker container ls
+```
+
+E creare il file `.env` così:
+
+``` sh
+#!/usr/bin/env bash
+MONGO_USR=user
+MONGO_PWD=pass
+MONGO_SITE=localhost:27017
+```
+
+Per verificare che funzioni:
+
+``` sh
+# 1. Controlla che stia eseguendo
+docker ps | grep mongo
+
+# 2. Ispeziona i log di mongo
+docker logs mongodb
+
+# 3. prova a connetterti al server
+docker exec -it mongodb mongosh -u user -p pass --authenticationDatabase admin
+```
