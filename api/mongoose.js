@@ -3,8 +3,8 @@ const { Schema } = mongoose;
 
 // Asset Schema
 const assetSchema = new Schema({
-  data: {}
-  type: { type: String, enum: ['image', 'video', 'audio', 'other'], required: true },
+  data: {type: Buffer, required: true},
+  datatype: { type: String, required: true },
   metadata: { type: Schema.Types.Mixed }
 }, { timestamps: true });
 
