@@ -26,7 +26,7 @@ const itemSchema = new Schema(
   {
     name: { type: String, required: true },
     tags: [{ type: String }],
-    museum: { type: Schema.Types.ObjectId, ref: 'Museum' },
+    tour: { type: Schema.Types.ObjectId, ref: 'Tour' },
     images: [{ type: Schema.Types.ObjectId, ref: 'Asset' }],
     description: { type: String },
   },
@@ -40,7 +40,7 @@ const museumSchema = new Schema(
     thumbnail: { type: Schema.Types.ObjectId, ref: 'Asset' },
     description: { type: String },
     address: { type: String },
-    items: [{ type: Schema.Types.ObjectId, ref: 'Item' }], // REVIEW: vogliamo ciò?
+    items: [{ type: Schema.Types.ObjectId, ref: 'Item' }],
   },
   { timestamps: true },
 )

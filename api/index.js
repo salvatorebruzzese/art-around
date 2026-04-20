@@ -13,8 +13,6 @@ router.post('/login', passport.authenticate('local'), (req, res) => {
   res.json({ user: req.user })
 })
 
-// write an signup api endpoint
-
 router.post('/signup', async (req, res) => {
   const { username, password } = req.body
   if (!username || !password) {
@@ -53,21 +51,63 @@ router.get('/profile', (req, res) => {
  * ITEMS
  */
 // GET /items
-router.get('/items', (req, res) => {
-  // Return a list of item metadata
-  res.json([]) // placeholder
+// Return a list of item metadata
+router.get('/items', async (req, res) => {
+  try {
+    const items = await MongooseModels.Item.find({}, 'name tags').lean()
+    const result = items.map((item) => ({
+      id: item._id,
+      name: item.name,
+      tags: item.tags,
+    }))
+    res.json(result)
+  } catch (err) {
+    res
+      .status(500)
+      .json({ error: 'Could not fetch items', details: err.message })
+  }
 })
 
 // GET /items/:id
-router.get('/items/:id', (req, res) => {
-  // Return a single item by id
-  res.json({}) // placeholder
+// Return a single item by id
+router.get('/items/:id', async (req, res) => {
+  try {
+    const item = await MongooseModels.Item.findById(req.params.id)
+      .populate('images')
+      .populate('tour')
+      .lean()
+    if (!item) {
+      return res.status(404).json({ error: 'Item not found' })
+    }
+    res.json(item)
+  } catch (err) {
+    res
+      .status(500)
+      .json({ error: 'Could not fetch item', details: err.message })
+  }
 })
 
 // POST /items
-router.post('/items', (req, res) => {
-  // Create a new item
-  res.status(201).json({}) // placeholder
+// Create a new item
+router.post('/items', async (req, res) => {
+  try {
+    const { name, tags, tour, images, description } = req.body
+    if (!name) {
+      return res.status(400).json({ error: 'Name is required' })
+    }
+    const item = await MongooseModels.Item.create({
+      name,
+      tags,
+      tour,
+      images,
+      description,
+    })
+    res.status(201).json(item)
+  } catch (err) {
+    res
+      .status(500)
+      .json({ error: 'Could not create item', details: err.message })
+  }
 })
 
 // PATCH /items/:id
