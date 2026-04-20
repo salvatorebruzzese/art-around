@@ -7,7 +7,8 @@
     "build:marketplace": "cd marketplace && npm run build",
     "build:navigator": "cd navigator && npm run build",
     "build": "npm run build:marketplace && npm run build:navigator",
-    "install:all": "npm install --omit=dev && cd marketplace && npm install && cd ../navigator && npm install"
+    "install:prod": "npm install --omit=dev && cd marketplace && npm install && cd ../navigator && npm install",
+    "install:all": "npm install && cd marketplace && npm install && cd ../navigator && npm install --omit=dev"
   },
   "lint-staged": {
     "*.{js,ts,jsx,tsx}": ["eslint --fix", "prettier --write"],

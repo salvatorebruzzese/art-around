@@ -17,7 +17,7 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm run install:all
+        run: npm run install:prod
 
       - name: Build frontends
         run: npm run build
@@ -27,6 +27,7 @@ jobs:
           echo "USR=${{ secrets.MONGO_USR }}" >> .env
           echo "PWD=${{ secrets.MONGO_PWD }}" >> .env
           echo "SITE=${{ secrets.MONGO_SITE }}" >> .env
+          echo "SESSION_SECRET=${{ secrets.SESSION_SECRET }}" >> .env
 
       - name: Setup SSH agent
         uses: webfactory/ssh-agent@v0.9.0
