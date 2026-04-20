@@ -8,11 +8,17 @@
     "build:navigator": "cd navigator && npm run build",
     "build": "npm run build:marketplace && npm run build:navigator",
     "install:prod": "npm install --omit=dev && cd marketplace && npm install && cd ../navigator && npm install",
-    "install:all": "npm install && cd marketplace && npm install && cd ../navigator && npm install --omit=dev"
+    "install:all": "npm install && cd marketplace && npm install && cd ../navigator && npm install --omit=dev",
+    "test": "npx vitest run"
   },
   "lint-staged": {
-    "*.{js,ts,jsx,tsx}": ["eslint --fix", "prettier --write"],
-    "*.{css,scss,html}": ["prettier --write"]
+    "*.{js,ts,jsx,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{css,scss,html}": [
+      "prettier --write"
+    ]
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -35,6 +41,7 @@
     "globals": "^17.5.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
-    "prettier": "^3.8.3"
+    "prettier": "^3.8.3",
+    "vitest": "^4.1.4"
   }
 }
