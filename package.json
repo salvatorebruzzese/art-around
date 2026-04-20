@@ -1,12 +1,23 @@
 {
   "name": "art-around",
   "private": true,
+  "type": "module",
   "scripts": {
     "start": "node index.js",
     "build:marketplace": "cd marketplace && npm run build",
     "build:navigator": "cd navigator && npm run build",
     "build": "npm run build:marketplace && npm run build:navigator",
-    "install:all": "npm install && cd marketplace && npm install && cd ../navigator && npm install"
+    "install:all": "npm install && cd marketplace && npm install && cd ../navigator && npm install",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{js,ts,jsx,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{css,scss,html}": [
+      "prettier --write"
+    ]
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -14,6 +25,21 @@
     "express": "^4.18.0",
     "handlebars": "^4.7.7",
     "mongodb": "^4.5.0",
-    "mongoose": "^7.1.0"
+    "mongoose": "^7.1.0",
+    "path": "^0.12.7"
+  },
+  "devDependencies": {
+    "@eslint/css": "^1.1.0",
+    "@eslint/eslintrc": "^3.3.5",
+    "@eslint/js": "^10.0.1",
+    "@eslint/json": "^1.2.0",
+    "eslint": "^10.2.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.5",
+    "eslint-plugin-vue": "^10.8.0",
+    "globals": "^17.5.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.8.3"
   }
 }
