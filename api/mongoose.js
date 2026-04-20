@@ -1,10 +1,10 @@
 import mongoose from 'mongoose'
-import { Schema, Buffer } from 'mongoose'
+import { Schema } from 'mongoose'
 
 // Asset Schema
 const assetSchema = new Schema(
   {
-    data: { type: Buffer, required: true },
+    data: { type: Schema.Types.Buffer, required: true },
     datatype: { type: String, required: true },
     metadata: { type: Schema.Types.Mixed },
   },
@@ -14,7 +14,8 @@ const assetSchema = new Schema(
 // User Schema (Da definire, placeholder)
 const userSchema = new Schema(
   {
-    name: { type: String, required: true },
+    username: { type: String, required: true },
+    password: { type: String, required: true },
     // Altri campi da definire
   },
   { timestamps: true },

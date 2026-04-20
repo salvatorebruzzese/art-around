@@ -1,9 +1,52 @@
 import express from 'express'
+import passport from 'passport'
+import bcrypt from 'bcrypt'
+import MongooseModels from './mongoose.js'
 
 const router = express.Router()
 
 router.get('/', (req, res) => {
   res.json({ message: 'Art Around API', version: '1.0.0' })
+})
+
+router.post('/login', passport.authenticate('local'), (req, res) => {
+  res.json({ user: req.user })
+})
+
+// write an signup api endpoint
+
+router.post('/signup', async (req, res) => {
+  const { username, password } = req.body
+  if (!username || !password) {
+    return res.status(400).json({ error: 'Username and password required' })
+  }
+  try {
+    // Check if user exists
+    const existing = await MongooseModels.User.findOne({ username })
+    if (existing) {
+      return res.status(409).json({ error: 'Username already taken' })
+    }
+    // Hash password
+    const hashed = await bcrypt.hash(password, 10)
+    // Create user
+    const user = await MongooseModels.User.create({
+      username: username,
+      password: hashed,
+    })
+    req.login(user, (err) => {
+      if (err) {
+        return res.status(500).json({ error: 'Login after signup failed' })
+      }
+      res.json({ user })
+    })
+  } catch (err) {
+    res.status(500).json({ error: 'Signup failed', details: err.message })
+  }
+})
+
+router.get('/profile', (req, res) => {
+  if (req.isAuthenticated()) return res.json({ user: req.user })
+  res.status(401).json({ error: 'Unauthorized' })
 })
 
 /**

@@ -6,5 +6,12 @@ export default defineConfig({
   base: '/marketplace/',
   build: {
     outDir: 'dist',
+    rollupOptions: {
+      input: {
+        main: 'index.html',
+        login: 'login.html',
+        signup: 'signup.html',
+      },
+    },
   },
 })
