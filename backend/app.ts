@@ -24,7 +24,6 @@ console.log(global.rootDir)
 import express from 'express'
 import session from 'express-session'
 import cors from 'cors'
-// @ts-ignore
 import apiRouter from '../api/index.js'
 
 // @ts-ignore
@@ -94,23 +93,21 @@ passport.use(
   }),
 )
 
+// NOTE: questo deve essere il primo middleware, altrimenti verrà servito come file statico
+app.use('/api', apiRouter)
+
 /* --- Marketplace (JS + WebComponents + Tailwind) --- */
 app.use(
   '/marketplace',
-  express.static(path.join(global.rootDir, 'marketplace/dist')),
+  express.static(path.join(global.rootDir, 'marketplace/')),
 )
 
 /* --- Navigator (Vue 3 + Tailwind) --- */
-app.use(
-  '/navigator',
-  express.static(path.join(global.rootDir, 'navigator/dist')),
-)
+app.use('/navigator', express.static(path.join(global.rootDir, 'navigator/')))
 
 /* --- Root landing page --- */
 app.get('/', (req, res) => {
   res.sendFile(path.join(global.rootDir, 'index.html'))
 })
-
-app.use('/api', apiRouter)
 
 export default app

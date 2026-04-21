@@ -1,4 +1,4 @@
-import app from './src/app.js'
+import app from './backend/app.js'
 import mongoose from 'mongoose'
 
 // Controlla se esistono le variabili necessarie
