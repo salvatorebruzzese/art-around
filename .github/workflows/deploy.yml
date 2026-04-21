@@ -17,9 +17,9 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm run install:prod
+        run: npm run install:all
 
-      - name: Build frontends
+      - name: Build backend and frontends
         run: npm run build
 
       - name: Create .env file
@@ -40,24 +40,13 @@ jobs:
       - name: Sync files to server
         run: |
           rsync -az --delete-after \
-            --exclude='.git/' \
-            --exclude='.github/' \
-            --exclude='node_modules/' \
-            --exclude='marketplace/node_modules/' \
-            --exclude='navigator/node_modules/' \
-            --exclude='marketplace/src/' \
-            --exclude='navigator/src/' \
-            --exclude='tests' \
-            --exclude='marketplace/tests/' \
-            --exclude='navigator/tests/' \
-            --exclude='logs/' \
-            --exclude='uploads/' \
+            --exclude='*/src/' \
+            --exclude='*/tests/' \
+            --exclude='*/node_modules/' \
             --exclude='*.ts' \
-            --exclude='*.mjs' \
             --exclude='*.md' \
-            dist/ "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/web/site242556/html/" \
-            marketplace/ "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/web/site242556/html/marketplace/" \
-            navigator/ "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/web/site242556/html/navigator/"
+            package-lock.json package.json index.html \
+            dist/ marketplace navigator "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/web/site242556/html/"
 
       - name: Install production deps and restart server
         uses: appleboy/ssh-action@v1.0.3

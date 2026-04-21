@@ -8,7 +8,6 @@
     "build:marketplace": "cd marketplace && npm run build",
     "build:navigator": "cd navigator && npm run build",
     "build": "npx tsc && npm run build:marketplace && npm run build:navigator",
-    "install:prod": "npm install --omit=dev && cd marketplace && npm install && cd ../navigator && npm install",
     "install:all": "npm install && cd marketplace && npm install && cd ../navigator && npm install",
     "test": "npx vitest run"
   },
