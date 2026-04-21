@@ -1,8 +1,5 @@
-import app from './backend/app.js'
+import app from './src/app.js'
 import mongoose from 'mongoose'
-
-import dotenv from 'dotenv'
-dotenv.config() // Load .env
 
 // Controlla se esistono le variabili necessarie
 const requiredEnv = ['MONGO_USR', 'MONGO_PWD', 'MONGO_SITE', 'SESSION_SECRET']
@@ -46,3 +43,5 @@ app.listen(8000, () => {
     `App listening on port 8000 started ${global.startDate.toLocaleString()}`,
   )
 })
+
+export default app

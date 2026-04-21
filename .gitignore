@@ -4,5 +4,6 @@
 .env
 tmp/
 node_modules/
+dist/
 marketplace/dist/
 navigator/dist/

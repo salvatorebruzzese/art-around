@@ -1,21 +1,22 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import dotenv from 'dotenv'
 import request from 'supertest'
-import app from '../app.js'
+import app from '../src/app.js'
 import mongoose from 'mongoose'
 import MongooseModels from '../api/mongoose.js'
 
 dotenv.config({ path: '../.env' })
+
 const mongo_credentials = {
-  user: process.env.MONGO_USR,
-  pwd: process.env.MONGO_PWD,
-  site: process.env.MONGO_SITE,
+  user: process.env.MONGO_USR as string,
+  pwd: process.env.MONGO_PWD as string,
+  site: process.env.MONGO_SITE as string,
 }
 
 const mongouri = `mongodb://${mongo_credentials.user}:${mongo_credentials.pwd}@${mongo_credentials.site}`
+
 describe('Items API', () => {
   beforeAll(async () => {
-    // connect to a test database, optionally seed test data
     await mongoose.connect(mongouri)
     const seedItems = [
       {
@@ -52,11 +53,10 @@ describe('Items API', () => {
   })
 
   it('GET /items/:id returns an item', async () => {
-    // First, create an item
     const created = await request(app)
       .post('/api/items')
       .send({ name: 'Single', tags: [] })
-    const id = created.body._id
+    const id: string = created.body._id
     const res = await request(app).get(`/api/items/${id}`)
     expect(res.status).toBe(200)
     expect(res.body.name).toBe('Single')

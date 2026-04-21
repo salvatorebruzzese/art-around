@@ -47,10 +47,17 @@ jobs:
             --exclude='navigator/node_modules/' \
             --exclude='marketplace/src/' \
             --exclude='navigator/src/' \
-            --exclude='README.md' \
+            --exclude='tests' \
+            --exclude='marketplace/tests/' \
+            --exclude='navigator/tests/' \
             --exclude='logs/' \
             --exclude='uploads/' \
-            . "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/web/site242556/html/"
+            --exclude='*.ts' \
+            --exclude='*.mjs' \
+            --exclude='*.md' \
+            dist/ "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/web/site242556/html/" \
+            marketplace/ "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/web/site242556/html/marketplace/" \
+            navigator/ "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/web/site242556/html/navigator/"
 
       - name: Install production deps and restart server
         uses: appleboy/ssh-action@v1.0.3

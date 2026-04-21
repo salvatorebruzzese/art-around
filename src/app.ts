@@ -9,20 +9,28 @@ import { fileURLToPath } from 'url'
 import dotenv from 'dotenv'
 dotenv.config() // Load .env
 
+declare global {
+  // Add your custom types here
+  var rootDir: string
+  var startDate: Date | null
+}
+export {}
+
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-global.rootDir = __dirname
-global.startDate = null
+global.rootDir = process.cwd()
+console.log(global.rootDir)
 
 import express from 'express'
 import session from 'express-session'
 import cors from 'cors'
+// @ts-ignore
 import apiRouter from '../api/index.js'
 
+// @ts-ignore
 import passport from 'passport'
 import { Strategy as LocalStrategy } from 'passport-local'
 import bcrypt from 'bcrypt' // for hashing passwords
-import MongooseModels from '../api/mongoose.js' // Adjust the path as needed
 
 /* ========================== */
 /*                            */
@@ -35,11 +43,11 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cors())
 
-// Passport setup
-passport.serializeUser((user, done) => done(null, user.id))
-passport.deserializeUser(async (id, done) => {
+import { User } from '../api/mongoose.js'
+passport.serializeUser((user: any, done) => done(null, user.id))
+passport.deserializeUser(async (id: string, done) => {
   try {
-    const user = await MongooseModels.User.findById(id)
+    const user = await User.findById(id)
     done(null, user)
   } catch (err) {
     done(err)
@@ -49,9 +57,13 @@ passport.deserializeUser(async (id, done) => {
 // https://stackoverflow.com/questions/40459511/in-express-js-req-protocol-is-not-picking-up-https-for-my-secure-link-it-alwa
 app.enable('trust proxy')
 
+const sessionSecret = process.env.SESSION_SECRET
+if (!sessionSecret) {
+  throw new Error('Missing SESSION_SECRET in environment vars')
+}
 app.use(
   session({
-    secret: process.env.SESSION_SECRET,
+    secret: sessionSecret,
     resave: false,
     saveUninitialized: false,
   }),
@@ -63,7 +75,7 @@ passport.use(
   new LocalStrategy(async (username, password, done) => {
     try {
       // Find user by username
-      const user = await MongooseModels.User.findOne({ username })
+      const user = await User.findOne({ username })
       if (!user) {
         return done(null, false, { message: 'User not found' })
       }
