@@ -1,4 +1,4 @@
-import app from './backend/app.js'
+import app from './app.js'
 import mongoose from 'mongoose'
 
 // Controlla se esistono le variabili necessarie
@@ -24,6 +24,7 @@ const mongo_credentials = {
 
 const mongouri = `mongodb://${mongo_credentials.user}:${mongo_credentials.pwd}@${mongo_credentials.site}?writeConcern=majority`
 try {
+  console.log('Connecting with:' + mongouri)
   await mongoose.connect(mongouri)
   mongoose.connection.useDb('artaround')
   console.log('MongoDB connection successful!')

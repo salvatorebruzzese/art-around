@@ -3,8 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start:dev": "node dist/index.js",
-    "start": "node index.js",
+    "start": "cd dist && node index.js",
     "build:marketplace": "cd marketplace && npm run build",
     "build:navigator": "cd navigator && npm run build",
     "build": "npx tsc && npm run build:marketplace && npm run build:navigator",
@@ -12,8 +11,13 @@
     "test": "npx vitest run"
   },
   "lint-staged": {
-    "*.{js,ts,jsx,tsx}": ["eslint --fix", "prettier --write"],
-    "*.{css,scss,html}": ["prettier --write"]
+    "*.{js,ts,jsx,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{css,scss,html}": [
+      "prettier --write"
+    ]
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
@@ -40,6 +44,7 @@
     "@types/node": "^25.6.0",
     "@types/passport": "^1.0.17",
     "@types/passport-local": "^1.0.38",
+    "@types/supertest": "^7.2.0",
     "eslint": "^10.2.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",

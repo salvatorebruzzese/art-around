@@ -7,7 +7,6 @@
 import path from 'path'
 import { fileURLToPath } from 'url'
 import dotenv from 'dotenv'
-dotenv.config() // Load .env
 
 declare global {
   // Add your custom types here
@@ -16,15 +15,17 @@ declare global {
 }
 export {}
 
+// NOTE: Non possiamo fare assunzioni su quale sia la rootDir, o il percorso relativo
+// Per ciò usiamo ricaviamo dalla posizione di app.js la 'root'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-global.rootDir = process.cwd()
-console.log(global.rootDir)
+global.rootDir = __dirname
+dotenv.config({ path: path.join(__dirname, '.env') }) // Load .env
 
 import express from 'express'
 import session from 'express-session'
 import cors from 'cors'
-import apiRouter from '../api/index.js'
+import apiRouter from './api/index.js'
 
 // @ts-ignore
 import passport from 'passport'
@@ -42,7 +43,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cors())
 
-import { User } from '../api/mongoose.js'
+import { User } from './api/mongoose.js'
 passport.serializeUser((user: any, done) => done(null, user.id))
 passport.deserializeUser(async (id: string, done) => {
   try {
@@ -96,6 +97,10 @@ passport.use(
 // NOTE: questo deve essere il primo middleware, altrimenti verrà servito come file statico
 app.use('/api', apiRouter)
 
+app.get('/', (req, res) => {
+  res.redirect('/marketplace')
+})
+
 /* --- Marketplace (JS + WebComponents + Tailwind) --- */
 app.use(
   '/marketplace',
@@ -104,10 +109,5 @@ app.use(
 
 /* --- Navigator (Vue 3 + Tailwind) --- */
 app.use('/navigator', express.static(path.join(global.rootDir, 'navigator/')))
-
-/* --- Root landing page --- */
-app.get('/', (req, res) => {
-  res.sendFile(path.join(global.rootDir, 'index.html'))
-})
 
 export default app

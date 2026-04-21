@@ -12,5 +12,5 @@
     "skipLibCheck": true,
     "isolatedModules": true
   },
-  "include": ["index.ts", "backend/**/*.ts", "api/**/*.ts"]
+  "include": ["*.ts", "api/**/*.ts"]
 }

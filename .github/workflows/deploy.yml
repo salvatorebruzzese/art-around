@@ -24,9 +24,9 @@ jobs:
 
       - name: Create .env file
         run: |
-          echo "USR=${{ secrets.MONGO_USR }}" >> .env
-          echo "PWD=${{ secrets.MONGO_PWD }}" >> .env
-          echo "SITE=${{ secrets.MONGO_SITE }}" >> .env
+          echo "MONGO_USR=${{ secrets.MONGO_USR }}" >> .env
+          echo "MONGO_PWD=${{ secrets.MONGO_PWD }}" >> .env
+          echo "MONGO_SITE=${{ secrets.MONGO_SITE }}" >> .env
           echo "SESSION_SECRET=${{ secrets.SESSION_SECRET }}" >> .env
 
       - name: Setup SSH agent
@@ -45,8 +45,8 @@ jobs:
             --exclude='*/node_modules/' \
             --exclude='*.ts' \
             --exclude='*.md' \
-            package-lock.json package.json index.html \
-            dist/ marketplace navigator "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/web/site242556/html/"
+            package-lock.json package.json \
+            dist/ .env "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/web/site242556/html/"
 
       - name: Install production deps and restart server
         uses: appleboy/ssh-action@v1.0.3
@@ -57,12 +57,4 @@ jobs:
           port: 22
           script: |
             cd /home/web/site242556/html
-            mv marketplace/dist tmp
-            rm -r marketplace
-            mv tmp marketplace
-
-            mv navigator/dist tmp
-            rm -r navigator
-            mv tmp navigator
-
             /usr/local/node/bin/npm ci --omit=dev

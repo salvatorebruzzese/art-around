@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import dotenv from 'dotenv'
 import request from 'supertest'
-import app from '../backend/app.js'
+import app from '../app.js'
 import mongoose from 'mongoose'
 import MongooseModels from '../api/mongoose.js'
 

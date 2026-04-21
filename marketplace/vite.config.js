@@ -5,7 +5,7 @@ export default defineConfig({
   plugins: [tailwindcss()],
   base: '/marketplace/',
   build: {
-    outDir: 'dist',
+    outDir: '../dist/marketplace',
     rollupOptions: {
       input: {
         main: 'index.html',

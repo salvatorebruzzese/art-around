@@ -6,6 +6,6 @@ export default defineConfig({
   plugins: [vue(), tailwindcss()],
   base: '/navigator/',
   build: {
-    outDir: 'dist',
+    outDir: '../dist/navigator/',
   },
 })
