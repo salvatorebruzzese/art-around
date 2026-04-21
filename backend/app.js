@@ -17,12 +17,12 @@ global.startDate = null
 import express from 'express'
 import session from 'express-session'
 import cors from 'cors'
-import apiRouter from './api/index.js'
+import apiRouter from '../api/index.js'
 
 import passport from 'passport'
 import { Strategy as LocalStrategy } from 'passport-local'
 import bcrypt from 'bcrypt' // for hashing passwords
-import MongooseModels from './api/mongoose.js' // Adjust the path as needed
+import MongooseModels from '../api/mongoose.js' // Adjust the path as needed
 
 /* ========================== */
 /*                            */

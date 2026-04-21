@@ -1,4 +1,4 @@
-import app from './app.js'
+import app from './backend/app.js'
 import mongoose from 'mongoose'
 
 import dotenv from 'dotenv'
