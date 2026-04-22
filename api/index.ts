@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express'
 import passport from 'passport'
 import bcrypt from 'bcrypt'
-import { User, Item, IItem } from './mongoose.js'
+import { User, Item, IItem } from './models/index.js'
 
 const router = express.Router()
 

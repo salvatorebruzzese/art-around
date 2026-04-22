@@ -42,7 +42,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cors())
 
-import { User } from './api/mongoose.js'
+import { User } from './api/models/user.js'
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 passport.serializeUser((user: any, done) => done(null, user._id))
 passport.deserializeUser(async (id: string, done) => {

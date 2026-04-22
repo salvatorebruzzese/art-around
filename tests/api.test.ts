@@ -3,7 +3,7 @@ import dotenv from 'dotenv'
 import request from 'supertest'
 import app from '../app.js'
 import mongoose from 'mongoose'
-import MongooseModels from '../api/mongoose.js'
+import { Item } from '../api/models/index.js'
 
 dotenv.config({ path: '../.env' })
 
@@ -26,8 +26,8 @@ describe('Items API', () => {
       },
       { name: 'Painting', tags: ['art', 'oil'], description: 'Oil on canvas.' },
     ]
-    await MongooseModels.Item.deleteMany({})
-    await MongooseModels.Item.insertMany(seedItems)
+    await Item.deleteMany({})
+    await Item.insertMany(seedItems)
   })
 
   afterAll(async () => {
