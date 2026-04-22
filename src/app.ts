@@ -52,6 +52,9 @@ app.use(express.urlencoded({ extended: true }))
 
 // NOTE: questo deve essere il primo middleware, altrimenti verrà servito come file statico
 app.use('/api', mainRouter)
+app.get('/', (_req, res) => {
+  res.redirect('/marketplace')
+})
 app.use(
   '/marketplace',
   express.static(path.join(global.rootDir, 'marketplace/')),
