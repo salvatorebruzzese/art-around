@@ -1,35 +1,13 @@
 import mongoose, { Schema, Document, Types } from 'mongoose'
+
+// ===========================
+//          ASSET
+// ===========================
 export interface IAsset extends Document {
   data: Buffer
   datatype: string
 }
 
-export interface IItem extends Document {
-  name: string
-  tags?: string[]
-  tour?: Types.ObjectId
-  images?: Types.ObjectId[]
-  description?: string
-}
-
-export interface IMuseum extends Document {
-  name: string
-  thumbnail?: Types.ObjectId
-  description?: string
-  address?: string
-  items?: Types.ObjectId[]
-}
-
-export interface ITour extends Document {
-  name: string
-  author?: Types.ObjectId
-  thumbnail?: Types.ObjectId
-  museums?: Types.ObjectId[]
-  description?: string
-  // more fields...
-}
-
-// === Schemas ===
 const assetSchema = new Schema<IAsset>(
   {
     data: { type: Buffer, required: true },
@@ -37,6 +15,10 @@ const assetSchema = new Schema<IAsset>(
   },
   { timestamps: true },
 )
+
+// ===========================
+//            USER
+// ===========================
 
 export interface IUserCard {
   brand: string
@@ -109,6 +91,43 @@ const userSchema = new Schema<IUser>(
   { timestamps: true },
 )
 
+export interface IGeoPosition {
+  type: 'Point'
+  coordinates: [number, number]
+}
+
+const geoPositionSchema = new Schema<IGeoPosition>(
+  {
+    type: {
+      type: String,
+      enum: ['Point'],
+      required: true,
+      default: 'Point',
+    },
+    coordinates: {
+      type: [Number],
+      required: true,
+      validate: {
+        validator: function (v: number[]) {
+          return v.length === 2
+        },
+        message:
+          'Coordinates must be an array of two numbers [longitude, latitude]',
+      },
+    },
+  },
+  { _id: false },
+)
+
+export interface IItem extends Document {
+  name: string
+  tags?: string[]
+  tour?: Types.ObjectId
+  images?: Types.ObjectId[]
+  description?: string
+  position?: IGeoPosition
+}
+
 const itemSchema = new Schema<IItem>(
   {
     name: { type: String, required: true },
@@ -116,9 +135,17 @@ const itemSchema = new Schema<IItem>(
     tour: { type: Schema.Types.ObjectId, ref: 'Tour' },
     images: [{ type: Schema.Types.ObjectId, ref: 'Asset' }],
     description: { type: String },
+    position: { type: geoPositionSchema, required: false },
   },
   { timestamps: true },
 )
+export interface IMuseum extends Document {
+  name: string
+  thumbnail?: Types.ObjectId
+  description?: string
+  address?: string
+  tours?: Types.ObjectId[]
+}
 
 const museumSchema = new Schema<IMuseum>(
   {
@@ -126,18 +153,64 @@ const museumSchema = new Schema<IMuseum>(
     thumbnail: { type: Schema.Types.ObjectId, ref: 'Asset' },
     description: { type: String },
     address: { type: String },
-    items: [{ type: Schema.Types.ObjectId, ref: 'Item' }],
+    tours: [{ type: Schema.Types.ObjectId, ref: 'Tour' }],
   },
   { timestamps: true },
 )
+
+export interface IReview {
+  user: Types.ObjectId
+  rating: number
+  comment?: string
+  createdAt?: Date
+}
+
+const reviewSchema = new Schema<IReview>(
+  {
+    user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    rating: { type: Number, required: true, min: 1, max: 5 },
+    comment: { type: String },
+    createdAt: { type: Date, default: Date.now },
+  },
+  { _id: false },
+)
+
+export interface ITourPrice {
+  amount: number
+  currency: string
+  forSale: boolean
+}
+
+const tourPriceSchema = new Schema<ITourPrice>(
+  {
+    amount: { type: Number, required: true, min: 0 },
+    currency: { type: String, required: true },
+    forSale: { type: Boolean, default: false },
+  },
+  { _id: false },
+)
+
+export interface ITour extends Document {
+  name: string
+  author?: Types.ObjectId
+  thumbnail?: Types.ObjectId
+  images?: Types.ObjectId[]
+  items?: Types.ObjectId[]
+  description?: string
+  reviews?: IReview[]
+  price?: ITourPrice
+}
 
 const tourSchema = new Schema<ITour>(
   {
     name: { type: String, required: true },
     author: { type: Schema.Types.ObjectId, ref: 'User' },
     thumbnail: { type: Schema.Types.ObjectId, ref: 'Asset' },
-    museums: [{ type: Schema.Types.ObjectId, ref: 'Museum' }],
+    images: [{ type: Schema.Types.ObjectId, ref: 'Asset' }],
+    items: [{ type: Schema.Types.ObjectId, ref: 'Item' }],
     description: { type: String },
+    reviews: [reviewSchema],
+    price: tourPriceSchema,
   },
   { timestamps: true },
 )
