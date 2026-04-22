@@ -7,6 +7,8 @@ import { FlatCompat } from '@eslint/eslintrc'
 import globals from 'globals'
 import tseslint from '@typescript-eslint/eslint-plugin'
 import tsparser from '@typescript-eslint/parser'
+import { fixupPluginRules } from '@eslint/compat'
+import neverthrow from 'neverthrow'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -56,6 +58,7 @@ export default defineConfig([
     plugins: {
       '@typescript-eslint': tseslint,
       prettier,
+      neverthrow: fixupPluginRules(neverthrow),
     },
     ignores: ['dist/'],
     rules: {

@@ -28,11 +28,13 @@
     "handlebars": "^4.7.7",
     "mongodb": "^4.5.0",
     "mongoose": "^7.1.0",
+    "neverthrow": "^8.2.0",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
     "path": "^0.12.7"
   },
   "devDependencies": {
+    "@eslint/compat": "^2.0.5",
     "@eslint/css": "^1.1.0",
     "@eslint/eslintrc": "^3.3.5",
     "@eslint/js": "^10.0.1",
@@ -49,6 +51,7 @@
     "@typescript-eslint/parser": "^8.59.0",
     "eslint": "^10.2.1",
     "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-neverthrow": "^1.1.4",
     "eslint-plugin-prettier": "^5.5.5",
     "eslint-plugin-vue": "^10.8.0",
     "globals": "^17.5.0",
