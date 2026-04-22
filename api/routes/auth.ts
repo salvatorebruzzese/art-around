@@ -5,6 +5,7 @@ import { User } from '../models/index.js'
 
 const router = express.Router()
 
+// Usa il router di passport, ritorna come token il cookie che continere il nome utente
 router.post(
   '/login',
   passport.authenticate('local'),
@@ -42,7 +43,7 @@ router.post('/signup', async (req: Request, res: Response) => {
   }
 })
 
-router.get('/profile', (req: Request, res: Response) => {
+router.get('/profile', (_req: Request, res: Response) => {
   res.json({})
 })
 
