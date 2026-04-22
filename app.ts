@@ -27,7 +27,6 @@ import session from 'express-session'
 import cors from 'cors'
 import apiRouter from './api/index.js'
 
-// @ts-ignore
 import passport from 'passport'
 import { Strategy as LocalStrategy } from 'passport-local'
 import bcrypt from 'bcrypt' // for hashing passwords
@@ -44,7 +43,8 @@ app.use(express.urlencoded({ extended: true }))
 app.use(cors())
 
 import { User } from './api/mongoose.js'
-passport.serializeUser((user: any, done) => done(null, user.id))
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+passport.serializeUser((user: any, done) => done(null, user._id))
 passport.deserializeUser(async (id: string, done) => {
   try {
     const user = await User.findById(id)

@@ -1,17 +1,11 @@
-import express, { Request, Response, NextFunction } from 'express'
+import express, { Request, Response } from 'express'
 import passport from 'passport'
 import bcrypt from 'bcrypt'
-import MongooseModels, {
-  IUser,
-  IItem,
-  IMuseum,
-  ITour,
-  IAsset,
-} from './mongoose.js'
+import { User, Item, IItem } from './mongoose.js'
 
 const router = express.Router()
 
-router.get('/', (req: Request, res: Response) => {
+router.get('/', (_req: Request, res: Response) => {
   res.json({ message: 'Art Around API', version: '1.0.0' })
 })
 
@@ -32,12 +26,12 @@ router.post('/signup', async (req: Request, res: Response) => {
     return res.status(400).json({ error: 'Username and password required' })
   }
   try {
-    const existing = await MongooseModels.User.findOne({ username })
+    const existing = await User.findOne({ username })
     if (existing) {
       return res.status(409).json({ error: 'Username already taken' })
     }
     const hashed = await bcrypt.hash(password, 10)
-    const user = await MongooseModels.User.create({
+    const user = await User.create({
       username: username,
       password: hashed,
     })
@@ -47,39 +41,41 @@ router.post('/signup', async (req: Request, res: Response) => {
       }
       res.json({ user })
     })
-  } catch (err: any) {
-    res.status(500).json({ error: 'Signup failed', details: err.message })
+  } catch (err: unknown) {
+    res.status(500).json({
+      error: 'Signup failed',
+      details: err instanceof Error ? err.message : String(err),
+    })
   }
 })
 
 router.get('/profile', (req: Request, res: Response) => {
-  if ((req as any).isAuthenticated && (req as any).isAuthenticated())
-    return res.json({ user: req.user })
-  res.status(401).json({ error: 'Unauthorized' })
+  res.json({})
 })
 
 /**
  * ITEMS
  */
-router.get('/items', async (req: Request, res: Response) => {
+router.get('/items', async (_req: Request, res: Response) => {
   try {
-    const items = await MongooseModels.Item.find({}, 'name tags').lean()
-    const result = items.map((item: any) => ({
+    const items = await Item.find({}, 'name tags').lean()
+    const result = items.map((item: IItem) => ({
       id: item._id,
       name: item.name,
       tags: item.tags,
     }))
     res.json(result)
-  } catch (err: any) {
-    res
-      .status(500)
-      .json({ error: 'Could not fetch items', details: err.message })
+  } catch (err: unknown) {
+    res.status(500).json({
+      error: 'Could not fetch items',
+      details: err instanceof Error ? err.message : String(err),
+    })
   }
 })
 
 router.get('/items/:id', async (req: Request, res: Response) => {
   try {
-    const item = await MongooseModels.Item.findById(req.params.id)
+    const item = await Item.findById(req.params.id)
       .populate('images')
       .populate('tour')
       .lean()
@@ -87,10 +83,11 @@ router.get('/items/:id', async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Item not found' })
     }
     res.json(item)
-  } catch (err: any) {
-    res
-      .status(500)
-      .json({ error: 'Could not fetch item', details: err.message })
+  } catch (err: unknown) {
+    res.status(500).json({
+      error: 'Could not fetch items',
+      details: err instanceof Error ? err.message : String(err),
+    })
   }
 })
 
@@ -106,7 +103,7 @@ router.post('/items', async (req: Request, res: Response) => {
     if (!name) {
       return res.status(400).json({ error: 'Name is required' })
     }
-    const item = await MongooseModels.Item.create({
+    const item = await Item.create({
       name,
       tags,
       tour,
@@ -114,40 +111,39 @@ router.post('/items', async (req: Request, res: Response) => {
       description,
     })
     res.status(201).json(item)
-  } catch (err: any) {
-    res
-      .status(500)
-      .json({ error: 'Could not create item', details: err.message })
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err)
+    res.status(500).json({ error: 'Could not create item', details: message })
   }
 })
 
-router.patch('/items/:id', (req: Request, res: Response) => {
+router.patch('/items/:id', (_req: Request, res: Response) => {
   res.json({})
 })
 
 /**
  * MUSEUMS
  */
-router.get('/museums', (req: Request, res: Response) => {
+router.get('/museums', (_req: Request, res: Response) => {
   res.json([])
 })
 
-router.get('/museums/:id', (req: Request, res: Response) => {
+router.get('/museums/:id', (_req: Request, res: Response) => {
   res.json({})
 })
 
 /**
  * TOURS
  */
-router.get('/tours', (req: Request, res: Response) => {
+router.get('/tours', (_req: Request, res: Response) => {
   res.json([])
 })
 
-router.post('/tours', (req: Request, res: Response) => {
+router.post('/tours', (_req: Request, res: Response) => {
   res.status(201).json({})
 })
 
-router.patch('/tours/:id', (req: Request, res: Response) => {
+router.patch('/tours/:id', (_req: Request, res: Response) => {
   res.json({})
 })
 
@@ -159,11 +155,11 @@ router.patch('/tours/:id', (req: Request, res: Response) => {
 /**
  * ASSETS
  */
-router.get('/assets/:id', (req: Request, res: Response) => {
+router.get('/assets/:id', (_req: Request, res: Response) => {
   res.json({})
 })
 
-router.post('/assets', (req: Request, res: Response) => {
+router.post('/assets', (_req: Request, res: Response) => {
   res.status(201).json({})
 })
 

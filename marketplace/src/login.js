@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } catch (err) {
       errorDiv.textContent = 'Something went wrong.'
+      console.log(err)
     }
   })
 })

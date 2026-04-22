@@ -2,13 +2,6 @@ import mongoose, { Schema, Document, Types } from 'mongoose'
 export interface IAsset extends Document {
   data: Buffer
   datatype: string
-  metadata?: any
-}
-
-export interface IUser extends Document {
-  username: string
-  password: string
-  // Add more user fields here if needed
 }
 
 export interface IItem extends Document {
@@ -41,15 +34,77 @@ const assetSchema = new Schema<IAsset>(
   {
     data: { type: Buffer, required: true },
     datatype: { type: String, required: true },
-    metadata: { type: Schema.Types.Mixed },
   },
   { timestamps: true },
 )
+
+export interface IUserCard {
+  brand: string
+  last4: string
+  expMonth: number
+  expYear: number
+  cardholderName: string
+}
+
+const userCardSchema = new Schema<IUserCard>(
+  {
+    brand: { type: String, required: true },
+    last4: { type: String, required: true },
+    expMonth: { type: Number, required: true },
+    expYear: { type: Number, required: true },
+    cardholderName: { type: String, required: true },
+  },
+  { _id: false },
+)
+
+export interface IUserAddress {
+  street: string
+  city: string
+  state: string
+  zip: string
+  country: string
+}
+
+const userAddressSchema = new Schema<IUserAddress>(
+  {
+    street: { type: String, required: true },
+    city: { type: String, required: true },
+    state: { type: String, required: true },
+    zip: { type: String, required: true },
+    country: { type: String, required: true },
+  },
+  { _id: false },
+)
+
+export interface IUserBillingData {
+  cards: IUserCard[]
+  addresses: IUserAddress[]
+}
+
+const userBillingDataSchema = new Schema<IUserBillingData>(
+  {
+    cards: [userCardSchema],
+    addresses: [userAddressSchema],
+  },
+  { _id: false },
+)
+export interface IUser extends Document {
+  username: string
+  password: string
+  profilePicture?: Schema.Types.ObjectId
+  authoredTours: Schema.Types.ObjectId[]
+  purchasedTours: Schema.Types.ObjectId[]
+  billingData: IUserBillingData
+}
 
 const userSchema = new Schema<IUser>(
   {
     username: { type: String, required: true },
     password: { type: String, required: true },
+    profilePicture: { type: Schema.Types.ObjectId, ref: 'Asset' },
+    authoredTours: [{ type: Schema.Types.ObjectId, ref: 'Tour' }],
+    purchasedTours: [{ type: Schema.Types.ObjectId, ref: 'Tour' }],
+    billingData: userBillingDataSchema,
   },
   { timestamps: true },
 )

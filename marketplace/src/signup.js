@@ -25,5 +25,6 @@ document
       }
     } catch (err) {
       alert('An error occurred during signup.')
+      console.log(err)
     }
   })
