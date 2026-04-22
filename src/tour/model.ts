@@ -1,5 +1,10 @@
 import mongoose, { Schema, Document, Types } from 'mongoose'
-import { IReview, reviewSchema, ITourPrice, tourPriceSchema } from './shared.js'
+import {
+  IReview,
+  reviewSchema,
+  ITourPrice,
+  tourPriceSchema,
+} from '../shared/models.js'
 
 export interface ITour extends Document {
   name: string

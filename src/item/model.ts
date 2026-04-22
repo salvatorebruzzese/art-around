@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document, Types } from 'mongoose'
-import { IGeoPosition, geoPositionSchema } from './shared.js'
+import { IGeoPosition, geoPositionSchema } from '../shared/models.js'
 
 export interface IItem extends Document {
   name: string

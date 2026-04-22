@@ -3,9 +3,9 @@ import dotenv from 'dotenv'
 import request from 'supertest'
 import app from '../app.js'
 import mongoose from 'mongoose'
-import { Item } from '../api/models/index.js'
+import { Item } from '../item/model.js'
 
-dotenv.config({ path: '../.env' })
+dotenv.config({ path: '../../.env' })
 
 const mongo_credentials = {
   user: process.env.MONGO_USR as string,
