@@ -4,7 +4,14 @@ import tourRouter from './tour/router.js'
 import museumRouter from './museum/router.js'
 import assetRouter from './asset/router.js'
 import passport from 'passport'
-import { signupService } from './user/service.js'
+import userService, {
+  ConflictError,
+  DBError,
+  SignupInput,
+} from './user/service.js'
+import { EitherAsync } from 'purify-ts'
+import { ValidationError } from './shared/validation.js'
+import { assertNever } from './shared/utils.js'
 
 const router = express.Router()
 
@@ -18,35 +25,41 @@ router.use('/tours', tourRouter)
 router.use('/museums', museumRouter)
 router.use('/assets', assetRouter)
 
-// Auth routes from old api/routes/auth.ts now integrated below. See imports above for passport and signupService.
 router.post('/login', passport.authenticate('local'), (req, res) => {
   res.json({ user: req.user })
 })
+
 router.post('/signup', async (req, res) => {
-  const { username, password } = req.body
-  const result = await signupService({ username, password })
-  result.match(
-    (user) => {
-      req.login(user, (err) => {
-        if (err)
-          return res.status(500).json({ error: 'Login after signup failed' })
-        res.json({ user })
-      })
-    },
-    (error) => {
-      switch (error.type) {
-        case 'ValidationError':
-          return res.status(400).json({ error: error.message })
-        case 'Conflict':
-          return res.status(409).json({ error: error.message })
-        case 'DBError':
-          return res
-            .status(500)
-            .json({ error: 'Signup failed', details: error.details })
-      }
-    },
-  )
+  return await EitherAsync<
+    ConflictError | DBError | ValidationError,
+    SignupInput
+  >(async ({ liftEither }) => {
+    return liftEither(SignupInput.validate(req.body))
+  })
+    .chain(userService.signup)
+    .run()
+    .then((result) =>
+      result.caseOf({
+        Right: (user) => res.status(201).json(user),
+        Left: (error) => {
+          switch (error.type) {
+            case 'ConflictError':
+              res.status(409).json({ error: error.message })
+              break
+            case 'DBError':
+              res.status(500).json({ error: error.message })
+              break
+            case 'ValidationError':
+              res.status(400).json({ error: error.message })
+              break
+            default:
+              assertNever(error)
+          }
+        },
+      }),
+    )
 })
+
 router.get('/profile', (_req, res) => {
   res.json({})
 })

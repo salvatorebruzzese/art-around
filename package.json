@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "cd dist && node index.js",
+    "start": "cd dist && node src/index.js",
     "build:marketplace": "cd marketplace && npm run build",
     "build:navigator": "cd navigator && npm run build",
     "build": "npx tsc && npm run build:marketplace && npm run build:navigator",
@@ -11,13 +11,8 @@
     "test": "npx vitest run"
   },
   "lint-staged": {
-    "*.{js,ts,jsx,tsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{css,scss,html}": [
-      "prettier --write"
-    ]
+    "*.{js,ts,jsx,tsx}": ["eslint --fix", "prettier --write"],
+    "*.{css,scss,html}": ["prettier --write"]
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
@@ -28,10 +23,11 @@
     "handlebars": "^4.7.7",
     "mongodb": "^4.5.0",
     "mongoose": "^7.1.0",
-    "neverthrow": "^8.2.0",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
-    "path": "^0.12.7"
+    "path": "^0.12.7",
+    "purify-ts": "^2.1.4",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@eslint/compat": "^2.0.5",
@@ -51,15 +47,16 @@
     "@typescript-eslint/parser": "^8.59.0",
     "eslint": "^10.2.1",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-neverthrow": "^1.1.4",
     "eslint-plugin-prettier": "^5.5.5",
-    "eslint-plugin-vue": "^10.8.0",
+    "eslint-plugin-vue": "^10.9.0",
     "globals": "^17.5.0",
     "husky": "^9.1.7",
+    "jiti": "^2.6.1",
     "lint-staged": "^16.4.0",
     "prettier": "^3.8.3",
     "supertest": "^7.2.2",
     "typescript": "^6.0.3",
+    "typescript-eslint": "^8.59.0",
     "vitest": "^4.1.4"
   }
 }
