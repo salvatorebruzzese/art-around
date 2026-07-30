@@ -5,3 +5,6 @@
 tmp/
 node_modules/
 dist/
+*.aux
+*.pdf
+*.log
