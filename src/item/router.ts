@@ -1,30 +1,30 @@
 import express, { Request, Response } from 'express'
-import ItemService, { ItemInput, ItemQuery } from './service.js'
+import ItemService, { DBError, ItemInput, ItemQuery } from './service.js'
 import mongoose from 'mongoose'
 import { assertNever } from '../shared/utils.js'
-import { EitherAsync } from 'purify-ts'
+import { Either } from 'purify-ts'
+import { IItem } from './model.js'
 
 const router = express.Router()
 
 router.get('/', async (req: Request, res: Response) => {
-  return await EitherAsync.liftEither(ItemQuery.validate(req.query))
-    .chain(ItemService.listItems)
-    .run()
-    .then((either) =>
-      either.caseOf({
-        Right: (itemList) => res.json(itemList),
-        Left: (e) => {
-          switch (e.type) {
-            case 'DBError':
-              break
-            case 'ValidationError':
-              break
-            default:
-              assertNever(e)
-          }
-        },
-      }),
-    )
+  // Explicit validation
+  const validation = ItemQuery.validate(req.query)
+  if (validation.isLeft()) {
+    return res.status(400).json({ error: validation.extract() })
+  }
+
+  const query = validation.unsafeCoerce()
+  const result: Either<DBError, IItem[]> = await ItemService.listItems(query)
+  result.caseOf({
+    Right: (itemList) => res.json(itemList),
+    Left: (e) => {
+      switch (e.type) {
+        case 'DBError':
+          return res.status(500).json({ error: e })
+      }
+    },
+  })
 })
 
 router.get('/:id', async (req, res) => {
@@ -34,9 +34,7 @@ router.get('/:id', async (req, res) => {
   const id = mongoose.Types.ObjectId.createFromHexString(req.params.id)
   const result = await ItemService.getItem(id)
   result.caseOf({
-    Right: (value) => {
-      return res.json(value)
-    },
+    Right: (value) => res.json(value),
     Left: (err) => {
       switch (err.type) {
         case 'DBError':
@@ -51,26 +49,23 @@ router.get('/:id', async (req, res) => {
 })
 
 router.post('/', async (req: Request, res: Response) => {
-  return await EitherAsync.liftEither(ItemInput.validate(req.body))
-    .chain(ItemService.createItem)
-    .run() // promise
-    .then((either) =>
-      either.caseOf({
-        Right: (item) => res.status(201).json(item),
-        Left: (error) => {
-          switch (error.type) {
-            case 'ValidationError':
-              res.status(400).json({ error: error })
-              break
-            case 'DBError':
-              res.status(500).json({ error: error })
-              break
-            default:
-              assertNever(error)
-          }
-        },
-      }),
-    )
+  // Explicit validation
+  const validation = ItemInput.validate(req.body)
+  if (validation.isLeft()) {
+    return res.status(400).json({ error: validation.extract() })
+  }
+
+  const input = validation.unsafeCoerce()
+  const result = await ItemService.createItem(input)
+  result.caseOf({
+    Right: (item) => res.status(201).json(item),
+    Left: (error) => {
+      switch (error.type) {
+        case 'DBError':
+          return res.status(500).json({ error })
+      }
+    },
+  })
 })
 
 router.patch('/:id', (_req: Request, res: Response) => {

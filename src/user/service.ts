@@ -1,40 +1,34 @@
 import bcrypt from 'bcrypt'
 import { User, IUser } from './model.js'
-import { EitherAsync } from 'purify-ts'
+import { Either, Left, Right } from 'purify-ts'
 
 export type ConflictError = { type: 'ConflictError'; message: string }
 export type DBError = { type: 'DBError'; message: string }
 
-function signup(
+async function signup(
   input: SignupInput,
-): EitherAsync<ConflictError | DBError, IUser> {
-  return EitherAsync(async ({ throwE }) => {
-    let existingUser
-    try {
-      existingUser = await User.findOne({ username: input.username })
-        .lean()
-        .exec()
-    } catch (e) {
-      return throwE({ type: 'DBError', message: String(e) })
-    }
+): Promise<Either<ConflictError | DBError, IUser>> {
+  let existingUser
+  try {
+    existingUser = await User.findOne({ username: input.username })
+      .lean()
+      .exec()
+  } catch (e) {
+    return Left({ type: 'DBError', message: String(e) })
+  }
 
-    if (existingUser) {
-      return throwE({ type: 'ConflictError', message: 'Username is taken.' })
-    }
+  if (existingUser) {
+    return Left({ type: 'ConflictError', message: 'Username is taken.' })
+  }
 
-    let hashedPassword
-    try {
-      hashedPassword = await bcrypt.hash(input.password, 10)
-    } catch (e) {
-      return throwE({ type: 'DBError', message: String(e) })
-    }
-    try {
-      const newUser = await User.create({ ...input, password: hashedPassword })
-      return newUser
-    } catch (e) {
-      return throwE({ type: 'DBError', message: String(e) })
-    }
-  })
+  let hashedPassword
+  try {
+    hashedPassword = await bcrypt.hash(input.password, 10)
+    const newUser = await User.create({ ...input, password: hashedPassword })
+    return Right(newUser)
+  } catch (e) {
+    return Left({ type: 'DBError', message: String(e) })
+  }
 }
 
 export default {

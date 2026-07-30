@@ -1,47 +1,43 @@
 import { Item, IItem } from './model.js'
-import { Left, Right } from 'purify-ts/Either'
+import { Either, Left, Right } from 'purify-ts/Either'
 import mongoose, { Types } from 'mongoose'
 import { z } from 'zod'
-import { EitherAsync } from 'purify-ts'
 import { makeZodValidator } from '../shared/validation.js'
 
 export type NotFound = { type: 'NotFound' }
 export type DBError = { type: 'DBError'; message: string }
 
-function getItem(id: Types.ObjectId): EitherAsync<NotFound | DBError, IItem> {
-  return EitherAsync(({ fromPromise }) =>
-    fromPromise(
-      Item.findById(id)
-        .lean()
-        .exec()
-        .then((item) =>
-          item ? Right(item) : Left({ type: 'NotFound' as const }),
-        )
-        .catch((e) => Left({ type: 'DBError', message: String(e) })),
-    ),
-  )
+async function getItem(
+  id: Types.ObjectId,
+): Promise<Either<NotFound | DBError, IItem>> {
+  try {
+    const item = await Item.findById(id).lean().exec()
+    if (item) {
+      return Right(item)
+    } else {
+      return Left({ type: 'NotFound' as const })
+    }
+  } catch (e) {
+    return Left({ type: 'DBError', message: String(e) })
+  }
 }
 
-function listItems(query: ItemQuery): EitherAsync<DBError, IItem[]> {
-  return EitherAsync(({ fromPromise }) =>
-    fromPromise(
-      Item.find(query, 'name tags')
-        .lean()
-        .exec()
-        .then((items) => Right(items))
-        .catch((e) => Left({ type: 'DBError', message: String(e) })),
-    ),
-  )
+async function listItems(query: ItemQuery): Promise<Either<DBError, IItem[]>> {
+  try {
+    const items = await Item.find(query, 'name tags').lean().exec()
+    return Right(items)
+  } catch (e) {
+    return Left({ type: 'DBError', message: String(e) })
+  }
 }
 
-function createItem(input: ItemInput): EitherAsync<DBError, IItem> {
-  return EitherAsync(({ fromPromise }) =>
-    fromPromise(
-      Item.create(input)
-        .then((item) => Right(item))
-        .catch((e) => Left({ type: 'DBError', message: String(e) })),
-    ),
-  )
+async function createItem(input: ItemInput): Promise<Either<DBError, IItem>> {
+  try {
+    const item = await Item.create(input)
+    return Right(item)
+  } catch (e) {
+    return Left({ type: 'DBError', message: String(e) })
+  }
 }
 
 // ==================
