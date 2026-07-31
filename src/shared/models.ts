@@ -1,5 +1,43 @@
 import { Schema, Types } from 'mongoose'
 
+/*
+ * TODO: Dovremmo implementare qui libre/guided/master? (README.md)
+ */
+export type Role = 'Unauthenticated' | 'User' | 'Editor' | 'Admin'
+export const sortedRoles: Role[] = [
+  'Admin',
+  'Editor',
+  'User',
+  'Unauthenticated',
+]
+
+/*
+ * Permission: Action x Class
+ */
+export type Permission =
+  | 'view:item'
+  | 'view:museum'
+  | 'view:tour'
+  | 'view:metatour'
+  | 'purchase:tour'
+  | 'create:tour'
+  | 'edit:tour'
+  | 'delete:tour'
+  | 'manage:group'
+  | 'sync:navigator'
+  | 'assign:quiz'
+  | 'view:users'
+  | 'edit:all'
+
+// Access Control Matrix: Role x Permission
+export const ACMatrix: Record<Role, Permission[]> = {
+  // TODO: fill theese
+  Unauthenticated: ['view:museum', 'view:metatour'],
+  User: [],
+  Editor: [],
+  Admin: [],
+}
+
 export interface IGeoPosition {
   type: 'Point'
   coordinates: [number, number]

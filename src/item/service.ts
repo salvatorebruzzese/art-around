@@ -1,15 +1,50 @@
 import { Item, IItem } from './model.js'
+import { IUser } from '../user/model.js'
 import { Either, Left, Right } from 'purify-ts/Either'
 import mongoose, { Types } from 'mongoose'
 import { z } from 'zod'
 import { makeZodValidator } from '../shared/validation.js'
+import { sortedRoles } from '../shared/models.js'
+import { checkRole } from '../shared/utils.js'
 
 export type NotFound = { type: 'NotFound' }
-export type DBError = { type: 'DBError'; message: string }
+export type DBError = { type: 'DBError'; message: string; details?: string }
+export type AccessDenied = { type: 'AccessDenied'; message: string }
+const EACCESS: AccessDenied = {
+  type: 'AccessDenied',
+  message: "You can't access this resource.",
+}
 
 async function getItem(
   id: Types.ObjectId,
-): Promise<Either<NotFound | DBError, IItem>> {
+  user?: IUser,
+): Promise<Either<NotFound | DBError | AccessDenied, IItem>> {
+  // 1. Check role
+  //    a. User -> Check if item is part of purchased tours
+  //    b. Editor -> Check if item is part of authored tours
+  //    d. _ -> granted (by ACMatrix)
+  // _ -> Denied
+
+  const roles = user?.roles || ['Unauthenticated']
+  if (!checkRole(roles, 'view:item')) return Left(EACCESS)
+
+  if (
+    !sortedRoles
+      .filter((item) => roles.includes(item))
+      .some((role) => {
+        switch (role) {
+          case 'User':
+            return user!.purchasedTours.includes(id)
+          case 'Editor':
+            return user!.authoredTours.includes(id)
+          default:
+            return true
+        }
+      })
+  ) {
+    return Left(EACCESS)
+  }
+
   try {
     const item = await Item.findById(id).lean().exec()
     if (item) {
@@ -18,7 +53,11 @@ async function getItem(
       return Left({ type: 'NotFound' as const })
     }
   } catch (e) {
-    return Left({ type: 'DBError', message: String(e) })
+    return Left({
+      type: 'DBError',
+      message: 'An error occurred with the database.',
+      details: process.env.DEBUG ? String(e) : undefined,
+    })
   }
 }
 

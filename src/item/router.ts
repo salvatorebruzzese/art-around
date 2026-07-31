@@ -41,6 +41,8 @@ router.get('/:id', async (req, res) => {
           return res.status(500).json({ error: err })
         case 'NotFound':
           return res.status(404).json({ error: err })
+        case 'AccessDenied':
+          return res.status(403).json({ error: err })
         default:
           assertNever(err)
       }
