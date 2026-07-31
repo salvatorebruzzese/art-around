@@ -10,3 +10,9 @@ export function checkRole(roles: Role[], permission: Permission): boolean {
     (role) => ACMatrix[role] && ACMatrix[role].includes(permission),
   )
 }
+
+export function filterRoles(roles: Role[], permission: Permission) {
+  return roles.filter(
+    (role) => ACMatrix[role] && ACMatrix[role].includes(permission),
+  )
+}

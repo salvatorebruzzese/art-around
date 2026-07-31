@@ -5,7 +5,7 @@ import mongoose, { Types } from 'mongoose'
 import { z } from 'zod'
 import { makeZodValidator } from '../shared/validation.js'
 import { sortedRoles } from '../shared/models.js'
-import { checkRole } from '../shared/utils.js'
+import { filterRoles } from '../shared/utils.js'
 
 export type NotFound = { type: 'NotFound' }
 export type DBError = { type: 'DBError'; message: string; details?: string }
@@ -26,11 +26,12 @@ async function getItem(
   // _ -> Denied
 
   const roles = user?.roles || ['Unauthenticated']
-  if (!checkRole(roles, 'view:item')) return Left(EACCESS)
+  const froles = filterRoles(roles, 'view:item') // filtered roles
+  if (froles.length == 0) return Left(EACCESS)
 
   if (
     !sortedRoles
-      .filter((item) => roles.includes(item))
+      .filter((item) => froles.includes(item))
       .some((role) => {
         switch (role) {
           case 'User':
