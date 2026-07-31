@@ -1,4 +1,5 @@
-import mongoose, { Schema, Document } from 'mongoose'
+import mongoose, { Schema, Document, Types } from 'mongoose'
+import { Role } from '../shared/models.js'
 
 export interface IUserCard {
   brand: string
@@ -51,9 +52,10 @@ export const userBillingDataSchema = new Schema<IUserBillingData>(
 export interface IUser extends Document {
   username: string
   password: string
-  profilePicture?: Schema.Types.ObjectId
-  authoredTours: Schema.Types.ObjectId[]
-  purchasedTours: Schema.Types.ObjectId[]
+  roles: Role[]
+  profilePicture?: Types.ObjectId
+  authoredTours: Types.ObjectId[]
+  purchasedTours: Types.ObjectId[]
   billingData: IUserBillingData
 }
 
