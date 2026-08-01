@@ -7,7 +7,7 @@ Si assicura la correttezza della logica e delle composizioni di funzioni grazie 
 ![backend diagram](./assets/backend-1.png)
 
 ### Access control
-Per un controllo primario basato sulla coppia **classe** di risorsa e **ruolo***, addottiamo la seguente politica:
+Per un controllo primario basato sulla coppia **Permesso**-**Ruolo***, addottiamo la seguente politica:
 | Azione\Ruolo      | Visitatore | Utente | Creatore | Guida | Amministratore |
 |-------------------|------------|--------|----------|-------|----------------|
 | Visualizza item   |            | ✓      | ✓        | ✓     | ✓              |
@@ -23,5 +23,5 @@ Per un controllo primario basato sulla coppia **classe** di risorsa e **ruolo***
 | Visualizza utenti |            |        |          |       | ✓              |
 | Modifica tutto    |            |        |          |       | ✓              |
 
-Passato questo test, si validano altre proprietà specifiche. Come la necessità di aver acquistato una visita per visualizzarla. Il meccanismo è implementato da un servizio che valida queste richieste dato un utente e la risorsa stessa.
+Passato questo test, si validano altre proprietà specifiche. Ad esmepio: la necessità di aver acquistato una visita per visualizzarla. Il meccanismo è implementato attraverso la consultazione di una matrice che definisce le politiche di accesso (auspicabilmente simile alla tabella qui riportata).
 
