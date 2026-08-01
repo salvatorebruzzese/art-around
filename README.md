@@ -1,4 +1,5 @@
 # Art around
+
 Un'applicazione web full-stack e responsive per gestire le visite ai musei, sviluppata come progetto del corso Tecnologie Web A.A. 2025/2026 dell'Università di Bologna.
 
 - [Art around](#art-around)
@@ -13,8 +14,10 @@ Un'applicazione web full-stack e responsive per gestire le visite ai musei, svil
   - [Il sistema di creazione visite](#il-sistema-di-creazione-visite)
 - [Tecnologie utilizzate](#tecnologie-utilizzate)
 
-# UI e UX
+## UI e UX
+
 Il progetto segue i principi del goal-oriented design, adattando la visita dell'utente in quattro dimensioni diverse:
+
 - Interessi individuali (specifici dell'utente, e.g. l'esposizione di maggiore interesse).
 - Competenze pregresse (la formazione, livello di educazione o attitudini del visitatore).
 - Contesto della visita (per interesse personale, professionale o formativo).
@@ -24,7 +27,8 @@ La UI verrà progettata in un'applicazione di web design basata su componenti ch
 
 L'applicazione utilizzerà WAI‑ARIA per rispettare (non completamente) il livello AA dello standard WCAG 2.2. Una buona parte del rispetto allo standard verrà controllata attraverso la [checklist del Project A11Y](https://www.a11yproject.com/checklist/).
 
-# Architettura
+## Architettura
+
 L'applicazione si divide in due moduli essenziali: Marketplace e Navigator.
 
 Marketplace è il modulo utilizzato per la creazione, pubblicazione, catalogazione e vendita delle visite. Marketplace è pensato per essere utilizzato al computer in modo totalmente generico rispetto al museo o la visita specifica. L'utente seleziona un museo tra quelli disponibili e vede tutte le visite con la possibilità di sceglierle, modificarle o comprarle.
@@ -34,6 +38,7 @@ Navigator è pensato per essere utilizzato da cellulare e auricolari durante la 
 Sia Marketplace che Navigator sono responsive e quindi devono adattarsi alla risoluzione del monitor dell'utente.
 
 ## Il Marketplace
+
 Il Marketplace è diviso tra un catalogo e un editor.
 Il museo viene scelto con un pannello di scelta multipla.
 Viene caricato sempre il catalogo inizialmente, e si ha una barra dove cambiare tra editor e marketplace.
@@ -47,6 +52,7 @@ I metadati delle visite mantengono anche lo stato di pubblicazione (pubblico, pr
 Durante la creazione della visita non si usano LLM, ma il [sistema di interazione](#il-sistema-di-interazione-con-lutente) permette di adattare la lingua e i contenuti all'utente.
 
 ## Il Navigator
+
 Il museo è rappresentato da un file di configurazione e un insieme di visite disponibili.
 
 Al navigator si può accedere come guida o come visitatore. La guida dispone di un sistema di sincronizzazione e di una chiave di accesso da dare ai visitatori. Nel caso di una visita formativa, si può somministrare un quiz a risposta multipla ai visitatori.
@@ -54,6 +60,7 @@ Al navigator si può accedere come guida o come visitatore. La guida dispone di 
 Il visitatore all'accesso trova una finestra di benvenuto: "Ciao, sono Navigator, puoi rispondere a queste domande per aiutarci a capirti meglio?"
 
 Per andare avanti l'utente deve rispondere a quattro domande:
+
 - "Qual è la tua età?"
 - "Sei qui per interesse personale, professionale o formativo?"
 - "Sei uno studente?"
@@ -65,10 +72,12 @@ Le risposte alle domande profilano l'utente a grandi linee, permettendo di perso
 Navigator gestisce anche il [sistema di navigazione](#il-sistema-di-navigazione).
 
 ## Visite: l'oggetto item
+
 La visita è una raccolta di dati del museo e della mostra (locazione, costo del biglietto, posizione dei servizi del museo ed eventuale test a risposta multipla) e una sequenza ordinata di *item*.
 Gli item sono dei dati strutturati, che identificano una tappa della visita e forniscono tutto quello che si sa sull'oggetto della tappa. Sono visualizzati a schermo e letti via sintesi vocale.
 
 L'item inizia come una classe astratta con questi campi:
+
 - Un nome.
 - Un UUID come identificativo (generato automaticamente).
 - Un membro di un'enumerazione per la tipologia di item (autore, stile, tecnica, opera, altro)
@@ -77,6 +86,7 @@ L'item inizia come una classe astratta con questi campi:
 - Una stringa per la licenza d'uso dell'item.
 
 La classe viene poi implementata per ogni tipologia di item:
+
 - `autore` aggiunge la data di nascita, di morte e la biografia.
 - `tecnica` aggiunge gli esponenti principali, gli strumenti essenziali della tecnica e una spiegazione.
 - `stile` aggiunge uno o più riferimenti `autore` come esponenti principali, un periodo storico e una spiegazione dello stile.
@@ -87,10 +97,12 @@ Le stringhe delle date sono standardizzate secondo lo standard ISO-8601.
 ---
 ¹ record composto da un membro di un'enumerazione per indicare la presenza di un livello di linguaggio specifico (semplice, normale, avanzato), una stringa per spiegazione dell'opera e un naturale per la durata della spiegazione in secondi.
 
-## Il sistema di navigazione 
+## Il sistema di navigazione
+
 Il sistema di navigazione gestisce due aspetti correlati: l'avanzamento della visita e la geolocalizzazione dell'utente rispetto alle opere. Il sistema non è visibile dall'utente, ma lo si può utilizzare attraverso il [sistema di interazione](#il-sistema-di-interazione-con-lutente).
 
 Le varie funzioni includono:
+
 - [ ] Gestione della sequenza di item (andare avanti e indietro nella visita).
 - [ ] Posizionamento degli item nella planimetria del museo.
 - [ ] Lista completa della posizione di tutti i servizi del museo (accoglienza, servizi igienici)
@@ -101,15 +113,18 @@ Le varie funzioni includono:
 - [ ] Pre-caricare dal database i contenuti dell'opera più vicina (se questa coincide con quella della visita).
 
 ## Il sistema di interazione con l'utente
+
 L'interazione con l'utente avviene via tasti o via comandi vocali.
 I comandi vocali fanno parte di un *vocabolario aperto* che viene mappato da un LLM ai [comandi predefiniti](#i-comandi-predefiniti).
 
 Il sistema ha tre modalità:
+
 - *libre* per gli utenti singoli, senza guida. In questa modalità sono disponibili tutte le funzionalità di navigator.
 - *guided* per gli utenti in gruppo o con una guida. È disponibile solo l'interazione attraverso sintesi vocale.
 - *master* per le guide. Permette di fornire una chiave d'accesso per la visita selezionata. Si può vedere una lista degli utenti collegati alla visita e le loro interazioni vocali con l'app. Si può fornire il test a risposta multipla associato alla visita.
 
 Le varie funzioni includono:
+
 - [ ] Presentazione visiva dell'item.
 - [ ] Lettura attraverso sintesi vocale dei campi associati all'item.
 - [ ] Traduzione nella lingua del browser (la proprietà `navigator.language`) di tutte le informazioni che l'utente può leggere o sentire nell'applicazione.
@@ -117,9 +132,11 @@ Le varie funzioni includono:
 - [ ] La visualizzazione opzionale di una planimetria del museo con le relative posizioni degli item.
 
 ## I comandi predefiniti
+
 I comandi predefiniti sono tutte le domande che l'utente può chiedere in qualunque momento a navigator. Il numero di domande è fisso e alcune fanno riferimento alla visita e altre all'item attualmente visibile.
 
 La lista dei comandi, così come sono visti internamente dal sistema di interazione con l'utente, è la seguente:
+
 - `avanti` va all'opera successiva nella visita.
 - `indietro` va all'opera precedente nella visita.
 - `autoreOpera` dà le informazioni nel campo autore per le opere di tipo opera.
@@ -133,6 +150,7 @@ La lista dei comandi, così come sono visti internamente dal sistema di interazi
 - `posizioneReception` fornisce un'indicazione assoluta sulla posizione della reception della struttura.
 
 ## Il sistema di creazione visite
+
 Il progetto richiede la possibilità di creare nuove visite per il museo attraverso l'intelligenza artificiale.
 La funzione principale del sistema di creazione visite è la capacità di fornire a un LLM i campi autore, nome e spiegazione di tutti gli item del museo e ritornare una sequenza ordinata di UUID. La sequenza viene poi raggruppata in una visita con i metadati del museo.
 
@@ -140,7 +158,8 @@ La creazione della visita avviene solo nel caso in cui l'utente fornisca un vinc
 
 Ottenuta la lista di item, la funzione `componi` prende la lista di output, per ogni UUID controlla l'appartenenza al museo e ritorna una visita con i metadati del museo e una nuova sequenza ordinata di item.
 
-# Tecnologie utilizzate
+## Tecnologie utilizzate
+
 Navigator e Marketplace sono applicazioni client-side costruite con JavaScript, collegate a processi locali in Node.js. Utilizzano come database NoSQL MongoDB.
 Le query al database vengono gestite attraverso delle API REST che seguono lo standard OPENAPI.
 
@@ -150,13 +169,17 @@ Per strutturare i dati in output dagli LLM, utilizzeremo la libreria TypeScript 
 
 Navigator è realizzata in Vue.
 Marketplace è realizzata in JavaScript e WebComponents.
-# MongoDB
-Per creare il container mongo: 
+
+## MongoDB
+
+Per creare il container mongo:
+
 ```sh
 docker run --name mongodb -d -p 27017:27017 -e MONGO_INITDB_ROOT_USERNAME=user -e MONGO_INITDB_ROOT_PASSWORD=pass -v mongodata:/data/db mongo
 ```
 
 E settare il file .env nella root del progetto:
+
 ```sh
 #!/usr/bin/env bash
 MONGO_USR=user
