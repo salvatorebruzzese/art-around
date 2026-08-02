@@ -23,7 +23,9 @@ export function filterRoles(roles: Role[], permission: Permission) {
 
 export function ensureAuth(req: Request, res: Response, next: NextFunction) {
   if (req.user) {
-    return next()
+    if (Types.ObjectId.isValid(req.user._id))
+      res.status(504).json({ message: 'Malformed user ID' })
+    else return next()
   }
   res.status(401).json({ error: 'Unauthorized' })
 }

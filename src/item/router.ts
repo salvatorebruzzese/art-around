@@ -34,9 +34,6 @@ router.get('/:id', ensureAuth, async (req, res) => {
   if (!mongoose.Types.ObjectId.isValid(itemID))
     return res.status(400).json({ message: 'Malformed item ID' })
 
-  if (!mongoose.Types.ObjectId.isValid(userID))
-    return res.status(504).json({ message: 'Malformed user ID' })
-
   const id = mongoose.Types.ObjectId.createFromHexString(itemID)
   const result = await ItemService.getItem(id, userID)
   result.caseOf({
