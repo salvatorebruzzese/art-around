@@ -40,8 +40,6 @@ app.use(cors())
 // https://stackoverflow.com/questions/40459511/in-express-js-req-protocol-is-not-picking-up-https-for-my-secure-link-it-alwa
 app.enable('trust proxy')
 app.use(express.json())
-app.use(passport.initialize())
-app.use(passport.session())
 app.use(
   session({
     secret: sessionSecret,
@@ -49,6 +47,8 @@ app.use(
     saveUninitialized: false,
   }),
 )
+app.use(passport.initialize())
+app.use(passport.session())
 app.use(express.urlencoded({ extended: true }))
 
 // NOTE: questo deve essere il primo middleware, altrimenti verrà servito come file statico
