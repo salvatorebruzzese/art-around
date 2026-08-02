@@ -5,7 +5,6 @@ import { z } from 'zod'
 import { makeZodValidator } from '../shared/validation.js'
 import { sortedRoles } from '../shared/models.js'
 import { _getById, filterRoles } from '../shared/utils.js'
-import { _getUserById } from '../user/service.js'
 import { AccessDenied, DBError, NotFound } from '../shared/errors.js'
 import { User } from '../user/model.js'
 
