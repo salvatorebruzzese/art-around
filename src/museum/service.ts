@@ -3,7 +3,7 @@ import { Either, Left, Right } from 'purify-ts/Either'
 import mongoose, { Types } from 'mongoose'
 import { z } from 'zod'
 import { makeZodValidator } from '../shared/validation.js'
-import { NotFound, DBError } from '../shared/models.js'
+import { NotFound, DBError, dbError, notFound } from '../shared/errors.js'
 
 async function getMuseum(
   id: Types.ObjectId,
@@ -16,14 +16,10 @@ async function getMuseum(
     if (museum) {
       return Right(museum)
     } else {
-      return Left({ type: 'NotFound' as const })
+      return Left(notFound())
     }
   } catch (e) {
-    return Left({
-      type: 'DBError',
-      message: 'An error occurred with the database.',
-      details: process.env.DEBUG ? String(e) : undefined,
-    })
+    return Left(dbError(undefined, () => String(e)))
   }
 }
 
@@ -34,11 +30,7 @@ async function listMuseums(
     const items = await Museum.find(query, 'name').lean().exec()
     return Right(items)
   } catch (e) {
-    return Left({
-      type: 'DBError',
-      message: 'An error occurred with the database.',
-      details: process.env.DEBUG ? String(e) : undefined,
-    })
+    return Left(dbError(undefined, () => String(e)))
   }
 }
 
@@ -49,10 +41,7 @@ async function createMuseum(
     const item = await Museum.create(input)
     return Right(item)
   } catch (e) {
-    return Left({
-      type: 'DBError',
-      message: String(e),
-    })
+    return Left(dbError(undefined, () => String(e)))
   }
 }
 

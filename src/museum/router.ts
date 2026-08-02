@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express'
-import { NotFound, DBError } from '../shared/models.js'
+import { NotFound, DBError } from '../shared/errors.js'
 import { IMuseum } from './model.js'
 import MuseumService, { MuseumQuery } from './service.js'
 import { Either } from 'purify-ts'
@@ -23,7 +23,7 @@ router.get('/', async (req: Request, res: Response) => {
         case 'DBError':
           return res.status(500).json({ error: e })
         case 'NotFound':
-          return res.status(404).json({ error: 'Museum not found' })
+          return res.status(404).json({ error: e })
       }
     },
   })
