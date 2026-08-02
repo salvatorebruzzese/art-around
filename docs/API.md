@@ -1,8 +1,8 @@
 Le API sono delle chiamate di tipo CRUD che modificano lo stato del server, creando, leggendo, aggiornando o rimuovendo dati.
 
-Gli endpoint delle API sono i seguenti:
+Gli endpoint delle API sono i seguenti, segnati con (*) i metodi che non richiedono autenticazione:
 - `/items`
-  - `GET /items`
+  - `GET /items` (*)
     Ritorna una lista di metadati di item. Questo include:
     - `id`
     - `name`
@@ -10,6 +10,7 @@ Gli endpoint delle API sono i seguenti:
   - `GET /items/{id}`
   - `POST /items/`
   - `PATCH /items/{id}`
+  - `DELETE /items/{id}`
 - `/museums`
   - `GET /museums`
     Ritorna una lista di metadati di tutti i musei. Questo include:
