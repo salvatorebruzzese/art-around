@@ -38,7 +38,8 @@ async function getItem(
 
   if (
     !sortedRoles
-      .filter((item) => froles.includes(item))
+      .filter((item) => froles
+      .includes(item))
       .some((role) => {
         switch (role) {
           case 'User':
