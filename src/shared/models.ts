@@ -11,6 +11,14 @@ export const sortedRoles: Role[] = [
   'Unauthenticated',
 ]
 
+export type NotFound = { type: 'NotFound' }
+export type DBError = { type: 'DBError'; message: string; details?: string }
+export type AccessDenied = { type: 'AccessDenied'; message: string }
+export const EACCESS: AccessDenied = {
+  type: 'AccessDenied',
+  message: "You can't access this resource.",
+}
+
 /*
  * Permission: Action x Class
  */
