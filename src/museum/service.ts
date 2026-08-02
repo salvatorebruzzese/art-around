@@ -44,6 +44,19 @@ async function listMuseums(query: MuseumQuery): Promise<Either<DBError, IMuseum[
   }
 }
 
+async function createMuseum(input: MuseumInput): Promise<Either<DBError, IMuseum>> {
+  try {
+    const item = await Museum.create(input)
+    return Right(item);
+  }
+  catch (e) {
+    return Left({
+      type: 'DBError',
+      message: String(e)
+    })
+  }
+}
+
 // ==================
 //      Schemas
 // ==================
@@ -51,7 +64,7 @@ async function listMuseums(query: MuseumQuery): Promise<Either<DBError, IMuseum[
 // Really stripped down schema
 // Do we really need more to query museums?
 const MuseumQuerySchema = z.object({
-  name: z.string().optional()
+  name: z.union([z.string(), z.array(z.string())]).optional()
 })
 
 export type MuseumQuery = z.infer<typeof MuseumQuerySchema>
@@ -59,7 +72,21 @@ export const MuseumQuery = {
   validate: makeZodValidator(MuseumQuerySchema)
 }
 
+const MuseumInputSchema = z.object({
+  name: z.string(),
+  thumbnail: z.string().refine((val) => !val || mongoose.Types.ObjectId.isValid(val), {message: 'thumbnail must be a valid ObjectId'}),
+  description: z.string().optional(),
+  address: z.string().optional()
+})
+
+export type MuseumInput = z.
+infer<typeof MuseumInputSchema>
+export const MuseumInput = {
+  validate: makeZodValidator(MuseumQuerySchema)
+}
+
 export default {
+  createMuseum,
   getMuseum,
   listMuseums
 }
