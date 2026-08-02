@@ -1,9 +1,5 @@
 import express, { Request, Response } from 'express'
 import ItemService, { ItemInput, ItemQuery } from './service.js'
-<<<<<<< HEAD
-=======
-import { DBError } from '../shared/models.js'
->>>>>>> e84c297 (refactor: common errors moved into shared dir)
 import mongoose from 'mongoose'
 import { assertNever, ensureAuth } from '../shared/utils.js'
 import { Either } from 'purify-ts'

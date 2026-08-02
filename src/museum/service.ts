@@ -3,11 +3,11 @@ import { Either, Left, Right } from 'purify-ts/Either'
 import mongoose, { Types } from 'mongoose'
 import { z } from 'zod'
 import { makeZodValidator } from '../shared/validation.js'
-import { NotFound, DBError, AccessDenied } from '../shared/models.js'
+import { NotFound, DBError } from '../shared/models.js'
 
 async function getMuseum(
   id: Types.ObjectId,
-): Promise<Either<NotFound | DBError | AccessDenied, IMuseum>> {
+): Promise<Either<NotFound | DBError, IMuseum>> {
   // NOTE: We don't need to check for ownership
   // over museums data, as it's public data
 
