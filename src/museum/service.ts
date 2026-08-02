@@ -29,3 +29,37 @@ async function getMuseum(
     })
   }
 }
+
+async function listMuseums(query: MuseumQuery): Promise<Either<DBError, IMuseum[]>> {
+  try {
+    const items = await Museum.find(query, 'name').lean().exec()
+    return Right(items)
+  }
+  catch (e) {
+    return Left({
+      type: 'DBError',
+      message: 'An error occurred with the database.',
+      details: process.env.DEBUG ? String(e) : undefined,
+    })
+  }
+}
+
+// ==================
+//      Schemas
+// ==================
+
+// Really stripped down schema
+// Do we really need more to query museums?
+const MuseumQuerySchema = z.object({
+  name: z.string().optional()
+})
+
+export type MuseumQuery = z.infer<typeof MuseumQuerySchema>
+export const MuseumQuery = {
+  validate: makeZodValidator(MuseumQuerySchema)
+}
+
+export default {
+  getMuseum,
+  listMuseums
+}

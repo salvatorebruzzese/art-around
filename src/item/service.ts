@@ -18,7 +18,6 @@ const EACCESS: AccessDenied = {
 import { sortedRoles, NotFound,DBError, AccessDenied, EACCESS } from '../shared/models.js'
 import { filterRoles } from '../shared/utils.js'
 
->>>>>>> e84c297 (refactor: common errors moved into shared dir)
 async function getItem(
   id: Types.ObjectId,
   userID: Types.ObjectId,
