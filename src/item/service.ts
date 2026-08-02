@@ -1,15 +1,14 @@
 import { Item, IItem } from './model.js'
-import { IUser } from '../user/model.js'
 import { Either, Left, Right } from 'purify-ts/Either'
 import mongoose, { Types } from 'mongoose'
 import { z } from 'zod'
 import { makeZodValidator } from '../shared/validation.js'
 import { sortedRoles } from '../shared/models.js'
-import { filterRoles } from '../shared/utils.js'
+import { _getById, filterRoles } from '../shared/utils.js'
+import { _getUserById } from '../user/service.js'
+import { AccessDenied, DBError, NotFound } from '../shared/errors.js'
+import { User } from '../user/model.js'
 
-export type NotFound = { type: 'NotFound' }
-export type DBError = { type: 'DBError'; message: string; details?: string }
-export type AccessDenied = { type: 'AccessDenied'; message: string }
 const EACCESS: AccessDenied = {
   type: 'AccessDenied',
   message: "You can't access this resource.",
@@ -17,7 +16,7 @@ const EACCESS: AccessDenied = {
 
 async function getItem(
   id: Types.ObjectId,
-  user?: IUser,
+  userID: Types.ObjectId,
 ): Promise<Either<NotFound | DBError | AccessDenied, IItem>> {
   // 1. Check role
   //    a. User -> Check if item is part of purchased tours
@@ -25,6 +24,9 @@ async function getItem(
   //    d. _ -> granted (by ACMatrix)
   // _ -> Denied
 
+  const userResult = await _getById(userID, User)
+  if (userResult.isLeft()) return userResult
+  const user = userResult.unsafeCoerce()
   const roles = user?.roles || ['Unauthenticated']
   const froles = filterRoles(roles, 'view:item') // filtered roles
   if (froles.length == 0) return Left(EACCESS)
@@ -46,20 +48,7 @@ async function getItem(
     return Left(EACCESS)
   }
 
-  try {
-    const item = await Item.findById(id).lean().exec()
-    if (item) {
-      return Right(item)
-    } else {
-      return Left({ type: 'NotFound' as const })
-    }
-  } catch (e) {
-    return Left({
-      type: 'DBError',
-      message: 'An error occurred with the database.',
-      details: process.env.DEBUG ? String(e) : undefined,
-    })
-  }
+  return _getById(id, Item)
 }
 
 async function listItems(query: ItemQuery): Promise<Either<DBError, IItem[]>> {

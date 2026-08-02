@@ -1,9 +1,10 @@
 import express, { Request, Response } from 'express'
-import ItemService, { DBError, ItemInput, ItemQuery } from './service.js'
+import ItemService, { ItemInput, ItemQuery } from './service.js'
 import mongoose from 'mongoose'
-import { assertNever } from '../shared/utils.js'
+import { assertNever, ensureAuth } from '../shared/utils.js'
 import { Either } from 'purify-ts'
 import { IItem } from './model.js'
+import { DBError } from '../shared/errors.js'
 
 const router = express.Router()
 
@@ -27,12 +28,17 @@ router.get('/', async (req: Request, res: Response) => {
   })
 })
 
-router.get('/:id', async (req, res) => {
-  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-    return res.status(400).json({ message: 'Malformed ID' })
-  }
-  const id = mongoose.Types.ObjectId.createFromHexString(req.params.id)
-  const result = await ItemService.getItem(id)
+router.get('/:id', ensureAuth, async (req, res) => {
+  const itemID = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id
+  const userID = req.user!._id
+  if (!mongoose.Types.ObjectId.isValid(itemID))
+    return res.status(400).json({ message: 'Malformed item ID' })
+
+  if (!mongoose.Types.ObjectId.isValid(userID))
+    return res.status(504).json({ message: 'Malformed user ID' })
+
+  const id = mongoose.Types.ObjectId.createFromHexString(itemID)
+  const result = await ItemService.getItem(id, userID)
   result.caseOf({
     Right: (value) => res.json(value),
     Left: (err) => {

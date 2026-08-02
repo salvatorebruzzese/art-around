@@ -3,7 +3,6 @@ import { User, IUser } from './model.js'
 import { Either, Left, Right } from 'purify-ts'
 
 export type ConflictError = { type: 'ConflictError'; message: string }
-export type DBError = { type: 'DBError'; message: string }
 
 async function signup(
   input: SignupInput,
@@ -37,6 +36,7 @@ export default {
 
 import { z } from 'zod'
 import { makeZodValidator } from '../shared/validation.js'
+import { DBError } from '../shared/errors.js'
 
 // UserCard
 export const UserCardSchema = z.object({
