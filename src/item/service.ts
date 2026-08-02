@@ -3,7 +3,6 @@ import { Either, Left, Right } from 'purify-ts/Either'
 import mongoose, { Types } from 'mongoose'
 import { z } from 'zod'
 import { makeZodValidator } from '../shared/validation.js'
-<<<<<<< HEAD
 import { sortedRoles } from '../shared/models.js'
 import { _getById, filterRoles } from '../shared/utils.js'
 import { AccessDenied, DBError, NotFound } from '../shared/errors.js'
@@ -13,10 +12,6 @@ const EACCESS: AccessDenied = {
   type: 'AccessDenied',
   message: "You can't access this resource.",
 }
-
-=======
-import { sortedRoles, NotFound,DBError, AccessDenied, EACCESS } from '../shared/models.js'
-import { filterRoles } from '../shared/utils.js'
 
 async function getItem(
   id: Types.ObjectId,
@@ -37,8 +32,7 @@ async function getItem(
 
   if (
     !sortedRoles
-      .filter((item) => froles
-      .includes(item))
+      .filter((item) => froles.includes(item))
       .some((role) => {
         switch (role) {
           case 'User':
