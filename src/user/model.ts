@@ -59,6 +59,15 @@ export interface IUser extends Document {
   billingData: IUserBillingData
 }
 
+export type PublicUser = {
+  username: string
+  _id: Types.ObjectId
+}
+
+export function toPublicUser(user: IUser): PublicUser {
+  return { username: user.username, _id: user._id }
+}
+
 export const userSchema = new Schema<IUser>(
   {
     username: { type: String, required: true },
