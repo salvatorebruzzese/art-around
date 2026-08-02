@@ -1,10 +1,7 @@
 import { z } from 'zod'
 import { Either, Left, Right } from 'purify-ts/Either'
+import { ValidationError, validationError } from './errors.js'
 
-// E.g. your service error type:
-export type ValidationError = { type: 'ValidationError'; message: string }
-
-// Generic validate function:
 function validate<T extends z.ZodTypeAny>(
   schema: T,
   value: unknown,
@@ -12,7 +9,13 @@ function validate<T extends z.ZodTypeAny>(
   const result = schema.safeParse(value)
   return result.success
     ? Right(result.data)
-    : Left({ type: 'ValidationError', message: result.error.message })
+    : Left(
+        validationError(
+          result.error.issues[0].path.map(String),
+          result.error.message,
+          () => JSON.stringify(result.error),
+        ),
+      )
 }
 
 export function makeZodValidator<T extends z.ZodTypeAny>(schema: T) {
