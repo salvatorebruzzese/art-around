@@ -9,7 +9,7 @@ Gli endpoint delle API sono i seguenti:
     - `tags`
   - `GET /items/{id}`
   - `POST /items/`
-  - `PATCH items/{id}`
+  - `PATCH /items/{id}`
 - `/museums`
   - `GET /museums`
     Ritorna una lista di metadati di tutti i musei. Questo include:
