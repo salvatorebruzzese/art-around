@@ -12,5 +12,6 @@
     "skipLibCheck": true,
     "isolatedModules": true
   },
-  "include": ["*.ts", "src/**/*.ts"]
+  "include": ["*.ts", "src/**/*.ts"],
+  "exclude": ["*.test.ts", "src/**/*.test.ts"]
 }

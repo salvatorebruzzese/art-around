@@ -31,6 +31,7 @@ describe('Items API', () => {
   })
 
   afterAll(async () => {
+    await Item.deleteMany({})
     await mongoose.connection.db.dropDatabase()
     await mongoose.disconnect()
   })
