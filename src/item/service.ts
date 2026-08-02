@@ -1,6 +1,6 @@
 import { Item, IItem } from './model.js'
 import { Either, Left, Right } from 'purify-ts/Either'
-import mongoose, { Types } from 'mongoose'
+import { Types } from 'mongoose'
 import { z } from 'zod'
 import { makeZodValidator } from '../shared/validation.js'
 import { sortedRoles } from '../shared/models.js'
@@ -79,16 +79,13 @@ const ItemQuerySchema = z.object({
     .union([z.string(), z.array(z.string())])
     .optional()
     .transform((val) => (typeof val === 'string' ? [val] : val)), // gestisce ?tags=foo or ?tags=foo&tags=bar
-  tour: z
-    .string()
-    .optional()
-    .refine((val) => !val || mongoose.Types.ObjectId.isValid(val), {
-      message: 'tour must be a valid ObjectId string',
-    }),
+  tour: z.string().refine((val) => !val || Types.ObjectId.isValid(val), {
+    message: 'tour must be a valid ObjectId string',
+  }),
   museum: z
     .string()
     .optional()
-    .refine((val) => !val || mongoose.Types.ObjectId.isValid(val), {
+    .refine((val) => !val || Types.ObjectId.isValid(val), {
       message: 'museum must be a valid ObjectId string',
     }),
 })
@@ -99,7 +96,16 @@ export const ItemQuery = {
 }
 
 const ItemInputSchema = ItemQuerySchema.extend({
-  name: z.string(),
+  images: z
+    .array(z.string().refine((id) => Types.ObjectId.isValid(id)))
+    .optional(),
+  description: z.string().optional(),
+  position: z
+    .object({
+      type: z.literal('Point'),
+      coordinates: z.tuple([z.number(), z.number()]),
+    })
+    .optional(),
 })
 
 export type ItemInput = z.infer<typeof ItemInputSchema>

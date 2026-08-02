@@ -3,8 +3,8 @@ import { IGeoPosition, geoPositionSchema } from '../shared/models.js'
 
 export interface IItem extends Document {
   name: string
+  tour: Types.ObjectId
   tags?: string[]
-  tour?: Types.ObjectId
   images?: Types.ObjectId[]
   description?: string
   position?: IGeoPosition
