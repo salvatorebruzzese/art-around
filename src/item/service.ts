@@ -5,13 +5,14 @@ import { z } from 'zod'
 import { makeZodValidator } from '../shared/validation.js'
 import { sortedRoles } from '../shared/models.js'
 import { _getById, filterRoles } from '../shared/utils.js'
-import { AccessDenied, DBError, NotFound } from '../shared/errors.js'
+import {
+  accessDenied,
+  AccessDenied,
+  dbError,
+  DBError,
+  NotFound,
+} from '../shared/errors.js'
 import { User } from '../user/model.js'
-
-const EACCESS: AccessDenied = {
-  type: 'AccessDenied',
-  message: "You can't access this resource.",
-}
 
 async function getItem(
   id: Types.ObjectId,
@@ -28,7 +29,7 @@ async function getItem(
   const user = userResult.unsafeCoerce()
   const roles = user?.roles || ['Unauthenticated']
   const froles = filterRoles(roles, 'view:item') // filtered roles
-  if (froles.length == 0) return Left(EACCESS)
+  if (froles.length == 0) return Left(accessDenied())
 
   if (
     !sortedRoles
@@ -44,7 +45,7 @@ async function getItem(
         }
       })
   ) {
-    return Left(EACCESS)
+    return Left(accessDenied())
   }
 
   return _getById(id, Item)
@@ -55,16 +56,41 @@ async function listItems(query: ItemQuery): Promise<Either<DBError, IItem[]>> {
     const items = await Item.find(query, 'name tags').lean().exec()
     return Right(items)
   } catch (e) {
-    return Left({ type: 'DBError', message: String(e) })
+    return Left({ type: 'DBError', message: String(e) }) // TODO: use dbError
   }
 }
 
-async function createItem(input: ItemInput): Promise<Either<DBError, IItem>> {
+async function createItem(
+  input: ItemInput,
+  userId: Types.ObjectId,
+): Promise<Either<DBError | AccessDenied, IItem>> {
+  // RBAC
+  const userResult = await _getById(userId, User)
+  if (userResult.isLeft()) return Left(accessDenied())
+  const user = userResult.unsafeCoerce()
+  const roles = user?.roles || ['Unauthenticated']
+  const froles = filterRoles(roles, 'create:item') // filtered roles
+  if (froles.length == 0) return Left(accessDenied())
+  if (
+    !sortedRoles
+      .filter((item) => froles.includes(item))
+      .some((role) => {
+        switch (role) {
+          case 'Editor':
+            return user!.authoredTours.includes(new Types.ObjectId(input.tour))
+          default:
+            return true
+        }
+      })
+  ) {
+    return Left(accessDenied())
+  }
+
   try {
-    const item = await Item.create(input)
+    const item = await Item.create(input) // It's actually easy
     return Right(item)
   } catch (e) {
-    return Left({ type: 'DBError', message: String(e) })
+    return Left(dbError(undefined, () => JSON.stringify(e)))
   }
 }
 

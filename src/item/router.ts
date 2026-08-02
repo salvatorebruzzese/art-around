@@ -53,15 +53,13 @@ router.get('/:id', ensureAuth, async (req, res) => {
   })
 })
 
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', ensureAuth, async (req: Request, res: Response) => {
   // Explicit validation
   const validation = ItemInput.validate(req.body)
-  if (validation.isLeft()) {
+  if (validation.isLeft())
     return res.status(400).json({ error: validation.extract() })
-  }
-
   const input = validation.unsafeCoerce()
-  const result = await ItemService.createItem(input)
+  const result = await ItemService.createItem(input, req.user!._id)
   result.caseOf({
     Right: (item) => res.status(201).json(item),
     Left: (error) => {

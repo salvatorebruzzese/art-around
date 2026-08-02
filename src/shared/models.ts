@@ -21,6 +21,7 @@ export type Permission =
   | 'view:metatour'
   | 'purchase:tour'
   | 'create:tour'
+  | 'create:item'
   | 'edit:tour'
   | 'delete:tour'
   | 'manage:group'
