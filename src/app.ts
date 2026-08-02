@@ -41,6 +41,7 @@ app.use(cors())
 app.enable('trust proxy')
 app.use(express.json())
 app.use(passport.initialize())
+app.use(passport.session())
 app.use(
   session({
     secret: sessionSecret,
