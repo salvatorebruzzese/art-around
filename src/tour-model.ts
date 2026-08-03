@@ -4,7 +4,7 @@ import {
   reviewSchema,
   ITourPrice,
   tourPriceSchema,
-} from '../shared/models.js'
+} from './shared/models.js'
 
 export interface ITour extends Document {
   name: string

@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document, Types } from 'mongoose'
-import { Role } from '../shared/models.js'
+import { Role } from './shared/models.js'
 
 export interface IUserCard {
   brand: string
