@@ -30,9 +30,17 @@ router.get('/', async (req: Request, res: Response) => {
 })
 
 router.get('/:id', async (req: Request, res: Response) => {
-  const museumID = Array.isArray(req.params.id)
-    ? req.params.id[0]
-    : req.params.id
+  // For now we'll avoid filters
+  const validation = MuseumQuery.validate(req.params)
+
+  if (validation.isLeft()) {
+    return res.status(400).json({ error: validation.extract() })
+  }
+
+  const raw = validation.extract()
+
+  const museumID = Array.isArray(raw) ? raw[0] : raw
+
   if (!mongoose.Types.ObjectId.isValid(museumID))
     return res.status(400).json({ message: 'Malformed museum ID' })
 
