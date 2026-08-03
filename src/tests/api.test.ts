@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
+import app from '../app.js'
 import dotenv from 'dotenv'
 import request from 'supertest'
-import app from '../app.js'
 import mongoose from 'mongoose'
-import { Item } from '../item/model.js'
+import { Item } from '../item-model.js'
 
 dotenv.config({ path: '../../.env' })
 
