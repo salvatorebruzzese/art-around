@@ -8,13 +8,13 @@ import {
 
 export interface ITour extends Document {
   name: string
-  author?: Types.ObjectId
+  author: Types.ObjectId
   thumbnail?: Types.ObjectId
   images?: Types.ObjectId[]
   items?: Types.ObjectId[]
   description?: string
   reviews?: IReview[]
-  price?: ITourPrice
+  price: ITourPrice
 }
 
 export const tourSchema = new Schema<ITour>(

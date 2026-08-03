@@ -2,15 +2,35 @@ import { Tour, ITour } from './model.js'
 import { Either, Left, Right } from 'purify-ts/Either'
 import { z } from 'zod'
 import { makeZodValidator } from '../shared/validation.js'
-import { sortedRoles } from '../shared/models.js'
+import {
+  AccessDenied,
+  NotFound,
+  sortedRoles,
+  tourPriceSchema,
+} from '../shared/models.js'
 import { _getById, filterRoles } from '../shared/utils.js'
-import { dbError, DBError } from '../shared/errors.js'
-import { ObjectId } from 'mongoose'
+import { dbError, DBError, notFound } from '../shared/errors.js'
+import { Types, ObjectId } from 'mongoose'
 
-// Returns an array of tours
-async function getTour(query: TourQuery): Promise<Either<DBError, ITour[]>> {
+const projection: string = 'name author price'
+
+async function getTour(
+  id: Types.ObjectId,
+): Promise<Either<DBError | NotFound, [ITour, Types.ObjectId]>> {
   try {
-    const result = await Tour.find(query, 'name author').lean().exec()
+    const result = await Tour.findById(id, projection).lean().exec()
+
+    if (result === null) return Left(notFound())
+
+    return Right([result, result._id])
+  } catch (e) {
+    return Left(dbError(undefined, () => String(e)))
+  }
+}
+
+async function listTour(query: TourQuery): Promise<Either<DBError, ITour[]>> {
+  try {
+    const result = await Tour.find(query, projection).lean().exec()
     return Right(result)
   } catch (e) {
     return Left(dbError(undefined, () => String(e)))
@@ -18,10 +38,12 @@ async function getTour(query: TourQuery): Promise<Either<DBError, ITour[]>> {
 }
 
 // TODO: add role checks for user and editors
-async function makeTour(input: TourInput): Promise<Either<DBError, ITour>> {
+async function makeTour(
+  input: TourInput,
+): Promise<Either<AccessDenied | DBError, [ITour, Types.ObjectId]>> {
   try {
     const result = await Tour.create(input)
-    return Right(result)
+    return Right([result, result._id])
   } catch (e) {
     return Left(dbError(undefined, () => String(e)))
   }
@@ -59,6 +81,7 @@ const TourQuerySchema = z.object({
     .union([z.string(), z.array(z.string())])
     .optional()
     .transform((val) => (Array.isArray(val) ? [val] : val)),
+  price: tourPriceSchema,
 })
 
 export type TourQuery = z.infer<typeof TourQuerySchema>
@@ -80,4 +103,4 @@ export const TourInput = {
   validate: makeZodValidator(TourInputSchema),
 }
 
-export default { getTour, makeTour, updateTour }
+export default { getTour, listTour, makeTour, updateTour }
