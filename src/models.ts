@@ -1,13 +1,58 @@
 import mongoose, { Schema, Document, Types } from 'mongoose'
-import {
-  Role,
-  IReview,
-  reviewSchema,
-  ITourPrice,
-  tourPriceSchema,
-  IGeoPosition,
-  geoPositionSchema,
-} from './shared/models.js'
+import { Role } from './shared/accessControl.js'
+
+// ==========================================
+// POSITION MODEL
+// ==========================================
+
+export interface IGeoPosition {
+  type: 'Point'
+  coordinates: [number, number]
+}
+
+export const geoPositionSchema = new Schema<IGeoPosition>(
+  {
+    type: {
+      type: String,
+      enum: ['Point'],
+      required: true,
+      default: 'Point',
+    },
+    coordinates: {
+      type: [Number],
+      required: true,
+      validate: {
+        validator: function (v: number[]) {
+          return v.length === 2
+        },
+        message:
+          'Coordinates must be an array of two numbers [longitude, latitude]',
+      },
+    },
+  },
+  { _id: false },
+)
+
+// ==========================================
+// REVIEW MODEL
+// ==========================================
+
+export interface IReview {
+  user: Types.ObjectId
+  rating: number
+  comment?: string
+  createdAt?: Date
+}
+
+export const reviewSchema = new Schema<IReview>(
+  {
+    user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    rating: { type: Number, required: true, min: 1, max: 5 },
+    comment: { type: String },
+    createdAt: { type: Date, default: Date.now },
+  },
+  { _id: false },
+)
 
 // ==========================================
 // USER MODEL
@@ -51,25 +96,25 @@ export const User = mongoose.model<IUser>('User', userSchema)
 
 export interface ITour extends Document {
   name: string
-  author?: Types.ObjectId
+  author: Types.ObjectId
+  price: number
   thumbnail?: Types.ObjectId
   images?: Types.ObjectId[]
   items?: Types.ObjectId[]
   description?: string
   reviews?: IReview[]
-  price?: ITourPrice
 }
 
 export const tourSchema = new Schema<ITour>(
   {
     name: { type: String, required: true },
-    author: { type: Schema.Types.ObjectId, ref: 'User' },
+    author: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     thumbnail: { type: Schema.Types.ObjectId, ref: 'Asset' },
     images: [{ type: Schema.Types.ObjectId, ref: 'Asset' }],
-    items: [{ type: Schema.Types.ObjectId, ref: 'Item' }],
+    items: [{ type: Schema.Types.ObjectId, ref: 'Item', required: true }],
     description: { type: String },
     reviews: [reviewSchema],
-    price: tourPriceSchema,
+    price: { type: Number, required: true },
   },
   { timestamps: true },
 )
