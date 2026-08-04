@@ -7,6 +7,8 @@ import { NotFound, DBError, dbError, notFound } from './shared/errors.js'
 import {
   User,
   IUser,
+  Museum,
+  IMuseum,
   Tour,
   ITour,
   Item,
@@ -14,6 +16,7 @@ import {
   Asset,
   IAsset,
 } from './models.js'
+import e from 'express'
 
 export class BaseCrudService<T> {
   constructor(private model: Model<T>) {}
@@ -47,6 +50,20 @@ export class BaseCrudService<T> {
       return Left(dbError(undefined, () => String(e)))
     }
   }
+
+  async update(
+    id: Types.ObjectId,
+    input: Partial<T>,
+  ): Promise<Either<DBError | NotFound, T>> {
+    try {
+      const doc = await this.model.findByIdAndUpdate(id, input)
+      if (doc === null) return Left(notFound(() => 'Object does not exist'))
+
+      return Right(doc)
+    } catch (e) {
+      return Left(dbError(undefined, () => String(e)))
+    }
+  }
 }
 
 /**
@@ -70,7 +87,7 @@ function createCrudRouter<T extends Document>(model: Model<T>): Router {
   // Get item by ID
   router.get('/:id', async (req, res) => {
     try {
-      const id = new mongoose.Types.ObjectId(req.params.id)
+      const id = new Types.ObjectId(req.params.id)
       const result = await service.get(id)
 
       result.caseOf({
@@ -95,11 +112,31 @@ function createCrudRouter<T extends Document>(model: Model<T>): Router {
     })
   })
 
+  router.patch('/:id', async (req, res) => {
+    const id = new Types.ObjectId(req.params.id)
+    const result = await service.update(id, req.body)
+
+    result.caseOf({
+      Left: (err) => {
+        switch (err.type) {
+          case 'DBError':
+            res.status(500).json({ error: err })
+            break
+          case 'NotFound':
+            res.status(500).json({ error: err })
+            break
+        }
+      },
+      Right: (data) => res.status(201).json(data),
+    })
+  })
+
   return router
 }
 
 // Instantiated middleware routers for each Mongoose model
 export const userRouter = createCrudRouter<IUser>(User)
+export const museumRouter = createCrudRouter<IMuseum>(Museum)
 export const tourRouter = createCrudRouter<ITour>(Tour)
 export const itemRouter = createCrudRouter<IItem>(Item)
 export const assetRouter = createCrudRouter<IAsset>(Asset)
