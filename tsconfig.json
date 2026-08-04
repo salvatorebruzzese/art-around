@@ -12,6 +12,6 @@
     "skipLibCheck": true,
     "isolatedModules": true
   },
-  "include": ["*.ts", "src/**/*.ts"],
+  "include": ["*.ts", "src/**/*.ts", "src/tests/api.integration.test.ts"],
   "exclude": ["*.test.ts", "src/**/*.test.ts"]
 }

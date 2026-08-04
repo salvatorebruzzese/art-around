@@ -40,11 +40,49 @@ export type Permission =
 
 // Access Control Matrix: Role x Permission
 export const ACMatrix: Record<Role, Permission[]> = {
-  // TODO: fill theese
   Unauthenticated: ['view:museum', 'view:metatour'],
-  User: [],
-  Editor: [],
-  Admin: [],
+
+  User: [
+    'view:museum',
+    'view:metatour',
+    'view:tour',
+    'view:item',
+    'purchase:tour',
+    'create:tour',
+  ],
+
+  Editor: [
+    'view:museum',
+    'view:metatour',
+    'view:tour',
+    'view:item',
+    'purchase:tour',
+    'create:tour',
+    'create:item',
+    'edit:tour',
+    'delete:tour',
+    'manage:group',
+    'sync:navigator',
+    'assign:quiz',
+    'view:users',
+  ],
+
+  Admin: [
+    'view:museum',
+    'view:metatour',
+    'view:tour',
+    'view:item',
+    'purchase:tour',
+    'create:tour',
+    'create:item',
+    'edit:tour',
+    'delete:tour',
+    'manage:group',
+    'sync:navigator',
+    'assign:quiz',
+    'view:users',
+    'edit:all',
+  ],
 }
 
 export interface IGeoPosition {
