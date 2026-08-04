@@ -3,7 +3,7 @@ import app from '../app.js'
 import dotenv from 'dotenv'
 import request from 'supertest'
 import mongoose from 'mongoose'
-import { Item } from '../item-model.js'
+import { Item } from '../models.js'
 
 dotenv.config({ path: '../../.env' })
 
