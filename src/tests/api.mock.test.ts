@@ -4,18 +4,22 @@ import app from '../app.js'
 import { User, Tour, Item } from '../models.js'
 
 // 1. Create a chainable mock to simulate Mongoose's .lean().exec() pattern
-const createChainableMock = () => {
-  const exec = vi.fn()
-  const lean = vi.fn(() => ({ exec }))
-  return {
-    find: vi.fn(() => ({ lean })),
-    findById: vi.fn(() => ({ lean })),
-    create: vi.fn(),
+const { createChainableMock } = vi.hoisted(() => {
+  const factory = () => {
+    const exec = vi.fn()
+    const lean = vi.fn(() => ({ exec }))
+    return {
+      find: vi.fn(() => ({ lean })),
+      findById: vi.fn(() => ({ lean })),
+      create: vi.fn(),
+    }
   }
-}
+
+  return { createChainableMock: factory }
+})
 
 // 2. Mock the models used by BaseCrudService
-vi.mock('./models.js', () => {
+vi.mock('../models.js', () => {
   return {
     User: createChainableMock(),
     Tour: createChainableMock(),
