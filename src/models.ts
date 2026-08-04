@@ -39,6 +39,25 @@ export const Position = mongoose.model<IGeoPosition>(
 )
 
 // ==========================================
+// ASSET MODEL
+// ==========================================
+
+export interface IAsset extends Document {
+  data: Buffer
+  datatype: string
+}
+
+export const assetSchema = new Schema<IAsset>(
+  {
+    data: { type: Buffer, required: true },
+    datatype: { type: String, required: true },
+  },
+  { timestamps: true },
+)
+
+export const Asset = mongoose.model<IAsset>('Asset', assetSchema)
+
+// ==========================================
 // REVIEW MODEL
 // ==========================================
 
@@ -51,7 +70,7 @@ export interface IReview {
 
 export const reviewSchema = new Schema<IReview>(
   {
-    user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    user: { type: Schema.ObjectId, ref: 'User', required: true },
     rating: { type: Number, required: true, min: 1, max: 5 },
     createdAt: { type: Date, default: Date.now, required: true },
     comment: { type: String },
@@ -90,9 +109,9 @@ export const userSchema = new Schema<IUser>(
     password: { type: String, required: true },
     roles: [{ type: String, required: true }],
     currentBalance: { type: Number, required: true, default: 0 },
-    profilePicture: { type: Schema.Types.ObjectId, ref: 'Asset' },
-    authoredTours: [{ type: Schema.Types.ObjectId, ref: 'Tour' }],
-    purchasedTours: [{ type: Schema.Types.ObjectId, ref: 'Tour' }],
+    profilePicture: { type: Schema.ObjectId, ref: 'Asset' },
+    authoredTours: [{ type: Schema.ObjectId, ref: 'Tour' }],
+    purchasedTours: [{ type: Schema.ObjectId, ref: 'Tour' }],
   },
   { timestamps: true },
 )
@@ -117,11 +136,11 @@ export interface ITour extends Document {
 export const tourSchema = new Schema<ITour>(
   {
     name: { type: String, required: true },
-    author: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    author: { type: Schema.ObjectId, ref: 'User', required: true },
     price: { type: Number, required: true },
-    items: [{ type: Schema.Types.ObjectId, ref: 'Item', required: true }],
-    thumbnail: { type: Schema.Types.ObjectId, ref: 'Asset' },
-    images: [{ type: Schema.Types.ObjectId, ref: 'Asset' }],
+    items: [{ type: Schema.ObjectId, ref: 'Item', required: true }],
+    thumbnail: { type: Schema.ObjectId, ref: 'Asset' },
+    images: [{ type: Schema.ObjectId, ref: 'Asset' }],
     description: { type: String },
     reviews: [reviewSchema],
   },
@@ -131,16 +150,16 @@ export const tourSchema = new Schema<ITour>(
 export const Tour = mongoose.model<ITour>('Tour', tourSchema)
 
 // ==========================================
-// EXPLANATION MODELS
+// EXPLANATION MODEL
 // ==========================================
 
-export interface IExplanation {
+export interface IDescription {
   level: 'simple' | 'normal' | 'advanced'
   text: string
   durationSeconds: number // Natural number
 }
 
-export const explanationSchema = new Schema<IExplanation>(
+export const explanationSchema = new Schema<IDescription>(
   {
     level: {
       type: String,
@@ -162,7 +181,7 @@ export const explanationSchema = new Schema<IExplanation>(
 )
 
 export enum ItemType {
-  Author = 'author',
+  Artist = 'artist',
   Style = 'style',
   Technique = 'technique',
   Artwork = 'artwork',
@@ -178,7 +197,7 @@ export interface IItem extends Document {
   itemType: ItemType
   itemAuthor: Types.ObjectId
   tour: Types.ObjectId
-  explanations: IExplanation[]
+  explanations: IDescription[]
   license: string
   tags?: string[]
   images?: Types.ObjectId[]
@@ -188,19 +207,19 @@ export interface IItem extends Document {
 export const itemSchema = new Schema<IItem>(
   {
     name: { type: String, required: true },
-    itemAuthor: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    itemAuthor: { type: Schema.ObjectId, ref: 'User', required: true },
     explanations: {
       type: [explanationSchema],
       required: true,
       validate: [
-        (v: IExplanation[]) => v.length > 0,
+        (v: IDescription[]) => v.length > 0,
         'Must have at least one explanation',
       ],
     },
     license: String,
-    tour: { type: Schema.Types.ObjectId, ref: 'Tour', required: true },
+    tour: { type: Schema.ObjectId, ref: 'Tour', required: true },
     tags: [{ type: String }],
-    images: [{ type: Schema.Types.ObjectId, ref: 'Asset' }],
+    images: [{ type: Schema.ObjectId, ref: 'Asset' }],
   },
   { discriminatorKey: 'itemType', collection: 'items', timestamps: true },
 )
@@ -208,23 +227,88 @@ export const itemSchema = new Schema<IItem>(
 export const Item = mongoose.model<IItem>('Item', itemSchema)
 
 // ==========================================
-// ASSET MODEL
+// 1. ARTIST MODEL
 // ==========================================
 
-export interface IAsset extends Document {
-  data: Buffer
-  datatype: string
+export interface IArtist extends IItem {
+  birthDate?: string // ISO-8601 string
+  deathDate?: string // ISO-8601 string
 }
 
-export const assetSchema = new Schema<IAsset>(
-  {
-    data: { type: Buffer, required: true },
-    datatype: { type: String, required: true },
-  },
-  { timestamps: true },
+export const itemArtistSchema = new Schema<IArtist>({
+  birthDate: { type: String },
+  deathDate: { type: String },
+})
+
+export const ItemArtist = Item.discriminator<IArtist>(
+  ItemType.Artist,
+  itemArtistSchema,
 )
 
-export const Asset = mongoose.model<IAsset>('Asset', assetSchema)
+// ==========================================
+// 2. TECHNIQUE MODEL
+// ==========================================
+
+export interface ITechnique extends IItem {
+  keyExponents?: Types.ObjectId
+  essentialTools?: string[]
+}
+
+export const itemTechniqueSchema = new Schema<ITechnique>({
+  keyExponents: [{ type: Schema.ObjectId, ref: ItemArtist }],
+  essentialTools: [{ type: String }],
+})
+
+export const ItemTechnique = Item.discriminator<ITechnique>(
+  ItemType.Technique,
+  itemTechniqueSchema,
+)
+
+// ==========================================
+// 3. STYLE MODEL
+// ==========================================
+
+export interface IStyle extends IItem {
+  historicalPeriod?: string
+  keyExponents?: Types.ObjectId[]
+}
+
+export const itemStyleSchema = new Schema<IStyle>({
+  historicalPeriod: { type: String },
+  keyExponents: [{ type: Schema.ObjectId, ref: 'ItemAuthor' }],
+})
+
+export const ItemStyle = Item.discriminator<IStyle>(
+  ItemType.Style,
+  itemStyleSchema,
+)
+
+// ==========================================
+// 4. ARTWORK MODEL
+// ==========================================
+
+export interface IArtwork extends IItem {
+  artists: Types.ObjectId[]
+  style?: Types.ObjectId
+  technique?: Types.ObjectId
+  creationPeriod?: string
+  position?: IGeoPosition
+  image?: Types.ObjectId
+}
+
+export const itemArtworkSchema = new Schema<IArtwork>({
+  artists: [{ type: Schema.ObjectId, ref: 'ItemArtist', required: true }],
+  style: { type: Schema.ObjectId, ref: 'ItemStyle' },
+  technique: { type: Schema.ObjectId, ref: 'ItemTechnique' },
+  creationPeriod: { type: String },
+  position: { type: geoPositionSchema },
+  image: { type: Schema.ObjectId, ref: 'Asset' },
+})
+
+export const ItemArtwork = Item.discriminator<IArtwork>(
+  ItemType.Artwork,
+  itemArtworkSchema,
+)
 
 // ==========================================
 // MUSEUM MODEL
@@ -241,10 +325,10 @@ export interface IMuseum extends Document {
 export const museumSchema = new Schema<IMuseum>(
   {
     name: { type: String, required: true },
-    thumbnail: { type: Schema.Types.ObjectId, ref: 'Asset' },
+    thumbnail: { type: Schema.ObjectId, ref: 'Asset' },
     description: { type: String },
     address: { type: String },
-    tours: [{ type: Schema.Types.ObjectId, ref: 'Tour' }],
+    tours: [{ type: Schema.ObjectId, ref: 'Tour' }],
   },
   { timestamps: true },
 )
