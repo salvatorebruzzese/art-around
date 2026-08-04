@@ -13,57 +13,6 @@ import {
 // USER MODEL
 // ==========================================
 
-export interface IUserCard {
-  brand: string
-  last4: string
-  expMonth: number
-  expYear: number
-  cardholderName: string
-}
-
-export const userCardSchema = new Schema<IUserCard>(
-  {
-    brand: { type: String, required: true },
-    last4: { type: String, required: true },
-    expMonth: { type: Number, required: true },
-    expYear: { type: Number, required: true },
-    cardholderName: { type: String, required: true },
-  },
-  { _id: false },
-)
-
-export interface IUserAddress {
-  street: string
-  city: string
-  state: string
-  zip: string
-  country: string
-}
-
-export const userAddressSchema = new Schema<IUserAddress>(
-  {
-    street: { type: String, required: true },
-    city: { type: String, required: true },
-    state: { type: String, required: true },
-    zip: { type: String, required: true },
-    country: { type: String, required: true },
-  },
-  { _id: false },
-)
-
-export interface IUserBillingData {
-  cards: IUserCard[]
-  addresses: IUserAddress[]
-}
-
-export const userBillingDataSchema = new Schema<IUserBillingData>(
-  {
-    cards: [userCardSchema],
-    addresses: [userAddressSchema],
-  },
-  { _id: false },
-)
-
 export interface IUser extends Document {
   username: string
   password: string
@@ -71,7 +20,7 @@ export interface IUser extends Document {
   profilePicture?: Types.ObjectId
   authoredTours: Types.ObjectId[]
   purchasedTours: Types.ObjectId[]
-  billingData: IUserBillingData
+  currentBalance: number // Let's just add a web page later to load currency, K.I.S.S.
 }
 
 export type PublicUser = {
@@ -90,7 +39,6 @@ export const userSchema = new Schema<IUser>(
     profilePicture: { type: Schema.Types.ObjectId, ref: 'Asset' },
     authoredTours: [{ type: Schema.Types.ObjectId, ref: 'Tour' }],
     purchasedTours: [{ type: Schema.Types.ObjectId, ref: 'Tour' }],
-    billingData: userBillingDataSchema,
   },
   { timestamps: true },
 )
