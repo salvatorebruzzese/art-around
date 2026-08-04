@@ -16,6 +16,7 @@ import {
   Asset,
   IAsset,
 } from './models.js'
+import { assertNever } from './accessControl.js'
 
 export class BaseCrudService<T> {
   constructor(private model: Model<T>) {}
@@ -63,6 +64,7 @@ export class BaseCrudService<T> {
       return Left(dbError(undefined, () => String(e)))
     }
   }
+  // TODO: delete
 }
 
 /**
@@ -77,7 +79,7 @@ function createCrudRouter<T extends Document>(model: Model<T>): Router {
     const result = await service.list(req.query as FilterQuery<T>)
 
     result.caseOf({
-      Left: (err) => res.status(500).json({ error: err }),
+      Left: (err: DBError) => res.status(500).json({ error: err }),
       Right: (data) => res.status(200).json(data),
     })
   })
@@ -89,12 +91,20 @@ function createCrudRouter<T extends Document>(model: Model<T>): Router {
       const result = await service.get(id)
 
       result.caseOf({
-        Left: (err) =>
-          res.status(err.type === 'NotFound' ? 404 : 500).json({ error: err }),
+        Left: (err) => {
+          switch (err.type) {
+            case 'NotFound':
+              return res.status(404).json({ error: err })
+            case 'DBError':
+              return res.status(500).json({ error: err })
+            default:
+              assertNever(err)
+          }
+        },
         Right: (data) => res.status(200).json(data),
       })
     } catch (error) {
-      res.status(400).json({ error })
+      res.status(400).json({ error }) // FIXME: This is just wrong, requests must be validated, emitted errors controlled
     }
   })
 
@@ -103,7 +113,7 @@ function createCrudRouter<T extends Document>(model: Model<T>): Router {
     const result = await service.create(req.body)
 
     result.caseOf({
-      Left: (err) => res.status(500).json({ error: err }),
+      Left: (err: DBError) => res.status(500).json({ error: err }),
       Right: (data) => res.status(201).json(data),
     })
   })
@@ -116,15 +126,16 @@ function createCrudRouter<T extends Document>(model: Model<T>): Router {
       Left: (err) => {
         switch (err.type) {
           case 'DBError':
-            res.status(500).json({ error: err })
-            break
+            return res.status(500).json({ error: err })
           case 'NotFound':
-            res.status(404).json({ error: err })
-            break
+            return res.status(404).json({ error: err })
+          default:
+            assertNever(err)
         }
       },
       Right: (data) => res.status(201).json(data),
     })
+    // FIXME: cf. loc 107
   })
 
   return router
