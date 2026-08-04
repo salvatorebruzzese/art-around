@@ -1,10 +1,5 @@
 import express from 'express'
-import {
-  userRouter,
-  tourRouter,
-  itemRouter,
-  assetRouter,
-} from './BaseCrudService.js'
+import { userRouter, tourRouter, itemRouter, assetRouter } from './service.js'
 
 const app = express()
 app.use(express.json())

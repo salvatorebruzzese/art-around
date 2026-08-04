@@ -1,14 +1,53 @@
 import express, { Router } from 'express'
-import mongoose, { Model, Document, FilterQuery } from 'mongoose'
-
-// Importing the BaseCrudService
-import { BaseCrudService } from './shared/service.js'
+import mongoose, { Model, Document, FilterQuery, Types } from 'mongoose'
+import { Either, Left, Right } from 'purify-ts/Either'
+import { NotFound, DBError, dbError, notFound } from './shared/errors.js'
 
 // Importing the Mongoose models and interfaces
-import { User, IUser } from './user-model.js'
-import { Tour, ITour } from './tour-model.js'
-import { Item, IItem } from './item-model.js'
-import { Asset, IAsset } from './asset-model.js'
+import {
+  User,
+  IUser,
+  Tour,
+  ITour,
+  Item,
+  IItem,
+  Asset,
+  IAsset,
+} from './models.js'
+
+export class BaseCrudService<T> {
+  constructor(private model: Model<T>) {}
+
+  async get(id: Types.ObjectId): Promise<Either<NotFound | DBError, T>> {
+    try {
+      const doc = await this.model.findById(id).lean().exec()
+      return doc ? Right(doc as T) : Left(notFound())
+    } catch (e) {
+      return Left(dbError(undefined, () => String(e)))
+    }
+  }
+
+  async list(
+    query: FilterQuery<T> = {},
+    projection?: string,
+  ): Promise<Either<DBError, T[]>> {
+    try {
+      const items = await this.model.find(query, projection).lean().exec()
+      return Right(items as T[])
+    } catch (e) {
+      return Left(dbError(undefined, () => String(e)))
+    }
+  }
+
+  async create(input: Partial<T>): Promise<Either<DBError, T>> {
+    try {
+      const doc = await this.model.create(input)
+      return Right(doc as T)
+    } catch (e) {
+      return Left(dbError(undefined, () => String(e)))
+    }
+  }
+}
 
 /**
  * Generic factory function to create a CRUD router for any Mongoose model.
