@@ -1,24 +1,17 @@
 import express from 'express'
 import { userRouter, tourRouter, itemRouter, assetRouter } from './service.js'
 
-const app = express()
-app.use(express.json())
-
 const router = express.Router()
 
 router.get('/', (_req, res) => {
   res.json({ message: 'Art Around API', version: '1.0.0' })
 })
 
-// API Root
-app.use('/', router)
+// Attach your model routers to the `router`, NOT to `app`!
+router.use('/users', userRouter)
+router.use('/tours', tourRouter)
+router.use('/items', itemRouter)
+router.use('/assets', assetRouter)
 
-// Model Routers
-app.use('/users', userRouter)
-app.use('/tours', tourRouter)
-app.use('/items', itemRouter)
-app.use('/assets', assetRouter)
-
-app.listen(8000, () => console.log('Server running on port 8000'))
-
+// Simply export the router. No app.listen() here!
 export default router
