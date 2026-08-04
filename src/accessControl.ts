@@ -2,17 +2,9 @@ import { Request, Response, NextFunction } from 'express'
 
 // A user and an editor are not that different, as editors are
 // users who either created a tour or bought one and have the right to fork it
-export type Role = 'Unauthenticated' | 'User' | 'Teacher' | 'Admin'
-export const sortedRoles: Role[] = [
-  'Admin',
-  'User',
-  'Teacher',
-  'Unauthenticated',
-]
+export type Role = 'Guest' | 'User' | 'Teacher' | 'Admin'
 
-/*
- * Permission: Action x Class
- */
+// Permission is a pair action:class
 export type Permission =
   | 'view:item'
   | 'view:museum'
@@ -29,7 +21,7 @@ export type Permission =
   | 'view:users'
   | 'edit:all'
 
-const Unauthenticated: Permission[] = ['view:museum', 'view:metatour']
+const Guest: Permission[] = ['view:museum', 'view:metatour']
 
 const User: Permission[] = [
   'view:museum',
@@ -54,7 +46,7 @@ const Teacher: Permission[] = [
 const Admin: Permission[] = [...Teacher, 'edit:all']
 
 export const ACMatrix: Record<Role, Permission[]> = {
-  Unauthenticated,
+  Guest,
   User,
   Teacher,
   Admin,
@@ -65,16 +57,12 @@ export function assertNever(x: never): never {
   throw new Error('Unexpected case: ' + JSON.stringify(x))
 }
 
-export function checkRole(roles: Role[], permission: Permission): boolean {
-  return roles.some(
-    (role) => ACMatrix[role] && ACMatrix[role].includes(permission),
-  )
+export function checkRole(role: Role, permission: Permission): boolean {
+  return ACMatrix[role] && ACMatrix[role].includes(permission)
 }
 
-export function filterRoles(roles: Role[], permission: Permission) {
-  return roles.filter(
-    (role) => ACMatrix[role] && ACMatrix[role].includes(permission),
-  )
+export function filterRoles(role: Role, permission: Permission) {
+  return ACMatrix[role] && ACMatrix[role].includes(permission)
 }
 
 export function ensureAuth(req: Request, res: Response, next: NextFunction) {

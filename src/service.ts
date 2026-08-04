@@ -1,7 +1,7 @@
 import express, { Router } from 'express'
-import mongoose, { Model, Document, FilterQuery, Types } from 'mongoose'
+import { Model, Document, FilterQuery, Types } from 'mongoose'
 import { Either, Left, Right } from 'purify-ts/Either'
-import { NotFound, DBError, dbError, notFound } from './shared/errors.js'
+import { NotFound, DBError, dbError, notFound } from './errors.js'
 
 // Importing the Mongoose models and interfaces
 import {
@@ -16,7 +16,6 @@ import {
   Asset,
   IAsset,
 } from './models.js'
-import e from 'express'
 
 export class BaseCrudService<T> {
   constructor(private model: Model<T>) {}
@@ -75,7 +74,6 @@ function createCrudRouter<T extends Document>(model: Model<T>): Router {
 
   // List items
   router.get('/', async (req, res) => {
-    // Passes the query parameters to the service's list method
     const result = await service.list(req.query as FilterQuery<T>)
 
     result.caseOf({
@@ -91,13 +89,11 @@ function createCrudRouter<T extends Document>(model: Model<T>): Router {
       const result = await service.get(id)
 
       result.caseOf({
-        // Assuming NotFound error maps to 404, otherwise 500 for DBError
         Left: (err) =>
           res.status(err.type === 'NotFound' ? 404 : 500).json({ error: err }),
         Right: (data) => res.status(200).json(data),
       })
     } catch (error) {
-      // Catch invalid ObjectId casting errors
       res.status(400).json({ error })
     }
   })
@@ -123,7 +119,7 @@ function createCrudRouter<T extends Document>(model: Model<T>): Router {
             res.status(500).json({ error: err })
             break
           case 'NotFound':
-            res.status(500).json({ error: err })
+            res.status(404).json({ error: err })
             break
         }
       },
