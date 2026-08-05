@@ -2,6 +2,7 @@ import mongoose, { Schema, Document, Types } from 'mongoose'
 import { IGeoPosition } from '../shared/models.js'
 import z from 'zod'
 import { makeZodValidator, objectIdZod } from '../shared/validation.js'
+import { ShallowAny } from '../shared/utils.js'
 
 export interface IDescription {
   level: 'simple' | 'normal' | 'advanced'
@@ -37,7 +38,7 @@ export enum ItemType {
   Other = 'other',
 }
 
-export interface IItem extends Document {
+interface _Item {
   name: string
   itemType: ItemType
   itemAuthor: Types.ObjectId
@@ -48,6 +49,8 @@ export interface IItem extends Document {
   images?: Types.ObjectId[]
   position?: IGeoPosition
 }
+
+export interface IItem extends Document, _Item {}
 
 export const itemSchema = new Schema<IItem>(
   {
@@ -68,6 +71,15 @@ export const itemSchema = new Schema<IItem>(
   },
   { discriminatorKey: 'itemType', collection: 'items', timestamps: true },
 )
+
+export const safeItemFields: ShallowAny<_Item> = {
+  name: 1,
+  itemType: 1,
+  itemAuthor: 1,
+  tour: 1,
+  explanations: 1,
+  license: 1,
+}
 
 export const Item = mongoose.model<IItem>('Item', itemSchema)
 

@@ -1,4 +1,4 @@
-import { Item, IItem, ItemQuery, ItemInput } from './model.js'
+import { Item, IItem, ItemQuery, ItemInput, safeItemFields } from './model.js'
 import { Either, Left, Right } from 'purify-ts/Either'
 import { Types } from 'mongoose'
 import { sortedRoles } from '../shared/models.js'
@@ -8,6 +8,7 @@ import {
   AccessDenied,
   dbError,
   DBError,
+  notFound,
   NotFound,
 } from '../shared/errors.js'
 import { User } from '../user/model.js'
@@ -49,12 +50,14 @@ async function getItem(
   return _getById(id, Item)
 }
 
-async function listItems(query: ItemQuery): Promise<Either<DBError, IItem[]>> {
+async function listItems(
+  query: ItemQuery,
+): Promise<Either<NotFound | DBError, IItem[]>> {
   try {
-    const items = await Item.find(query, 'name tags').lean().exec()
-    return Right(items)
+    const items = await Item.find(query, safeItemFields).lean().exec()
+    return items ? Right(items) : Left(notFound())
   } catch (e) {
-    return Left({ type: 'DBError', message: String(e) }) // TODO: use dbError
+    return Left(dbError(undefined, () => String(e)))
   }
 }
 
