@@ -36,14 +36,12 @@ const UserBaseSchemaZod = z.object({
   profilePicture: objectIdZod.optional(), // Asset
 })
 
-const UserQuerySchemaZod = z.object({
-  ...UserBaseSchemaZod,
+const UserQuerySchemaZod = UserBaseSchemaZod.extend({
   role: z.string(),
   authoredTours: z.array(objectIdZod).optional(), // Tour
 })
 
-const UserInputSchemaZod = z.object({
-  ...UserBaseSchemaZod,
+const UserInputSchemaZod = UserBaseSchemaZod.extend({
   password: z.string(),
 })
 
@@ -127,8 +125,86 @@ const ItemSchemaZod = z.object({
   license: z.string(),
   tags: z.array(z.string()).optional(),
   images: z.array(objectIdZod).optional(),
-  position: PositionSchemaZod.optional(),
 })
 
 export type Item = z.infer<typeof ItemSchemaZod>
 export const Item = { validate: makeZodValidator(ItemSchemaZod) }
+
+// -----------
+// ASSET VALIDATOR
+// -----------
+
+const AssetSchemaZod = z.object({
+  data: z.any(), // Buffer
+  datatype: z.string(),
+})
+
+export type Asset = z.infer<typeof AssetSchemaZod>
+export const Asset = { validate: makeZodValidator(AssetSchemaZod) }
+
+// ----------------
+// ARTIST VALIDATOR
+// ----------------
+
+const ArtistSchemaZod = ItemSchemaZod.extend({
+  birthDate: z.string().optional(), // ISO-8601 string
+  deathDate: z.string().optional(), // ISO-8601 string
+})
+
+export type Artist = z.infer<typeof ArtistSchemaZod>
+export const Artist = { validate: makeZodValidator(ArtistSchemaZod) }
+
+// ------------------
+// TECHNIQUE VALIDATOR
+// ------------------
+
+const TechniqueSchemaZod = ItemSchemaZod.extend({
+  keyExponents: z.array(objectIdZod).optional(),
+  essentialTools: z.array(z.string()).optional(),
+})
+
+export type Technique = z.infer<typeof TechniqueSchemaZod>
+export const Technique = { validate: makeZodValidator(TechniqueSchemaZod) }
+
+// --------------
+// STYLE VALIDATOR
+// --------------
+
+const StyleSchemaZod = ItemSchemaZod.extend({
+  historicalPeriod: z.string().optional(),
+  keyExponents: z.array(objectIdZod).optional(),
+})
+
+export type Style = z.infer<typeof StyleSchemaZod>
+export const Style = { validate: makeZodValidator(StyleSchemaZod) }
+
+// ----------------
+// ARTWORK VALIDATOR
+// ----------------
+
+const ArtworkSchemaZod = ItemSchemaZod.extend({
+  artists: z.array(objectIdZod),
+  style: objectIdZod.optional(),
+  technique: objectIdZod.optional(),
+  creationPeriod: z.string().optional(),
+  position: PositionSchemaZod.optional(),
+  image: objectIdZod.optional(),
+})
+
+export type Artwork = z.infer<typeof ArtworkSchemaZod>
+export const Artwork = { validate: makeZodValidator(ArtworkSchemaZod) }
+
+// ------------
+// MUSEUM VALIDATOR
+// ------------
+
+const MuseumSchemaZod = z.object({
+  name: z.string(),
+  thumbnail: objectIdZod.optional(),
+  description: z.string().optional(),
+  address: z.string().optional(),
+  tours: z.array(objectIdZod).optional(),
+})
+
+export type Museum = z.infer<typeof MuseumSchemaZod>
+export const Museum = { validate: makeZodValidator(MuseumSchemaZod) }
