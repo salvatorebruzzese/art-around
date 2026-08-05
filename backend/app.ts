@@ -1,7 +1,8 @@
 import express from 'express'
 import session from 'express-session'
 import passport from 'passport'
-import mainRouter from './mainRouter.js'
+import apiRouter from './router.js'
+import marketRouter from '../marketplace/router.js'
 import './passportConfig.js'
 import cors from 'cors'
 import path from 'path'
@@ -13,7 +14,6 @@ declare global {
   var rootDir: string
   var startDate: Date | null
 }
-export {}
 
 // NOTE: Non possiamo fare assunzioni su quale sia la rootDir, o il percorso relativo
 // Per ciò usiamo ricaviamo dalla posizione di app.js la 'root'
@@ -52,13 +52,10 @@ app.use(passport.session())
 app.use(express.urlencoded({ extended: true }))
 
 // NOTE: questo deve essere il primo middleware, altrimenti verrà servito come file statico
-app.use('/api', mainRouter)
+app.use('/api', apiRouter)
 app.get('/', (_req, res) => {
   res.redirect('/marketplace')
 })
-app.use(
-  '/marketplace',
-  express.static(path.join(global.rootDir, 'marketplace/')),
-)
+app.use('/marketplace', marketRouter)
 app.use('/navigator', express.static(path.join(global.rootDir, 'navigator/')))
 export default app
