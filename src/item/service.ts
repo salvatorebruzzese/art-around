@@ -1,8 +1,6 @@
-import { Item, IItem } from './model.js'
+import { Item, IItem, ItemQuery, ItemInput } from './model.js'
 import { Either, Left, Right } from 'purify-ts/Either'
 import { Types } from 'mongoose'
-import { z } from 'zod'
-import { makeZodValidator } from '../shared/validation.js'
 import { sortedRoles } from '../shared/models.js'
 import { _getById, filterRoles } from '../shared/utils.js'
 import {
@@ -92,51 +90,6 @@ async function createItem(
   } catch (e) {
     return Left(dbError(undefined, () => JSON.stringify(e)))
   }
-}
-
-// ==================
-//      Schemas
-// ==================
-
-const ItemQuerySchema = z.object({
-  name: z.string().optional(),
-  // Accetta sia un array di stringhe che una singola stringa
-  tags: z
-    .union([z.string(), z.array(z.string())])
-    .optional()
-    .transform((val) => (typeof val === 'string' ? [val] : val)), // gestisce ?tags=foo or ?tags=foo&tags=bar
-  tour: z.string().refine((val) => !val || Types.ObjectId.isValid(val), {
-    message: 'tour must be a valid ObjectId string',
-  }),
-  museum: z
-    .string()
-    .optional()
-    .refine((val) => !val || Types.ObjectId.isValid(val), {
-      message: 'museum must be a valid ObjectId string',
-    }),
-})
-
-export type ItemQuery = z.infer<typeof ItemQuerySchema>
-export const ItemQuery = {
-  validate: makeZodValidator(ItemQuerySchema),
-}
-
-const ItemInputSchema = ItemQuerySchema.extend({
-  images: z
-    .array(z.string().refine((id) => Types.ObjectId.isValid(id)))
-    .optional(),
-  description: z.string().optional(),
-  position: z
-    .object({
-      type: z.literal('Point'),
-      coordinates: z.tuple([z.number(), z.number()]),
-    })
-    .optional(),
-})
-
-export type ItemInput = z.infer<typeof ItemInputSchema>
-export const ItemInput = {
-  validate: makeZodValidator(ItemInputSchema),
 }
 
 export default {

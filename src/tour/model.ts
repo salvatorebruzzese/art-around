@@ -1,12 +1,13 @@
 import mongoose, { Schema, Document, Types } from 'mongoose'
-import {
-  IReview,
-  reviewSchema,
-  ITourPrice,
-  tourPriceSchema,
-} from '../shared/models.js'
 import { makeZodValidator, objectIdZod } from '../shared/validation.js'
 import z from 'zod'
+
+export interface IReview {
+  user: Types.ObjectId
+  rating: number
+  comment?: string
+  createdAt?: Date
+}
 
 export interface ITour extends Document {
   name: string
@@ -16,8 +17,18 @@ export interface ITour extends Document {
   items?: Types.ObjectId[]
   description?: string
   reviews?: IReview[]
-  price?: ITourPrice
+  price?: number
 }
+
+export const reviewSchema = new Schema<IReview>(
+  {
+    user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    rating: { type: Number, required: true, min: 1, max: 5 },
+    comment: { type: String },
+    createdAt: { type: Date, default: Date.now },
+  },
+  { _id: false },
+)
 
 export const tourSchema = new Schema<ITour>(
   {
@@ -28,7 +39,7 @@ export const tourSchema = new Schema<ITour>(
     items: [{ type: Schema.Types.ObjectId, ref: 'Item' }],
     description: { type: String },
     reviews: [reviewSchema],
-    price: tourPriceSchema,
+    price: { type: Number },
   },
   { timestamps: true },
 )

@@ -1,5 +1,6 @@
 import mongoose, { Schema, Document } from 'mongoose'
 import z from 'zod'
+import { makeZodValidator } from '../shared/validation.js'
 
 export interface IAsset extends Document {
   data: Buffer

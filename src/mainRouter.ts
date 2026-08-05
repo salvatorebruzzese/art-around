@@ -4,7 +4,8 @@ import tourRouter from './tour/router.js'
 import museumRouter from './museum/router.js'
 import assetRouter from './asset/router.js'
 import passport from 'passport'
-import userService, { SignupInput } from './user/service.js'
+import { SignupInput } from './user/model.js'
+import userService from './user/service.js'
 import { assertNever } from './shared/utils.js'
 
 const router = express.Router()

@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt'
-import { User, IUser } from './model.js'
+import { User, IUser, SignupInput } from './model.js'
 import { Either, Left, Right } from 'purify-ts'
 
 export type ConflictError = { type: 'ConflictError'; message: string }
@@ -33,3 +33,32 @@ async function signup(
 export default {
   signup,
 }
+
+import { z } from 'zod'
+import { DBError } from '../shared/errors.js'
+
+// UserCard
+export const UserCardSchema = z.object({
+  // TODO: refine
+  brand: z.string(),
+  last4: z.string(),
+  expMonth: z.number(),
+  expYear: z.number(),
+  cardholderName: z.string(),
+})
+
+// UserAddress
+export const UserAddressSchema = z.object({
+  // TODO: refine with lib?
+  street: z.string(),
+  city: z.string(),
+  state: z.string(),
+  zip: z.string(),
+  country: z.string(),
+})
+
+// UserBillingData
+export const UserBillingDataSchema = z.object({
+  cards: z.array(UserCardSchema),
+  addresses: z.array(UserAddressSchema),
+})

@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { Either, Left, Right } from 'purify-ts/Either'
 import { ValidationError, validationError } from './errors.js'
+import { isValidObjectId } from 'mongoose'
 
 function validate<T extends z.ZodTypeAny>(
   schema: T,

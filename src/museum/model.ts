@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Types } from 'mongoose'
 import z from 'zod'
-import { objectIdZod } from '../shared/validation.js'
+import { makeZodValidator, objectIdZod } from '../shared/validation.js'
 
 export interface IMuseum extends Document {
   name: string

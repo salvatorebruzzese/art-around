@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express'
 import { NotFound, DBError } from '../shared/errors.js'
-import { IMuseum } from './model.js'
-import MuseumService, { MuseumQuery } from './service.js'
+import { IMuseum, MuseumQuery } from './model.js'
+import MuseumService from './service.js'
 import { Either } from 'purify-ts'
 import mongoose from 'mongoose'
 

@@ -103,3 +103,38 @@ export const UserQuery = { validate: makeZodValidator(UserQuerySchemaZod) }
 
 export type UserInput = z.infer<typeof UserInputSchemaZod>
 export const UserInput = { validate: makeZodValidator(UserInputSchemaZod) }
+
+export const UserCardSchema = z.object({
+  // TODO: refine
+  brand: z.string(),
+  last4: z.string(),
+  expMonth: z.number(),
+  expYear: z.number(),
+  cardholderName: z.string(),
+})
+
+export const UserAddressSchema = z.object({
+  // TODO: refine with lib?
+  street: z.string(),
+  city: z.string(),
+  state: z.string(),
+  zip: z.string(),
+  country: z.string(),
+})
+
+export const UserBillingDataSchema = z.object({
+  cards: z.array(UserCardSchema),
+  addresses: z.array(UserAddressSchema),
+})
+
+export const SignupInputSchema = z.object({
+  username: z.string(),
+  password: z.string(),
+  profilePicture: z.any().optional(),
+  billingData: UserBillingDataSchema.optional(),
+})
+
+export type SignupInput = z.infer<typeof SignupInputSchema>
+export const SignupInput = {
+  validate: makeZodValidator(SignupInputSchema),
+}

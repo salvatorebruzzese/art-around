@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express'
-import ItemService, { ItemInput, ItemQuery } from './service.js'
+import { ItemInput, ItemQuery } from './model.js'
+import ItemService from './service.js'
 import mongoose from 'mongoose'
 import { assertNever, ensureAuth } from '../shared/utils.js'
 import { Either } from 'purify-ts'
