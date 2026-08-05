@@ -1,26 +1,17 @@
 import express from 'express'
 import session from 'express-session'
 import passport from 'passport'
-import apiRouter from './router.js'
+import rootDir from './rootdir.js'
+import apiRouter from '../backend/router.js'
 import marketRouter from '../marketplace/router.js'
-import './passportConfig.js'
+import navigatorRouter from '../navigator/router.js'
+import homeRouter from '../app/router.js'
+import '../backend/passportConfig.js'
 import cors from 'cors'
 import path from 'path'
 import dotenv from 'dotenv'
-import { fileURLToPath } from 'url'
 
-declare global {
-  // Add your custom types here
-  var rootDir: string
-  var startDate: Date | null
-}
-
-// NOTE: Non possiamo fare assunzioni su quale sia la rootDir, o il percorso relativo
-// Per ciò usiamo ricaviamo dalla posizione di app.js la 'root'
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-global.rootDir = path.join(__dirname, '..')
-dotenv.config({ path: path.join(global.rootDir, '.env') }) // Load .env
+dotenv.config({ path: path.join(rootDir, '.env') }) // Load .env
 
 const requiredEnv = ['MONGO_USR', 'MONGO_PWD', 'MONGO_SITE', 'SESSION_SECRET']
 const missing = requiredEnv.filter((envVar) => !process.env[envVar])
@@ -52,10 +43,9 @@ app.use(passport.session())
 app.use(express.urlencoded({ extended: true }))
 
 // NOTE: questo deve essere il primo middleware, altrimenti verrà servito come file statico
+app.use('/', homeRouter)
 app.use('/api', apiRouter)
-app.get('/', (_req, res) => {
-  res.redirect('/marketplace')
-})
 app.use('/marketplace', marketRouter)
-app.use('/navigator', express.static(path.join(global.rootDir, 'navigator/')))
+app.use('/navigator', navigatorRouter)
+
 export default app

@@ -1,4 +1,5 @@
 import app from './app.js'
+import rootDir from './rootdir.js'
 import mongoose from 'mongoose'
 
 const MONGO_USR = process.env.MONGO_USR as string
@@ -14,11 +15,13 @@ try {
   console.error('MongoDB connection failed:', err)
 }
 
+let startDate: Date | null
+
 const PORT = process.env.PORT || 8000
 app.listen(PORT, () => {
-  global.startDate = new Date()
-  console.log('Root dir: ' + global.rootDir)
+  startDate = new Date()
+  console.log('Root dir: ' + rootDir)
   console.log(
-    `App listening on port 8000 started ${global.startDate.toLocaleString()}`,
+    `App listening on port 8000 started ${startDate.toLocaleString()}`,
   )
 })
