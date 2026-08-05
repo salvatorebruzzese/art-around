@@ -36,13 +36,13 @@ const UserBaseSchemaZod = z.object({
   profilePicture: objectIdZod.optional(), // Asset
 })
 
-export const UserQuerySchemaZod = z.object({
+const UserQuerySchemaZod = z.object({
   ...UserBaseSchemaZod,
   role: z.string(),
   authoredTours: z.array(objectIdZod).optional(), // Tour
 })
 
-export const UserInputSchemaZod = z.object({
+const UserInputSchemaZod = z.object({
   ...UserBaseSchemaZod,
   password: z.string(),
 })
@@ -85,3 +85,50 @@ const TourSchemaZod = z.object({
 
 export type Tour = z.infer<typeof TourSchemaZod>
 export const Tour = { validate: makeZodValidator(TourSchemaZod) }
+
+// ------------------
+// POSITION VALIDATOR
+// ------------------
+
+const PositionSchemaZod = z.object({
+  coordinates: z.array(z.number()).length(2),
+})
+
+export type Position = z.infer<typeof PositionSchemaZod>
+export const Position = { validate: makeZodValidator(PositionSchemaZod) }
+
+// ---------------------
+// DESCRIPTION VALIDATOR
+// ---------------------
+
+const levels = ['simple', 'normal', 'advanced']
+
+const DescriptionSchemaZod = z.object({
+  level: z.string().refine((str) => levels.includes(str), {
+    error: 'Level must be either normal, simple or advanced',
+  }),
+  text: z.string(),
+  duration: z.number().min(0),
+})
+
+export type Description = z.infer<typeof DescriptionSchemaZod>
+export const Description = { validate: makeZodValidator(DescriptionSchemaZod) }
+
+// --------------
+// ITEM VALIDATOR
+// --------------
+
+const ItemSchemaZod = z.object({
+  name: z.string(),
+  itemType: z.enum(ItemType),
+  itemAuthor: objectIdZod,
+  tour: objectIdZod,
+  explanations: z.array(DescriptionSchemaZod),
+  license: z.string(),
+  tags: z.array(z.string()).optional(),
+  images: z.array(objectIdZod).optional(),
+  position: PositionSchemaZod.optional(),
+})
+
+export type Item = z.infer<typeof ItemSchemaZod>
+export const Item = { validate: makeZodValidator(ItemSchemaZod) }
