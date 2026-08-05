@@ -1,9 +1,9 @@
 import mongoose, { Schema, Document, Types } from 'mongoose'
 import { Role } from './accessControl.js'
 
-// ==========================================
+// --------------
 // POSITION MODEL
-// ==========================================
+// --------------
 
 export interface IGeoPosition {
   type: 'Point'
@@ -38,9 +38,9 @@ export const Position = mongoose.model<IGeoPosition>(
   geoPositionSchema,
 )
 
-// ==========================================
+// -----------
 // ASSET MODEL
-// ==========================================
+// -----------
 
 export interface IAsset extends Document {
   data: Buffer
@@ -57,9 +57,9 @@ export const assetSchema = new Schema<IAsset>(
 
 export const Asset = mongoose.model<IAsset>('Asset', assetSchema)
 
-// ==========================================
+// ------------
 // REVIEW MODEL
-// ==========================================
+// ------------
 
 export interface IReview {
   user: Types.ObjectId
@@ -80,9 +80,9 @@ export const reviewSchema = new Schema<IReview>(
 
 export const Review = mongoose.model<IReview>('Review', reviewSchema)
 
-// ==========================================
+// ----------
 // USER MODEL
-// ==========================================
+// ----------
 
 export interface IUser extends Document {
   username: string
@@ -118,9 +118,9 @@ export const userSchema = new Schema<IUser>(
 
 export const User = mongoose.model<IUser>('User', userSchema)
 
-// ==========================================
+// ----------
 // TOUR MODEL
-// ==========================================
+// ----------
 
 export interface ITour extends Document {
   name: string
@@ -149,9 +149,9 @@ export const tourSchema = new Schema<ITour>(
 
 export const Tour = mongoose.model<ITour>('Tour', tourSchema)
 
-// ==========================================
-// EXPLANATION MODEL
-// ==========================================
+// -----------------
+// DESCRIPTION MODEL
+// -----------------
 
 export interface IDescription {
   level: 'simple' | 'normal' | 'advanced'
@@ -159,7 +159,7 @@ export interface IDescription {
   durationSeconds: number // Natural number
 }
 
-export const explanationSchema = new Schema<IDescription>(
+export const DescriptionSchema = new Schema<IDescription>(
   {
     level: {
       type: String,
@@ -180,6 +180,10 @@ export const explanationSchema = new Schema<IDescription>(
   { _id: false },
 )
 
+// ----------
+// ITEM MODEL
+// ----------
+
 export enum ItemType {
   Artist = 'artist',
   Style = 'style',
@@ -187,10 +191,6 @@ export enum ItemType {
   Artwork = 'artwork',
   Other = 'other',
 }
-
-// ==========================================
-// ITEM MODEL
-// ==========================================
 
 export interface IItem extends Document {
   name: string
@@ -209,7 +209,7 @@ export const itemSchema = new Schema<IItem>(
     name: { type: String, required: true },
     itemAuthor: { type: Schema.ObjectId, ref: 'User', required: true },
     explanations: {
-      type: [explanationSchema],
+      type: [DescriptionSchema],
       required: true,
       validate: [
         (v: IDescription[]) => v.length > 0,
@@ -226,9 +226,9 @@ export const itemSchema = new Schema<IItem>(
 
 export const Item = mongoose.model<IItem>('Item', itemSchema)
 
-// ==========================================
+// ---------------
 // 1. ARTIST MODEL
-// ==========================================
+// ---------------
 
 export interface IArtist extends IItem {
   birthDate?: string // ISO-8601 string
@@ -245,9 +245,9 @@ export const ItemArtist = Item.discriminator<IArtist>(
   itemArtistSchema,
 )
 
-// ==========================================
+// ------------------
 // 2. TECHNIQUE MODEL
-// ==========================================
+// ------------------
 
 export interface ITechnique extends IItem {
   keyExponents?: Types.ObjectId
@@ -264,9 +264,9 @@ export const ItemTechnique = Item.discriminator<ITechnique>(
   itemTechniqueSchema,
 )
 
-// ==========================================
+// --------------
 // 3. STYLE MODEL
-// ==========================================
+// --------------
 
 export interface IStyle extends IItem {
   historicalPeriod?: string
@@ -283,9 +283,9 @@ export const ItemStyle = Item.discriminator<IStyle>(
   itemStyleSchema,
 )
 
-// ==========================================
+// ----------------
 // 4. ARTWORK MODEL
-// ==========================================
+// ----------------
 
 export interface IArtwork extends IItem {
   artists: Types.ObjectId[]
@@ -310,9 +310,9 @@ export const ItemArtwork = Item.discriminator<IArtwork>(
   itemArtworkSchema,
 )
 
-// ==========================================
+// ------------
 // MUSEUM MODEL
-// ==========================================
+// ------------
 
 export interface IMuseum extends Document {
   name: string
