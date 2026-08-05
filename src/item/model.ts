@@ -1,25 +1,121 @@
 import mongoose, { Schema, Document, Types } from 'mongoose'
-import { IGeoPosition, geoPositionSchema } from '../shared/models.js'
+import { IGeoPosition } from '../shared/models.js'
+import z from 'zod'
+import { makeZodValidator, objectIdZod } from '../shared/validation.js'
+
+export interface IDescription {
+  level: 'simple' | 'normal' | 'advanced'
+  text: string
+  durationSeconds: number // Natural number
+}
+
+export const DescriptionSchema = new Schema<IDescription>(
+  {
+    level: {
+      type: String,
+      enum: ['simple', 'normal', 'advanced'],
+      required: true,
+    },
+    text: { type: String, required: true },
+    durationSeconds: {
+      type: Number,
+      required: true,
+      min: [0, 'Duration must be a natural number'],
+      validate: {
+        validator: Number.isInteger,
+        message: 'Duration must be an integer',
+      },
+    },
+  },
+  { _id: false },
+)
+export enum ItemType {
+  Artist = 'artist',
+  Style = 'style',
+  Technique = 'technique',
+  Artwork = 'artwork',
+  Other = 'other',
+}
 
 export interface IItem extends Document {
   name: string
+  itemType: ItemType
+  itemAuthor: Types.ObjectId
   tour: Types.ObjectId
+  explanations: IDescription[]
+  license: string
   tags?: string[]
   images?: Types.ObjectId[]
-  description?: string
   position?: IGeoPosition
 }
 
 export const itemSchema = new Schema<IItem>(
   {
     name: { type: String, required: true },
+    itemAuthor: { type: Schema.ObjectId, ref: 'User', required: true },
+    explanations: {
+      type: [DescriptionSchema],
+      required: true,
+      validate: [
+        (v: IDescription[]) => v.length > 0,
+        'Must have at least one explanation',
+      ],
+    },
+    license: String,
+    tour: { type: Schema.ObjectId, ref: 'Tour', required: true },
     tags: [{ type: String }],
-    tour: { type: Schema.Types.ObjectId, ref: 'Tour' },
-    images: [{ type: Schema.Types.ObjectId, ref: 'Asset' }],
-    description: { type: String },
-    position: { type: geoPositionSchema, required: false },
+    images: [{ type: Schema.ObjectId, ref: 'Asset' }],
   },
-  { timestamps: true },
+  { discriminatorKey: 'itemType', collection: 'items', timestamps: true },
 )
 
 export const Item = mongoose.model<IItem>('Item', itemSchema)
+
+// ---------------------
+// DESCRIPTION VALIDATOR
+// ---------------------
+
+const levels = ['simple', 'normal', 'advanced']
+
+const DescriptionSchemaZod = z.object({
+  level: z.string().refine((str) => levels.includes(str), {
+    error: 'Level must be either normal, simple or advanced',
+  }),
+  text: z.string(),
+  duration: z.number().min(0),
+})
+
+export type Description = z.infer<typeof DescriptionSchemaZod>
+export const Description = { validate: makeZodValidator(DescriptionSchemaZod) }
+
+// --------------
+// ITEM VALIDATOR
+// --------------
+
+const ItemInputSchemaZod = z.object({
+  name: z.string(),
+  itemType: z.enum(ItemType),
+  itemAuthor: objectIdZod,
+  tour: objectIdZod,
+  explanations: z.array(DescriptionSchemaZod),
+  license: z.string(),
+  tags: z.array(z.string()).optional(),
+  images: z.array(objectIdZod).optional(),
+})
+
+const ItemQuerySchemaZod = z.object({
+  name: z.string().optional(),
+  itemType: z.enum(ItemType).optional(),
+  itemAuthor: objectIdZod.optional(),
+  tour: objectIdZod.optional(),
+  explanations: z.array(DescriptionSchemaZod).optional(),
+  license: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+  images: z.array(objectIdZod).optional(),
+})
+
+export type ItemInput = z.infer<typeof ItemInputSchemaZod>
+export const ItemInput = { validate: makeZodValidator(ItemInputSchemaZod) }
+
+export type ItemQuery = z.infer<typeof ItemQuerySchemaZod>
+export const ItemQuery = { validate: makeZodValidator(ItemQuerySchemaZod) }

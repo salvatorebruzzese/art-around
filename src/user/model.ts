@@ -1,5 +1,7 @@
 import mongoose, { Schema, Document, Types } from 'mongoose'
 import { Role } from '../shared/models.js'
+import { makeZodValidator, objectIdZod } from '../shared/validation.js'
+import z from 'zod'
 
 export interface IUserCard {
   brand: string
@@ -81,3 +83,23 @@ export const userSchema = new Schema<IUser>(
 )
 
 export const User = mongoose.model<IUser>('User', userSchema)
+
+const UserBaseSchemaZod = z.object({
+  username: z.string(),
+  profilePicture: objectIdZod.optional(),
+})
+
+const UserQuerySchemaZod = UserBaseSchemaZod.extend({
+  role: z.string(),
+  authoredTours: z.array(objectIdZod).optional(), // Tour
+})
+
+const UserInputSchemaZod = UserBaseSchemaZod.extend({
+  password: z.string(),
+})
+
+export type UserQuery = z.infer<typeof UserQuerySchemaZod>
+export const UserQuery = { validate: makeZodValidator(UserQuerySchemaZod) }
+
+export type UserInput = z.infer<typeof UserInputSchemaZod>
+export const UserInput = { validate: makeZodValidator(UserInputSchemaZod) }

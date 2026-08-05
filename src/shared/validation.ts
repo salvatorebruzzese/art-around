@@ -21,3 +21,7 @@ function validate<T extends z.ZodTypeAny>(
 export function makeZodValidator<T extends z.ZodTypeAny>(schema: T) {
   return (value: unknown) => validate(schema, value)
 }
+
+export const objectIdZod = z.string().refine((val) => isValidObjectId(val), {
+  error: 'Must be a valid ObjectId type',
+})

@@ -1,4 +1,6 @@
-import { Schema, Types } from 'mongoose'
+import { Schema } from 'mongoose'
+import z from 'zod'
+import { makeZodValidator } from './validation.js'
 
 /*
  * TODO: Dovremmo implementare qui libre/guided/master? (README.md)
@@ -75,34 +77,9 @@ export const geoPositionSchema = new Schema<IGeoPosition>(
   { _id: false },
 )
 
-export interface IReview {
-  user: Types.ObjectId
-  rating: number
-  comment?: string
-  createdAt?: Date
-}
+const PositionSchemaZod = z.object({
+  coordinates: z.array(z.number()).length(2),
+})
 
-export const reviewSchema = new Schema<IReview>(
-  {
-    user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    rating: { type: Number, required: true, min: 1, max: 5 },
-    comment: { type: String },
-    createdAt: { type: Date, default: Date.now },
-  },
-  { _id: false },
-)
-
-export interface ITourPrice {
-  amount: number
-  currency: string
-  forSale: boolean
-}
-
-export const tourPriceSchema = new Schema<ITourPrice>(
-  {
-    amount: { type: Number, required: true, min: 0 },
-    currency: { type: String, required: true },
-    forSale: { type: Boolean, default: false },
-  },
-  { _id: false },
-)
+export type Position = z.infer<typeof PositionSchemaZod>
+export const Position = { validate: makeZodValidator(PositionSchemaZod) }
