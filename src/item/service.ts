@@ -69,7 +69,7 @@ async function createItem(
   const userResult = await _getById(userId, User)
   if (userResult.isLeft()) return Left(accessDenied())
   const user = userResult.unsafeCoerce()
-  const roles = user?.roles || ['Unauthenticated']
+  const roles = user.roles || ['Unauthenticated']
   const froles = filterRoles(roles, 'create:item') // filtered roles
   if (froles.length == 0) return Left(accessDenied())
   if (
@@ -93,6 +93,38 @@ async function createItem(
   } catch (e) {
     return Left(dbError(undefined, () => JSON.stringify(e)))
   }
+}
+
+/* eslint-disable @typescript-eslint/no-unused-vars */
+async function deleteItem(
+  id: Types.ObjectId,
+  userId: Types.ObjectId,
+): Promise<Either<AccessDenied | NotFound | DBError, IItem>> {
+  const userResult = await _getById(userId, User)
+  if (userResult.isLeft()) {
+    const error = userResult.extract()
+    return error.type === 'NotFound' ? Left(accessDenied()) : Left(error)
+  }
+
+  const itemResult = await _getById(id, Item)
+  if (itemResult.isLeft()) return itemResult
+
+  const user = userResult.unsafeCoerce()
+  const item = itemResult.unsafeCoerce()
+
+  const roles = user.roles ?? ['Unauthenticated']
+  const froles = filterRoles(roles, 'create:item')
+  if (froles.length === 0) return Left(accessDenied())
+
+  const permitted = sortedRoles
+    .filter((role) => froles.includes(role))
+    .some((role) => {
+      if (role === 'Editor') return item.itemAuthor.equals(userId)
+      return true
+    })
+
+  if (!permitted) return Left(accessDenied())
+  return Right(item)
 }
 
 export default {
