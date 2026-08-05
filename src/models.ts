@@ -87,7 +87,7 @@ export const Review = mongoose.model<IReview>('Review', reviewSchema)
 export interface IUser extends Document {
   username: string
   password: string
-  roles: Role[]
+  role: Role
   currentBalance: number
   profilePicture?: Types.ObjectId
   authoredTours?: Types.ObjectId[]
@@ -107,7 +107,7 @@ export const userSchema = new Schema<IUser>(
   {
     username: { type: String, required: true },
     password: { type: String, required: true },
-    roles: [{ type: String, required: true }],
+    role: [{ type: String, required: true }],
     currentBalance: { type: Number, required: true, default: 0 },
     profilePicture: { type: Schema.ObjectId, ref: 'Asset' },
     authoredTours: [{ type: Schema.ObjectId, ref: 'Tour' }],
