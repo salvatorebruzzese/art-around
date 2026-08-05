@@ -4,7 +4,7 @@ import { Either, Left, Right } from 'purify-ts/Either'
 import { ItemType } from './models.js'
 import { ValidationError, validationError } from './errors.js'
 
-function validate<T extends z.ZodTypeAny>(
+function validate<T extends z.ZodType>(
   schema: T,
   value: unknown,
 ): Either<ValidationError, z.infer<T>> {
@@ -27,13 +27,14 @@ export function makeZodValidator<T extends z.ZodTypeAny>(schema: T) {
 const objectIdZod = z.string().refine((val) => isValidObjectId(val), {
   error: 'Must be a valid ObjectId type',
 })
+
 // --------------
 // USER VALIDATOR
 // --------------
 
 const UserBaseSchemaZod = z.object({
   username: z.string(),
-  profilePicture: objectIdZod.optional(), // Asset
+  profilePicture: objectIdZod.optional(),
 })
 
 const UserQuerySchemaZod = UserBaseSchemaZod.extend({
@@ -74,9 +75,9 @@ const TourSchemaZod = z.object({
   name: z.string(),
   author: z.string(),
   price: z.number(),
-  items: z.array(objectIdZod), // Item
-  thumbnail: objectIdZod.optional(), // Asset
-  images: z.array(objectIdZod).optional(), // Asset
+  items: z.array(objectIdZod),
+  thumbnail: objectIdZod.optional(),
+  images: z.array(objectIdZod).optional(),
   description: z.string().optional(),
   reviews: z.array(ReviewSchemaZod).optional(),
 })
