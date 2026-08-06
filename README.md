@@ -25,8 +25,6 @@ Il progetto segue i principi del goal-oriented design, adattando la visita dell'
 
 La UI verrà progettata in un'applicazione di web design basata su componenti chiamata [Penpot](https://penpot.app).
 
-L'applicazione utilizzerà WAI‑ARIA per rispettare (non completamente) il livello AA dello standard WCAG 2.2. Una buona parte del rispetto allo standard verrà controllata attraverso la [checklist del Project A11Y](https://www.a11yproject.com/checklist/).
-
 ## Architettura
 
 L'applicazione si divide in due moduli essenziali: Marketplace e Navigator.
@@ -73,7 +71,7 @@ Navigator gestisce anche il [sistema di navigazione](#il-sistema-di-navigazione)
 
 ## Visite: l'oggetto item
 
-La visita è una raccolta di dati del museo e della mostra (locazione, costo del biglietto, posizione dei servizi del museo ed eventuale test a risposta multipla) e una sequenza ordinata di *item*.
+La visita è una raccolta di dati del museo e della mostra (locazione, costo del biglietto, posizione dei servizi del museo ed eventuale test a risposta multipla) e una sequenza ordinata di _item_.
 Gli item sono dei dati strutturati, che identificano una tappa della visita e forniscono tutto quello che si sa sull'oggetto della tappa. Sono visualizzati a schermo e letti via sintesi vocale.
 
 L'item inizia come una classe astratta con questi campi:
@@ -95,6 +93,7 @@ La classe viene poi implementata per ogni tipologia di item:
 Le stringhe delle date sono standardizzate secondo lo standard ISO-8601.
 
 ---
+
 ¹ record composto da un membro di un'enumerazione per indicare la presenza di un livello di linguaggio specifico (semplice, normale, avanzato), una stringa per spiegazione dell'opera e un naturale per la durata della spiegazione in secondi.
 
 ## Il sistema di navigazione
@@ -115,13 +114,13 @@ Le varie funzioni includono:
 ## Il sistema di interazione con l'utente
 
 L'interazione con l'utente avviene via tasti o via comandi vocali.
-I comandi vocali fanno parte di un *vocabolario aperto* che viene mappato da un LLM ai [comandi predefiniti](#i-comandi-predefiniti).
+I comandi vocali fanno parte di un _vocabolario aperto_ che viene mappato da un LLM ai [comandi predefiniti](#i-comandi-predefiniti).
 
 Il sistema ha tre modalità:
 
-- *libre* per gli utenti singoli, senza guida. In questa modalità sono disponibili tutte le funzionalità di navigator.
-- *guided* per gli utenti in gruppo o con una guida. È disponibile solo l'interazione attraverso sintesi vocale.
-- *master* per le guide. Permette di fornire una chiave d'accesso per la visita selezionata. Si può vedere una lista degli utenti collegati alla visita e le loro interazioni vocali con l'app. Si può fornire il test a risposta multipla associato alla visita.
+- _libre_ per gli utenti singoli, senza guida. In questa modalità sono disponibili tutte le funzionalità di navigator.
+- _guided_ per gli utenti in gruppo o con una guida. È disponibile solo l'interazione attraverso sintesi vocale.
+- _master_ per le guide. Permette di fornire una chiave d'accesso per la visita selezionata. Si può vedere una lista degli utenti collegati alla visita e le loro interazioni vocali con l'app. Si può fornire il test a risposta multipla associato alla visita.
 
 Le varie funzioni includono:
 
@@ -190,7 +189,7 @@ SESSION_SECRET=secret
 
 Per verificare che funzioni:
 
-``` sh
+```sh
 # 1. Controlla che stia eseguendo
 docker ps | grep mongo
 
