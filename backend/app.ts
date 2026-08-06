@@ -1,6 +1,7 @@
 import express from 'express'
 import session from 'express-session'
 import passport from 'passport'
+import homeRouter from '../home/router.js'
 import mainRouter from './mainRouter.js'
 import './passportConfig.js'
 import cors from 'cors'
@@ -54,8 +55,9 @@ app.use(express.urlencoded({ extended: true }))
 // NOTE: questo deve essere il primo middleware, altrimenti verrà servito come file statico
 app.use('/api', mainRouter)
 app.get('/', (_req, res) => {
-  res.redirect('/marketplace')
+  res.redirect('/home')
 })
+app.use('/home', homeRouter)
 app.use(
   '/marketplace',
   express.static(path.join(global.rootDir, 'marketplace/')),
