@@ -2,16 +2,16 @@ import express from 'express'
 import session from 'express-session'
 import passport from 'passport'
 import rootDir from './rootdir.js'
+import homeRouter from '../app/router.js'
 import apiRouter from '../backend/router.js'
 import marketRouter from '../marketplace/router.js'
 import navigatorRouter from '../navigator/router.js'
-import homeRouter from '../app/router.js'
 import '../backend/passportConfig.js'
 import cors from 'cors'
-import path from 'path'
+import { join } from 'path'
 import dotenv from 'dotenv'
 
-dotenv.config({ path: path.join(rootDir, '.env') }) // Load .env
+dotenv.config({ path: join(rootDir, '.env') }) // Load .env
 
 const requiredEnv = ['MONGO_USR', 'MONGO_PWD', 'MONGO_SITE', 'SESSION_SECRET']
 const missing = requiredEnv.filter((envVar) => !process.env[envVar])
@@ -42,7 +42,6 @@ app.use(passport.initialize())
 app.use(passport.session())
 app.use(express.urlencoded({ extended: true }))
 
-// NOTE: questo deve essere il primo middleware, altrimenti verrà servito come file statico
 app.use('/', homeRouter)
 app.use('/api', apiRouter)
 app.use('/marketplace', marketRouter)

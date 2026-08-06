@@ -1,9 +1,11 @@
 import express from 'express'
-import path from 'path'
+import { join } from 'path'
 import rootDir from '../backend/rootdir.js'
 
 const router = express.Router()
 
-router.use('/', express.static(path.join(rootDir, '/index.html')))
+router.get('/', (req, res) => {
+  res.sendFile(join(rootDir, 'navigator/index.html'))
+})
 
 export default router

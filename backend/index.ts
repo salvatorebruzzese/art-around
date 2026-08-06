@@ -15,11 +15,9 @@ try {
   console.error('MongoDB connection failed:', err)
 }
 
-let startDate: Date | null
-
 const PORT = process.env.PORT || 8000
 app.listen(PORT, () => {
-  startDate = new Date()
+  const startDate = new Date()
   console.log('Root dir: ' + rootDir)
   console.log(
     `App listening on port 8000 started ${startDate.toLocaleString()}`,
