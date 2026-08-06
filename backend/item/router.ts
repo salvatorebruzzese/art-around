@@ -2,10 +2,11 @@ import express, { Request, Response } from 'express'
 import { ItemInput, ItemQuery } from './model.js'
 import ItemService from './service.js'
 import mongoose from 'mongoose'
-import { assertNever, ensureAuth } from '../shared/utils.js'
+import { assertNever } from '../shared/utils.js'
 import { Either } from 'purify-ts'
 import { IItem } from './model.js'
 import { DBError } from '../shared/errors.js'
+import { ensureAuth } from '../accessControl.js'
 
 const router = express.Router()
 
