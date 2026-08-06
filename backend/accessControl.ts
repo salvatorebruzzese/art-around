@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
-import { DBError, NotFound } from './shared/errors'
-import { Either } from 'purify-ts'
-import { Model, Types } from 'mongoose'
+import { DBError, NotFound } from './shared/errors.js'
+import { Either, Left, Right } from 'purify-ts'
+import { Model, Types, Document } from 'mongoose'
 
 // A user and an editor are not that different, as editors are
 // users who either created a tour or bought one and have the right to fork it
@@ -14,8 +14,9 @@ export type Permission =
   | 'view:tour'
   | 'view:metatour'
   | 'purchase:tour'
-  | 'create:tour'
   | 'create:item'
+  | 'delete:item'
+  | 'create:tour'
   | 'edit:tour'
   | 'delete:tour'
   | 'manage:group'
@@ -31,6 +32,7 @@ const User: Permission[] = [
   'view:metatour',
   'view:tour',
   'view:item',
+  'delete:item',
   'purchase:tour',
   'create:tour',
   'create:item',
@@ -56,10 +58,6 @@ export const ACMatrix: Record<Role, Permission[]> = {
 }
 
 export function checkRole(role: Role, permission: Permission): boolean {
-  return ACMatrix[role] && ACMatrix[role].includes(permission)
-}
-
-export function filterRoles(role: Role, permission: Permission) {
   return ACMatrix[role] && ACMatrix[role].includes(permission)
 }
 

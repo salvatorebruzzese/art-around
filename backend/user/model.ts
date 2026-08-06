@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document, Types } from 'mongoose'
-import { Role } from '../shared/models.js'
+import { Role } from '../accessControl.js'
 import { makeZodValidator, objectIdZod } from '../shared/validation.js'
 import z from 'zod'
 
@@ -54,7 +54,7 @@ export const userBillingDataSchema = new Schema<IUserBillingData>(
 export interface IUser extends Document {
   username: string
   password: string
-  roles: Role[]
+  role: Role
   profilePicture?: Types.ObjectId
   authoredTours: Types.ObjectId[]
   purchasedTours: Types.ObjectId[]
