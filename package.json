@@ -4,6 +4,9 @@
   "type": "module",
   "scripts": {
     "start": "cd dist && node backend/index.js",
+    "start:home": "npm run build:home && npm run start",
+    "start:marketplace": "npm run build:marketplace  && npm run start",
+    "start:navigator": "npm run build:navigator && npm run start",
     "build:home": "cd home && npm run build",
     "build:marketplace": "cd marketplace && npm run build",
     "build:navigator": "cd navigator && npm run build",
