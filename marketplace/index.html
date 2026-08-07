@@ -3,41 +3,157 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Art Around – Marketplace</title>
-    <style>
-      body {
-        font-family: sans-serif;
-        max-width: 600px;
-        margin: 4rem auto;
-        padding: 0 1rem;
+    <title>Responsive Prototype Interface</title>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'p-light': '#fffffd',
+              'p-soft': '#90caf9',
+              'p-medium': '#2196f3',
+              'p-dark': '#0d47a1',
+            },
+            fontFamily: {
+              serif: ['"Cormorant Garamond"', 'serif'],
+              sans: ['Inter', 'sans-serif'],
+            },
+          },
+        },
       }
-      h1 {
-        font-size: 2rem;
-        margin-bottom: 0.25rem;
-      }
-      p {
-        color: #555;
-      }
-      nav {
-        margin-top: 1.5rem;
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-      }
-      a {
-        font-size: 1.1rem;
-        color: #2563eb;
-        text-decoration: underline;
-      }
-    </style>
+    </script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/daisyui@3.9.0/dist/full.css"
+      rel="stylesheet"
+      type="text/css"
+    />
   </head>
-  <body>
-    <h1>Art Around</h1>
-    <p>Marketplace</p>
-    <nav>
-      <a href="/home">Home</a>
-      <a href="/navigator">Navigator</a>
-      <a href="/api">API</a>
-    </nav>
+  <body
+    class="flex h-screen bg-p-light text-p-dark font-serif selection:bg-p-soft"
+  >
+    <main class="flex-1 flex flex-col p-10 overflow-y-auto w-full">
+      <!-- Added flex-wrap to the main header -->
+      <header
+        class="flex flex-wrap justify-between items-start mb-10 gap-6 font-sans"
+      >
+        <!-- Added flex-wrap to the left-side container -->
+        <div class="flex flex-wrap gap-6 items-center flex-1 min-w-[300px]">
+          <!-- Search Bar -->
+          <div class="relative flex-1 max-w-lg min-w-[250px]">
+            <input
+              type="text"
+              placeholder="Cerca..."
+              class="input input-bordered rounded-full w-full pr-12 border-p-soft bg-white text-p-dark placeholder-p-medium focus:border-p-medium focus:ring-2 focus:ring-p-soft focus:outline-none transition-all shadow-sm"
+            />
+            <button
+              type="button"
+              aria-label="Submit search"
+              class="absolute right-2 top-1.5 p-2 rounded-full text-p-medium hover:bg-p-soft/30 hover:text-p-dark active:scale-95 transition-all outline-none focus:ring-2 focus:ring-p-medium"
+            >
+              <svg
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                ></path>
+              </svg>
+            </button>
+          </div>
+
+          <select
+            class="select select-bordered rounded-full w-56 border-p-soft bg-white text-p-dark focus:border-p-medium focus:ring-2 focus:ring-p-soft focus:outline-none font-medium shadow-sm cursor-pointer transition-all"
+          >
+            <option disabled selected>Museo</option>
+            <option>Museum 1</option>
+            <option>Museum 2</option>
+          </select>
+
+          <!-- Segmented Control Buttons -->
+          <div
+            class="flex items-center border border-p-soft rounded-full h-12 p-1 bg-white shadow-sm w-64"
+          >
+            <button
+              class="flex-1 h-full rounded-full bg-p-medium text-white font-semibold text-sm transition-all duration-150 active:scale-95 shadow-sm"
+            >
+              VISITE
+            </button>
+            <button
+              class="flex-1 h-full rounded-full bg-transparent text-p-medium hover:bg-p-soft/20 font-semibold text-sm transition-all duration-150 active:scale-95"
+            >
+              ITEM
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-col items-end gap-3">
+          <div class="avatar">
+            <div
+              class="w-14 rounded-full bg-white flex items-center justify-center overflow-hidden border-4 border-p-medium shadow-md cursor-pointer hover:scale-105 transition-transform"
+            >
+              <svg
+                class="w-8 h-8 text-p-soft mt-2"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                  clip-rule="evenodd"
+                ></path>
+              </svg>
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <button
+              class="w-10 h-10 rounded-xl bg-p-medium hover:bg-p-soft transition-colors shadow-md"
+            ></button>
+            <button
+              class="w-10 h-10 rounded-xl bg-p-dark hover:bg-p-medium transition-colors shadow-md"
+            ></button>
+          </div>
+        </div>
+      </header>
+
+      <div
+        id="item-container"
+        class="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-8"
+      ></div>
+    </main>
+
+    <script>
+      const container = document.getElementById('item-container')
+
+      function addCard() {
+        const card = document.createElement('div')
+        card.className =
+          'w-full h-80 rounded-3xl flex flex-col overflow-hidden shadow-lg border border-p-soft bg-white group hover:-translate-y-1 hover:shadow-xl transition-all duration-300'
+        card.innerHTML = `
+                <div class="flex-1 bg-gradient-to-br from-p-light to-p-soft/20 p-6 flex flex-col justify-end">
+                </div>
+                <div class="h-24 bg-p-soft/30 flex items-center justify-center gap-4 px-6 border-t border-p-soft/50">
+                    <button class="h-10 flex-1 bg-p-medium rounded-xl text-white font-sans font-medium text-sm hover:bg-p-dark transition-all duration-150 active:scale-95 shadow-sm">Azione 1</button>
+                    <button class="h-10 flex-1 bg-white text-p-medium border border-p-medium rounded-xl font-sans font-medium text-sm hover:bg-p-soft transition-all duration-150 active:scale-95 shadow-sm">Azione 2</button>
+                </div>
+            `
+        container.appendChild(card)
+      }
+
+      for (let i = 0; i < 120; i++) {
+        addCard()
+      }
+    </script>
   </body>
 </html>

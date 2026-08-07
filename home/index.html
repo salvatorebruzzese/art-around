@@ -1,24 +1,19 @@
 <!doctype html>
-<html lang="it">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Art Around</title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <title>Prototype Interface</title>
+    <!-- Google Fonts: Cormorant Garamond -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
 
-    <link
-      href="https://cdn.jsdelivr.net/npm/daisyui@4.10.2/dist/full.min.css"
-      rel="stylesheet"
-      type="text/css"
-    />
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
+    <!-- Tailwind Config injected from prompt -->
     <script>
       tailwind.config = {
         theme: {
@@ -30,22 +25,23 @@
               'p-dark': '#0d47a1',
             },
             fontFamily: {
-              cormorant: ['"Cormorant Garamond"', 'serif'],
+              serif: ['"Cormorant Garamond"', 'serif'],
+              sans: ['Inter', 'sans-serif'],
             },
           },
         },
       }
     </script>
 
-    <style>
-      body {
-        font-family: 'Cormorant Garamond', serif;
-        font-weight: 600;
-      }
-    </style>
+    <!-- DaisyUI -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/daisyui@3.9.0/dist/full.css"
+      rel="stylesheet"
+      type="text/css"
+    />
   </head>
   <body
-    class="bg-p-light text-p-dark min-h-screen flex items-center justify-center"
+    class="bg-p-light text-p-dark min-h-screen flex font-serif items-center justify-center"
   >
     <main class="text-center px-4">
       <h1 class="text-7xl md:text-8xl mb-4 text-p-dark tracking-wide">
@@ -67,6 +63,12 @@
           class="btn btn-primary bg-p-light text-p-dark hover:text-white hover:bg-p-medium text-3xl border-none shadow-[4px_4px_0px_rgba(13,71,161,0.3)] hover:shadow-[4px_4px_0px_rgba(13,71,161,0.7)]"
         >
           Sign up
+        </a>
+        <a
+          href="../marketplace/"
+          class="btn btn-primary bg-p-light text-p-dark hover:text-white hover:bg-p-medium text-3xl border-none shadow-[4px_4px_0px_rgba(13,71,161,0.3)] hover:shadow-[4px_4px_0px_rgba(13,71,161,0.7)]"
+        >
+          Marketplace
         </a>
       </div>
     </main>
