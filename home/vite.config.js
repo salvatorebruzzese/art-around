@@ -1,14 +1,14 @@
 import { defineConfig } from 'vite'
 
 export default defineConfig({
-  base: '/home/',
+  base: '/home/public/',
   build: {
-    outDir: '../dist/home',
+    outDir: '../dist/home/',
     rollupOptions: {
       input: {
         main: 'index.html',
-	login: 'login.html',
-        signup: 'signup.html',      
+        login: 'login.html',
+        signup: 'signup.html',
       },
     },
   },
