@@ -1,25 +1,108 @@
 <!doctype html>
-<html lang="en">
+<html lang="it">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sign Up</title>
-    <link rel="stylesheet" href="/src/styles.css" />
+    <title>Sign Up - Art Around</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&display=swap"
+      rel="stylesheet"
+    />
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/daisyui@4.10.2/dist/full.min.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'p-light': '#fffffd',
+              'p-soft': '#90caf9',
+              'p-medium': '#2196f3',
+              'p-dark': '#0d47a1',
+            },
+            fontFamily: {
+              cormorant: ['"Cormorant Garamond"', 'serif'],
+            },
+          },
+        },
+      }
+    </script>
+
+    <style>
+      body {
+        font-family: 'Cormorant Garamond', serif;
+        font-weight: 600;
+      }
+    </style>
   </head>
-  <body>
-    <h2>Sign Up</h2>
-    <form id="signup-form">
-      <label for="username">Username:</label>
-      <input type="text" id="username" name="username" required />
-      <br />
-      <label for="email">Email:</label>
-      <input type="email" id="email" name="email" required />
-      <br />
-      <label for="password">Password:</label>
-      <input type="password" id="password" name="password" required />
-      <br />
-      <button type="submit">Sign Up</button>
-    </form>
+  <body
+    class="bg-p-light text-p-dark min-h-screen flex items-center justify-center"
+  >
+    <main class="text-center px-4 w-full max-w-sm">
+      <h2 class="text-5xl mb-8 text-p-dark tracking-wide">Sign Up</h2>
+      <form id="signup-form" class="flex flex-col gap-4">
+        <div class="form-control w-full">
+          <label for="username" class="label"
+            ><span class="label-text text-p-medium text-xl"
+              >Username:</span
+            ></label
+          >
+          <input
+            type="text"
+            id="username"
+            name="username"
+            required
+            class="input input-bordered w-full border-p-dark text-p-dark bg-transparent"
+          />
+        </div>
+        <div class="form-control w-full">
+          <label for="email" class="label"
+            ><span class="label-text text-p-medium text-xl">Email:</span></label
+          >
+          <input
+            type="email"
+            id="email"
+            name="email"
+            required
+            class="input input-bordered w-full border-p-dark text-p-dark bg-transparent"
+          />
+        </div>
+        <div class="form-control w-full">
+          <label for="password" class="label"
+            ><span class="label-text text-p-medium text-xl"
+              >Password:</span
+            ></label
+          >
+          <input
+            type="password"
+            id="password"
+            name="password"
+            required
+            class="input input-bordered w-full border-p-dark text-p-dark bg-transparent"
+          />
+        </div>
+        <button
+          type="submit"
+          class="btn btn-primary mt-4 bg-p-light text-p-dark hover:text-white hover:bg-p-dark border-p-dark text-2xl shadow-[4px_4px_0px_rgba(13,71,161,0.3)]"
+        >
+          Sign Up
+        </button>
+      </form>
+      <a
+        href="/home"
+        class="block mt-6 text-p-medium hover:text-p-dark underline text-lg"
+        >Torna alla Home</a
+      >
+    </main>
     <script type="module" src="/src/signup.js"></script>
   </body>
 </html>
