@@ -2,6 +2,7 @@ import express from 'express'
 import session from 'express-session'
 import passport from 'passport'
 import marketRouter from '../marketplace/router.js'
+import accessRouter from '../access/router.js'
 import navigatorRouter from '../navigator/router.js'
 import homeRouter from '../home/router.js'
 import mainRouter from './mainRouter.js'
@@ -57,8 +58,10 @@ app.use(express.urlencoded({ extended: true }))
 app.get('/', (_req, res) => {
   res.redirect('/home')
 })
+
 app.use('/home', homeRouter)
-app.use('/marketplace', marketRouter)
+app.use(['/login', '/signup'], accessRouter)
+app.use(['/marketplace', '/editor'], marketRouter)
 app.use('/navigator', navigatorRouter)
 app.use('/api', mainRouter)
 
