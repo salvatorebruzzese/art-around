@@ -109,11 +109,28 @@
               class="w-10 h-10 border border-p-soft rounded-xl hover:bg-p-soft transition-colors shadow-md"
             ></button>
           </div>
-          <div class="avatar">
-            <div
+          <details class="avatar dropdown dropdown-end z-20">
+            <summary
               class="w-14 h-14 rounded-full bg-white flex items-center justify-center overflow-hidden border-4 border-p-medium shadow-md cursor-pointer hover:scale-105 transition-transform"
-            ></div>
-          </div>
+            ></summary>
+
+            <ul
+              class="menu w-40 dropdown-content rounded-xl bg-white text-sm font-sans text-p-dark shadow-lg border-none"
+            >
+              <li>
+                <a class="hover:bg-p-soft/20 rounded-lg">Opzione 1</a>
+              </li>
+              <li>
+                <a class="hover:bg-p-soft/20 rounded-lg">Opzione 2</a>
+              </li>
+              <li>
+                <a class="hover:bg-p-soft/20 rounded-lg">Opzione 3</a>
+              </li>
+              <li>
+                <a class="hover:bg-p-soft/20 rounded-lg">Opzione 4</a>
+              </li>
+            </ul>
+          </details>
         </div>
       </header>
 
@@ -123,6 +140,6 @@
       ></div>
     </main>
 
-    <script src="index.ts" type="module" defer></script>
+    <script src="index.js" type="module" defer></script>
   </body>
 </html>
