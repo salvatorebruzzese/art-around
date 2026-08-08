@@ -4,14 +4,22 @@
     "outDir": "./dist",
 
     "target": "esnext",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "strict": true,
+    "allowJs": true,
+    "checkJs": true,
+
     "skipLibCheck": true,
     "isolatedModules": true
   },
-  "include": ["*.ts", "./**/*.ts"],
+  "include": [
+    "*.ts",
+    "./**/*.ts",
+    "marketplace/router.js",
+    "marketplace/index.js"
+  ],
   "exclude": ["*.test.ts", "src/**/*.test.ts"]
 }

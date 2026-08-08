@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 
 export default defineConfig({
-  base: '/home/public/',
+  base: '/home/',
   build: {
     outDir: '../dist/home/',
     rollupOptions: {
