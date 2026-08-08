@@ -8,7 +8,8 @@ export default defineConfig({
     outDir: '../dist/marketplace',
     rollupOptions: {
       input: {
-        main: 'index.html',
+        marketplace: 'marketplace.html',
+        editor: 'editor.html',
         card: 'card.html',
       },
     },

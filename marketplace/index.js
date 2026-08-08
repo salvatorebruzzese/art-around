@@ -3,7 +3,9 @@ const container = document.getElementById('item-container')
 async function addCard() {
   if (container === null) return
   const card = document.createElement('div')
-  const cardHtml = await fetch('card.html')
+  let path = ''
+  if (!window.location.href.endsWith('/')) path = '/marketplace/'
+  const cardHtml = await fetch(path + 'card.html')
   card.className =
     'w-full h-80 rounded-3xl flex flex-col overflow-hidden shadow-lg border border-p-soft bg-white group hover:-translate-y-1 hover:shadow-xl transition-all duration-300'
   card.innerHTML = await cardHtml.text()
