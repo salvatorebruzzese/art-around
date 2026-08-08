@@ -10,7 +10,7 @@ async function addCard() {
   container.appendChild(card)
 }
 
-for (let i = 0; i < 10; i++) {
+for (let i = 0; i < 20; i++) {
   addCard()
 }
 
@@ -32,7 +32,10 @@ document.addEventListener('DOMContentLoaded', () => {
     'hover:bg-p-soft/20',
   ]
 
-  function setActive(selected: string) {
+  /**
+   * @param {string} selected
+   */
+  function setActive(selected) {
     if (selected === 'VISITE') {
       btnVisite.classList.remove(...inactiveClasses)
       btnVisite.classList.add(...activeClasses)

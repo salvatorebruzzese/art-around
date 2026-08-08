@@ -34,6 +34,10 @@
       rel="stylesheet"
       type="text/css"
     />
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+    ></script>
   </head>
   <body
     class="flex h-screen bg-p-light text-p-dark font-serif selection:bg-p-soft"
@@ -97,30 +101,18 @@
         </div>
 
         <div class="flex flex-row justify-center items-center gap-3">
-          <div class="flex flex-row justify-center items-center gap-2">
+          <div class="flex items-center gap-2">
             <button
-              class="w-10 h-10 rounded-xl hover:bg-p-soft transition-colors shadow-md"
+              class="w-10 h-10 border border-p-soft rounded-xl hover:bg-p-soft transition-colors shadow-md"
             ></button>
             <button
-              class="w-10 h-10 rounded-xl hover:bg-p-soft transition-colors shadow-md"
+              class="w-10 h-10 border border-p-soft rounded-xl hover:bg-p-soft transition-colors shadow-md"
             ></button>
           </div>
           <div class="avatar">
             <div
               class="w-14 h-14 rounded-full bg-white flex items-center justify-center overflow-hidden border-4 border-p-medium shadow-md cursor-pointer hover:scale-105 transition-transform"
-            >
-              <svg
-                class="w-8 h-8 text-p-soft mt-2"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                  clip-rule="evenodd"
-                ></path>
-              </svg>
-            </div>
+            ></div>
           </div>
         </div>
       </header>
