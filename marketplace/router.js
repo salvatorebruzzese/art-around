@@ -7,10 +7,6 @@ const router = express.Router()
 
 router.use('/assets', express.static(join(rootDir, 'marketplace/assets')))
 
-router.get('/card.html', (req, res) => {
-  res.sendFile(join(rootDir, 'marketplace/card.html'))
-})
-
 router.all('/', (req, res) => {
   if (req.baseUrl === '/marketplace') {
     res.sendFile(join(rootDir, 'marketplace/marketplace.html'))

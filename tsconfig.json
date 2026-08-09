@@ -19,7 +19,8 @@
     "*.ts",
     "./**/*.ts",
     "marketplace/router.js",
-    "marketplace/index.js"
+    "marketplace/index.js",
+    "marketplace/form.js"
   ],
   "exclude": ["*.test.ts", "src/**/*.test.ts"]
 }

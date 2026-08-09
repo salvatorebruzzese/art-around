@@ -3,7 +3,100 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>Editor</title>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link href="styles.css" rel="stylesheet" />
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'p-light': '#fffffd',
+              'p-soft': '#90caf9',
+              'p-medium': '#2196f3',
+              'p-dark': '#0d47a1',
+            },
+            fontFamily: {
+              serif: ['"Cormorant Garamond"', 'serif'],
+              sans: ['Inter', 'sans-serif'],
+            },
+          },
+        },
+      }
+    </script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/daisyui@3.9.0/dist/full.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+    ></script>
   </head>
-  <body></body>
+  <body class="p-10 overflow-y-auto w-full">
+    <header
+      class="flex flex-wrap flex-row-reverse justify-between items-start gap-6 font-sans"
+    >
+      <div class="flex flex-row justify-center items-center gap-3">
+        <div class="flex items-center gap-2">
+          <a
+            class="w-10 h-10 border border-p-soft rounded-xl hover:bg-p-soft transition-colors shadow-md text-2xl text-center"
+            href="../home/"
+            >H</a
+          >
+          <a
+            class="w-10 h-10 border border-p-soft rounded-xl hover:bg-p-soft transition-colors shadow-md text-2xl text-center"
+            href="/marketplace/"
+            >M</a
+          >
+          <a
+            class="w-10 h-10 border border-p-soft rounded-xl hover:bg-p-soft transition-colors shadow-md text-2xl text-center"
+            href="/editor/"
+            >E</a
+          >
+          <a
+            class="w-10 h-10 border border-p-soft rounded-xl hover:bg-p-soft transition-colors shadow-md text-2xl text-center"
+            href="../navigator/"
+            >N</a
+          >
+        </div>
+        <details class="avatar dropdown dropdown-end z-20">
+          <summary
+            class="w-14 h-14 rounded-full bg-white flex items-center justify-center overflow-hidden border-4 border-p-medium shadow-md cursor-pointer hover:scale-105 transition-transform"
+          ></summary>
+
+          <ul
+            class="menu w-40 dropdown-content rounded-xl bg-white text-sm font-sans text-p-dark shadow-lg border-none"
+          >
+            <li>
+              <a class="hover:bg-p-soft/20 rounded-lg">Profilo</a>
+            </li>
+            <li>
+              <a class="hover:bg-p-soft/20 rounded-lg">Impostazioni</a>
+            </li>
+            <li>
+              <a class="hover:bg-p-soft/20 rounded-lg text-error">Esci</a>
+            </li>
+          </ul>
+        </details>
+      </div>
+    </header>
+    <main class="flex flex-row gap-8">
+      <img
+        src="https://dummyimage.com/600x400/efefef/a3a3a3.jpg&text=Image+Not+Found"
+        alt="Thumbnail not found"
+        class="h-9/10 w-1/2"
+      />
+      <form id="editor-form"></form>
+    </main>
+    <script src="form.js" type="module" defer></script>
+  </body>
 </html>
