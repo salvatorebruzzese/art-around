@@ -11,12 +11,12 @@ router.get('/card.html', (req, res) => {
   res.sendFile(join(rootDir, 'marketplace/card.html'))
 })
 
-router.get('/(marketplace)?', (req, res) => {
-  res.sendFile(join(rootDir, 'marketplace/marketplace.html'))
-})
-
-router.get('/editor', (req, res) => {
-  res.sendFile(join(rootDir, 'marketplace/editor.html'))
+router.all('/', (req, res) => {
+  if (req.baseUrl === '/marketplace') {
+    res.sendFile(join(rootDir, 'marketplace/marketplace.html'))
+  } else if (req.baseUrl === '/editor') {
+    res.sendFile(join(rootDir, 'marketplace/editor.html'))
+  }
 })
 
 export default router
