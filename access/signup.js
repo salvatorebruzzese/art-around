@@ -15,9 +15,8 @@ document
       })
 
       const data = await response.json()
-
       if (response.ok) {
-        alert(`Signup successful! Welcome ${data.user.username}`)
+        alert(`Signup successful! Welcome ${data.username}`)
         // Optionally redirect:
         // window.location.href = '/profile';
       } else {
