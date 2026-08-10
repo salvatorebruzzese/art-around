@@ -84,4 +84,18 @@ router.patch('/:id', ensureAuth, async (req: Request, res: Response) => {
     Left: handleLeft(res),
   })
 })
+
+router.delete('/:id', ensureAuth, async (req: Request, res: Response) => {
+  const itemID = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id
+  const userID = req.user!._id
+  if (!mongoose.Types.ObjectId.isValid(itemID))
+    return res.status(400).json({ message: 'Malformed item ID' })
+
+  const id = mongoose.Types.ObjectId.createFromHexString(itemID)
+  const result = await ItemService.deleteItem(id, userID)
+  result.caseOf({
+    Right: (item) => res.json(item),
+    Left: handleLeft(res),
+  })
+})
 export default router
