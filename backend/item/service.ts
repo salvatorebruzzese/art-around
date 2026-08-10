@@ -1,4 +1,11 @@
-import { Item, IItem, ItemQuery, ItemInput, safeItemFields } from './model.js'
+import {
+  Item,
+  IItem,
+  ItemQuery,
+  ItemInput,
+  safeItemFields,
+  ItemPatch,
+} from './model.js'
 import { Either, Left, Right } from 'purify-ts/Either'
 import { Types } from 'mongoose'
 import { _getById, checkRole } from '../accessControl.js'
@@ -61,7 +68,29 @@ async function createItem(
   }
 }
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
+async function patchItem(
+  id: Types.ObjectId,
+  input: ItemPatch,
+  userId: Types.ObjectId,
+): Promise<Either<DBError | AccessDenied | NotFound, IItem>> {
+  const userResult = await _getById(userId, User)
+  if (userResult.isLeft()) return Left(accessDenied())
+  const user = userResult.unsafeCoerce()
+
+  if (!checkRole(user.role, 'edit:item')) return Left(accessDenied())
+  if (!user.authoredTours.includes(new Types.ObjectId(input.tour))) {
+    return Left(accessDenied())
+  }
+
+  try {
+    const item = await Item.findByIdAndUpdate(id, input)
+    if (item) return Right(item)
+    else return Left(notFound())
+  } catch (e) {
+    return Left(dbError(undefined, () => JSON.stringify(e)))
+  }
+}
+
 async function deleteItem(
   id: Types.ObjectId,
   userId: Types.ObjectId,
@@ -88,4 +117,6 @@ export default {
   createItem,
   getItem,
   listItems,
+  patchItem,
+  deleteItem,
 }

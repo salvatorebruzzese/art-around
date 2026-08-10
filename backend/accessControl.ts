@@ -17,6 +17,7 @@ export type Permission =
   | 'create:item'
   | 'delete:item'
   | 'create:tour'
+  | 'edit:item'
   | 'edit:tour'
   | 'delete:tour'
   | 'manage:group'
