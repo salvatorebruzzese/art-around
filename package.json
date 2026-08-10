@@ -15,6 +15,7 @@
     "build:start:marketplace": "npx tsc && npm run build:marketplace  && npm run start",
     "build:start:navigator": "npx tsc && npm run build:navigator && npm run start",
     "install:all": "npm install && cd marketplace && npm install && cd ../navigator && npm install && cd ../home && npm install",
+    "fix": "find . -type d -name node_modules -prune -o -name package.json -execdir npm audit --no-fund fix \\;",
     "test": "npx vitest run"
   },
   "lint-staged": {
