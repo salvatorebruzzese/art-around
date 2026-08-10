@@ -1,1 +1,11 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+@plugin 'daisyui';
+
+@theme {
+  --color-p-light: #fffffd;
+  --color-p-soft: #90caf9;
+  --color-p-medium: #2196f3;
+  --color-p-dark: #0d47a1;
+  --font-serif: 'Cormorant Garamond', serif;
+  --font-sans: Inter, sans-serif;
+}
