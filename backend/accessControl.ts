@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
-import { DBError, NotFound } from './shared/errors.js'
+import { dbError, DBError, notFound, NotFound } from './shared/errors.js'
 import { Either, Left, Right } from 'purify-ts'
 import { Model, Types, Document } from 'mongoose'
 
@@ -77,13 +77,9 @@ export async function _getById<T extends Document>(
     if (doc) {
       return Right(doc)
     } else {
-      return Left({ type: 'NotFound' as const })
+      return Left(notFound())
     }
   } catch (e) {
-    return Left({
-      type: 'DBError',
-      message: 'An error occurred with the database.',
-      details: process.env.DEBUG ? String(e) : undefined,
-    })
+    return Left(dbError(undefined, () => JSON.stringify(e)))
   }
 }
