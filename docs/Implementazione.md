@@ -169,33 +169,33 @@ Per la parte grafica del progetto sono state usati Tailwind e DaisyUI.
 
 Per strutturare i dati in output dagli LLM, useremo la libreria TypeScript [instructor-js](https://github.com/567-labs/instructor-js)
 
-## MongoDB
+# Scelte implementative
 
-Per creare il container mongo:
+## Back-end
 
-```sh
-docker run --name mongodb -d -p 27017:27017 -e MONGO_INITDB_ROOT_USERNAME=user -e MONGO_INITDB_ROOT_PASSWORD=pass -v mongodata:/data/db mongo
-```
+Le **componenti** del backend sono associate **per funzionalità** piuttosto che per funzione: cioè le funzionalità del progetto (item, visite, musei) sono raccolte in **moduli** che espongono le proprie funzioni; piuttosto che raggruppare elementi di domini diversi per funzione (routing, logica, api endpoints).
 
-E settare il file .env nella root del progetto:
+Si assicura la correttezza della logica e delle composizioni di funzioni grazie al sistema di tipi di **TypeScript**. Per fare ciò abbiamo definito varie strutture dati: dai modelli di **mongoose**, passando per errori stessi, fino a generare schemi di oggetti JSON in **Zod**. Quest'ultima scelta implementativa usa Zod per modellare i tipi di input provenienti dalle richiese API (in formato JSON), ma soprattuto sfrutta la capacità di Zod di **validare** un dato input dato uno schema. Infine si assicura, e si forza, la **gestione statica degli errori** attraverso i tipi di dato algebrici (ADT), implementati dalla libreria **purify-ts**.
 
-```sh
-#!/usr/bin/env bash
-MONGO_USR=user
-MONGO_PWD=pass
-MONGO_SITE=localhost:27017
-SESSION_SECRET=secret
-```
+![backend diagram](./assets/backend-1.png)
 
-Per verificare che funzioni:
+### Access control
 
-```sh
-# 1. Controlla che stia eseguendo
-docker ps | grep mongo
+Per un controllo primario basato sulla coppia **Permesso**-**Ruolo\***, addottiamo la seguente politica:
+| Azione\Ruolo | Visitatore | Utente | Creatore | Guida | Amministratore |
 
-# 2. Ispeziona i log di mongo
-docker logs mongodb
+|-------------------|------------|--------|----------|-------|----------------|
+| Visualizza item | | ✓ | ✓ | ✓ | ✓ |
+| Visualizza museo | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Visualizza tour | ✓ (meta) | ✓ | ✓ | ✓ | ✓ |
+| Acquista tour | | ✓ | ✓ | ✓ | ✓ |
+| Crea tour/item | | | ✓ | | ✓ |
+| Modifica tour | | | ✓ | | ✓ |
+| Elimina tour | | | ✓ | | ✓ |
+| Gestione gruppo | | | | ✓ | ✓ |
+| Sincronizza nav. | | | | ✓ | ✓ |
+| Assegna quiz | | | | ✓ | ✓ |
+| Visualizza utenti | | | | | ✓ |
+| Modifica tutto | | | | | ✓ |
 
-# 3. prova a connetterti al server
-docker exec -it mongodb mongosh -u user -p pass --authenticationDatabase admin
-```
+Passato questo test, si validano altre proprietà specifiche. Ad esmepio: la necessità di aver acquistato una visita per visualizzarla. Il meccanismo è implementato attraverso la consultazione di una matrice che definisce le politiche di accesso (auspicabilmente simile alla tabella qui riportata).
