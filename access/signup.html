@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sign Up - Art Around</title>
+    <title>Sign Up</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -12,37 +12,7 @@
       rel="stylesheet"
     />
 
-    <link
-      href="https://cdn.jsdelivr.net/npm/daisyui@4.10.2/dist/full.min.css"
-      rel="stylesheet"
-      type="text/css"
-    />
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              'p-light': '#fffffd',
-              'p-soft': '#90caf9',
-              'p-medium': '#2196f3',
-              'p-dark': '#0d47a1',
-            },
-            fontFamily: {
-              cormorant: ['"Cormorant Garamond"', 'serif'],
-            },
-          },
-        },
-      }
-    </script>
-
-    <style>
-      body {
-        font-family: 'Cormorant Garamond', serif;
-        font-weight: 600;
-      }
-    </style>
+    <link href="../styles.css" rel="stylesheet" type="text/css" />
   </head>
   <body
     class="bg-p-light text-p-dark min-h-screen flex items-center justify-center"
@@ -103,6 +73,6 @@
         >Torna alla Home</a
       >
     </main>
-    <script type="module" src="/signup.js"></script>
+    <script type="module" src="./signup.js"></script>
   </body>
 </html>

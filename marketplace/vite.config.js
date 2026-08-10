@@ -5,12 +5,11 @@ export default defineConfig({
   plugins: [tailwindcss()],
   base: '/marketplace/',
   build: {
-    outDir: '../dist/marketplace',
+    outDir: '../dist/marketplace/',
     rollupOptions: {
       input: {
         marketplace: 'marketplace.html',
         editor: 'editor.html',
-        card: 'card.html',
       },
     },
   },

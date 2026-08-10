@@ -1,14 +1,17 @@
 import { join } from 'path'
 import express from 'express'
+import rootDir from '../backend/rootdir.js'
 
 const router = express.Router()
 
-router.all('/', (req, res) => {
+router.get('/', (req, res) => {
   if (req.baseUrl === '/login') {
     res.sendFile(join(rootDir, 'access/login.html'))
   } else if (req.baseUrl === '/signup') {
     res.sendFile(join(rootDir, 'access/signup.html'))
   }
 })
+
+router.use('/assets', express.static(join(rootDir, '/access/assets/')))
 
 export default router
