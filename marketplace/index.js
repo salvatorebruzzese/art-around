@@ -37,15 +37,15 @@ const cardHtml = `
   </div>
 </div>
 <div
-  class="h-24 bg-p-soft/30 flex items-center justify-center gap-4 px-6 border-t border-p-soft/50"
+  class="h-24 bg-p-soft/30 flex items-center justify-center gap-4 px-6 border-t text-p-dark border-p-soft/50"
 >
   <button
-    class="h-10 flex-1 bg-white text-p-medium border border-p-medium rounded-xl font-sans font-medium text-sm hover:bg-p-soft transition-all duration-150 active:scale-95 shadow-sm"
+    class="h-10 flex-1 bg-white cursor-pointer border border-p-medium rounded-xl font-sans font-medium text-sm hover:bg-p-soft/50 transition-all duration-150 active:scale-95 shadow-sm"
   >
     Apri
   </button>
   <button
-    class="h-10 flex-1 bg-white text-p-medium border border-p-medium rounded-xl font-sans font-medium text-sm hover:bg-p-soft transition-all duration-150 active:scale-95 shadow-sm"
+    class="h-10 flex-1 bg-white cursor-pointer border border-p-medium rounded-xl font-sans font-medium text-sm hover:bg-p-soft/50 transition-all duration-150 active:scale-95 shadow-sm"
   >
     Condividi
   </button>

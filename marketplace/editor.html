@@ -3,71 +3,179 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Editor</title>
-
+    <title>Modern Editor</title>
     <link href="../styles.css" rel="stylesheet" type="text/css" />
-
     <script
       defer
       src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
     ></script>
   </head>
-  <body class="p-10 overflow-y-auto w-full">
+  <body
+    class="p-6 md:p-10 min-h-screen font-sans text-p-dark"
+    x-data="editorState()"
+  >
+    <!-- Header Navigation -->
     <header
-      class="flex flex-wrap flex-row-reverse justify-between items-start gap-6 font-sans"
+      class="flex flex-wrap justify-end items-center gap-6 mb-10 w-full max-w-7xl mx-auto"
     >
-      <div class="flex flex-row justify-center items-center gap-3">
-        <div class="flex items-center gap-2">
-          <a
-            class="w-10 h-10 border border-p-soft rounded-xl hover:bg-p-soft transition-colors shadow-md text-2xl text-center"
-            href="../home/"
-            >H</a
-          >
-          <a
-            class="w-10 h-10 border border-p-soft rounded-xl hover:bg-p-soft transition-colors shadow-md text-2xl text-center"
-            href="/marketplace/"
-            >M</a
-          >
-          <a
-            class="w-10 h-10 border border-p-soft rounded-xl hover:bg-p-soft transition-colors shadow-md text-2xl text-center"
-            href="/editor/"
-            >E</a
-          >
-          <a
-            class="w-10 h-10 border border-p-soft rounded-xl hover:bg-p-soft transition-colors shadow-md text-2xl text-center"
-            href="../navigator/"
-            >N</a
-          >
-        </div>
-        <details class="avatar dropdown dropdown-end z-20">
-          <summary
-            class="w-14 h-14 rounded-full bg-white flex items-center justify-center overflow-hidden border-4 border-p-medium shadow-md cursor-pointer hover:scale-105 transition-transform"
-          ></summary>
+      <div class="flex items-center gap-2">
+        <a
+          class="w-10 h-10 border border-p-soft rounded-xl hover:bg-p-soft transition-colors shadow-md text-2xl text-center"
+          href="../home/"
+          >H</a
+        >
+        <a
+          class="w-10 h-10 border border-p-soft rounded-xl hover:bg-p-soft transition-colors shadow-md text-2xl text-center"
+          href="/marketplace/"
+          >M</a
+        >
+        <a
+          class="w-10 h-10 border border-p-soft rounded-xl hover:bg-p-soft transition-colors shadow-md text-2xl text-center"
+          href="/editor/"
+          >E</a
+        >
+        <a
+          class="w-10 h-10 border border-p-soft rounded-xl hover:bg-p-soft transition-colors shadow-md text-2xl text-center"
+          href="../navigator/"
+          >N</a
+        >
+      </div>
 
-          <ul
-            class="menu w-40 dropdown-content rounded-xl bg-white text-sm font-sans text-p-dark shadow-lg border-none"
-          >
-            <li>
-              <a class="hover:bg-p-soft/20 rounded-lg">Profilo</a>
-            </li>
-            <li>
-              <a class="hover:bg-p-soft/20 rounded-lg">Impostazioni</a>
-            </li>
-            <li>
-              <a class="hover:bg-p-soft/20 rounded-lg text-error">Esci</a>
-            </li>
-          </ul>
-        </details>
+      <!-- Avatar Dropdown -->
+      <div class="dropdown dropdown-end z-20">
+        <div tabindex="0" role="button" class="avatar">
+          <div
+            class="w-14 h-14 rounded-full border-4 border-p-medium shadow-md hover:scale-105 transition-transform bg-white"
+          ></div>
+        </div>
+        <ul
+          tabindex="0"
+          class="dropdown-content z-[1] menu p-2 shadow-lg bg-white rounded-xl w-48 mt-4 border border-p-soft font-medium"
+        >
+          <li><a class="hover:bg-p-soft/20 rounded-lg">Profilo</a></li>
+          <li><a class="hover:bg-p-soft/20 rounded-lg">Impostazioni</a></li>
+          <li><a class="hover:bg-p-soft/20 rounded-lg text-error">Esci</a></li>
+        </ul>
       </div>
     </header>
-    <main class="flex flex-row gap-8">
-      <img
-        src="https://dummyimage.com/600x400/efefef/a3a3a3.jpg&text=Image+Not+Found"
-        alt="Thumbnail not found"
-        class="h-9/10 w-1/2"
-      />
-      <form id="editor-form"></form>
+
+    <!-- Main Content -->
+    <main
+      class="grid lg:grid-cols-2 gap-10 items-start w-full max-w-7xl mx-auto"
+    >
+      <!-- Media Preview -->
+      <figure
+        class="w-full aspect-video lg:aspect-square bg-white rounded-3xl overflow-hidden shadow-sm border border-p-soft"
+      >
+        <img
+          src="https://dummyimage.com/800x800/efefef/a3a3a3.jpg&text=Image+Preview"
+          alt="Thumbnail"
+          class="object-cover w-full h-full"
+        />
+      </figure>
+
+      <!-- Data Form -->
+      <form
+        @submit.prevent="submitForm"
+        class="flex flex-col gap-5 bg-white p-8 rounded-3xl shadow-sm border border-p-soft"
+      >
+        <div class="border-b border-p-soft pb-4 mb-2">
+          <h1 class="text-2xl font-bold">Modifica Item</h1>
+        </div>
+
+        <div class="form-control w-full">
+          <label class="label"><span class="">Nome dell'item</span></label>
+          <input
+            type="text"
+            x-model="formData.name"
+            required
+            class="input input-bordered w-full rounded-xl border-p-soft focus:ring-2 focus:ring-p-medium transition-shadow"
+          />
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="form-control w-full">
+            <label class="label"
+              ><span class="label-text font-semibold">Tipo di item</span></label
+            >
+            <select
+              x-model="formData.itemType"
+              required
+              class="select select-bordered w-full rounded-xl border-p-soft focus:ring-2 focus:ring-p-medium"
+            >
+              <option value="artist">Artista</option>
+              <option value="style">Stile</option>
+              <option value="technique">Tecnica</option>
+              <option value="artwork">Opera</option>
+              <option value="other">Altro</option>
+            </select>
+          </div>
+
+          <div class="form-control w-full">
+            <label class="label"
+              ><span class="label-text font-semibold">Tour</span></label
+            >
+            <input
+              type="text"
+              x-model="formData.tour"
+              required
+              class="input input-bordered w-full rounded-xl border-p-soft focus:ring-2 focus:ring-p-medium"
+            />
+          </div>
+        </div>
+
+        <div class="form-control w-full">
+          <label class="label"
+            ><span class="label-text font-semibold">Licenza d'uso</span></label
+          >
+          <input
+            type="text"
+            x-model="formData.license"
+            class="input input-bordered w-full rounded-xl border-p-soft focus:ring-2 focus:ring-p-medium"
+          />
+        </div>
+
+        <!-- Mongoose Sub-schema Mapping -->
+        <fieldset
+          class="border border-p-soft p-5 rounded-2xl bg-gray-50/50 mt-2"
+        >
+          <legend class="px-3 font-semibold text-sm bg-gray-50/50 rounded-lg">
+            Spiegazione
+          </legend>
+          <div class="flex flex-col gap-4 mt-2">
+            <div class="form-control w-full md:w-1/2">
+              <label class="label"
+                ><span class="label-text">Livello</span></label
+              >
+              <select
+                x-model="formData.explanations[0].level"
+                required
+                class="select select-bordered w-full rounded-xl border-p-soft bg-white"
+              >
+                <option value="simple">Semplice</option>
+                <option value="normal">Normale</option>
+                <option value="advanced">Avanzato</option>
+              </select>
+            </div>
+            <div class="form-control w-full">
+              <label class="label"><span class="label-text">Testo</span></label>
+              <textarea
+                x-model="formData.explanations[0].text"
+                required
+                rows="4"
+                class="textarea textarea-bordered w-full rounded-xl border-p-soft bg-white resize-none"
+              ></textarea>
+            </div>
+          </div>
+        </fieldset>
+
+        <button
+          type="submit"
+          class="btn bg-p-medium text-white hover:bg-p-dark rounded-xl mt-4 border-none shadow-md"
+        >
+          Salva Modifiche
+        </button>
+      </form>
     </main>
-    <script src="form.js" type="module" defer></script>
   </body>
 </html>
