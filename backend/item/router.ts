@@ -1,12 +1,12 @@
 import express, { Request, Response } from 'express'
-import { ItemInput, ItemQuery } from './model.js'
+import { ItemInput, ItemPatch, ItemQuery } from './model.js'
 import ItemService from './service.js'
 import mongoose from 'mongoose'
-import { assertNever } from '../shared/utils.js'
 import { Either } from 'purify-ts'
 import { IItem } from './model.js'
 import { DBError, NotFound } from '../shared/errors.js'
 import { ensureAuth } from '../accessControl.js'
+import { handleLeft } from '../shared/router.js'
 
 const router = express.Router()
 
@@ -41,18 +41,7 @@ router.get('/:id', ensureAuth, async (req, res) => {
   const result = await ItemService.getItem(id, userID)
   result.caseOf({
     Right: (value) => res.json(value),
-    Left: (err) => {
-      switch (err.type) {
-        case 'DBError':
-          return res.status(500).json({ error: err })
-        case 'NotFound':
-          return res.status(404).json({ error: err })
-        case 'AccessDenied':
-          return res.status(403).json({ error: err })
-        default:
-          assertNever(err)
-      }
-    },
+    Left: handleLeft(res),
   })
 })
 
@@ -74,8 +63,25 @@ router.post('/', ensureAuth, async (req: Request, res: Response) => {
   })
 })
 
-router.patch('/:id', (_req: Request, res: Response) => {
-  res.json({})
-})
+router.patch('/:id', ensureAuth, async (req: Request, res: Response) => {
+  const itemID = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id
+  const userID = req.user!._id
+  if (!mongoose.Types.ObjectId.isValid(itemID))
+    return res.status(400).json({ message: 'Malformed item ID' })
 
+  const id = mongoose.Types.ObjectId.createFromHexString(itemID)
+
+  // Validate input
+  const validation = ItemPatch.validate(req.body)
+  if (validation.isLeft()) {
+    return res.status(400).json({ error: validation.extract() })
+  }
+  const input = validation.unsafeCoerce()
+
+  const result = await ItemService.patchItem(id, input, userID)
+  result.caseOf({
+    Right: (item) => res.json(item),
+    Left: handleLeft(res),
+  })
+})
 export default router
