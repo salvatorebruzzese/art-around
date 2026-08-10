@@ -126,8 +126,13 @@ const ItemQuerySchemaZod = z.object({
   images: z.array(objectIdZod).optional(),
 })
 
+const ItemPatchSchemaZod = ItemInputSchemaZod.partial()
+
 export type ItemInput = z.infer<typeof ItemInputSchemaZod>
 export const ItemInput = { validate: makeZodValidator(ItemInputSchemaZod) }
 
 export type ItemQuery = z.infer<typeof ItemQuerySchemaZod>
 export const ItemQuery = { validate: makeZodValidator(ItemQuerySchemaZod) }
+
+export type ItemPatch = z.infer<typeof ItemPatchSchemaZod>
+export const ItemPatch = { validate: makeZodValidator(ItemPatchSchemaZod) }
