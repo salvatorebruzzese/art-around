@@ -1,4 +1,11 @@
-import { Tour, ITour, TourQuery, TourInput, TourPatch } from './model.js'
+import {
+  Tour,
+  ITour,
+  TourQuery,
+  TourInput,
+  TourPatch,
+  safeTourFields,
+} from './model.js'
 import { Either, Left, Right } from 'purify-ts/Either'
 import { Types } from 'mongoose'
 import { _getById, checkRole } from '../accessControl.js'
@@ -11,6 +18,7 @@ import {
   NotFound,
 } from '../shared/errors.js'
 import { User } from '../user/model.js'
+import { project } from '../shared/utils.js'
 
 async function getTour(
   id: Types.ObjectId,
@@ -20,11 +28,13 @@ async function getTour(
   if (userResult.isLeft()) return userResult
   const user = userResult.unsafeCoerce()
 
-  // TODO: Update checkRole permission for viewing tours
-  if (!checkRole(user.role, 'view:tour')) return Left(accessDenied())
-
-  // TODO: Customize specific logic for who can view the tour
-  // Example: all tours are public? Or check if user purchased tour? For now allow with role only
+  if (
+    !checkRole(user.role, 'view:tour') ||
+    !user.purchasedTours.includes(id) ||
+    !user.authoredTours.includes(id)
+  )
+    // NOTE: Admin filtered out
+    return Left(accessDenied())
 
   return _getById(id, Tour)
 }
@@ -43,17 +53,19 @@ async function listTours(
 async function createTour(
   input: TourInput,
   userId: Types.ObjectId,
-): Promise<Either<DBError | AccessDenied, ITour>> {
+): Promise<Either<DBError | AccessDenied, Partial<ITour>>> {
   const userResult = await _getById(userId, User)
   if (userResult.isLeft()) return Left(accessDenied())
   const user = userResult.unsafeCoerce()
 
-  // TODO: Update for tour creation permissions as appropriate
   if (!checkRole(user.role, 'create:tour')) return Left(accessDenied())
-  // Optionally check if user is author in input
+  // TODO(Router): check if user is author in input
 
   try {
-    const tour = await Tour.create(input)
+    const tour = project(safeTourFields, await Tour.create(input))
+    await User.findByIdAndUpdate(userId, {
+      $push: { authoredTours: tour._id },
+    })
     return Right(tour)
   } catch (e) {
     return Left(dbError(undefined, () => JSON.stringify(e)))
@@ -69,12 +81,11 @@ async function patchTour(
   if (userResult.isLeft()) return Left(accessDenied())
   const user = userResult.unsafeCoerce()
 
-  // TODO: Update for edit tour permissions as appropriate
   if (!checkRole(user.role, 'edit:tour')) return Left(accessDenied())
-  // Optionally only allow if user is author; needs loading the Tour (see below)
+  // TODO: only allow if user is author; needs loading the Tour (see below)
 
   try {
-    const tour = await Tour.findByIdAndUpdate(id, input, { new: true })
+    const tour = await Tour.findByIdAndUpdate(id, input)
     if (tour) return Right(tour)
     else return Left(notFound())
   } catch (e) {
@@ -98,9 +109,8 @@ async function deleteTour(
   const user = userResult.unsafeCoerce()
   const tour = tourResult.unsafeCoerce()
 
-  // TODO: Update for delete permission; for example, only allow author or 'delete:tour' role
   if (!checkRole(user.role, 'delete:tour')) return Left(accessDenied())
-  // Optionally allow author to delete: if (!tour.author.equals(userId)) return Left(accessDenied())
+  // TODO only allow author to delete: if (!tour.author.equals(userId)) return Left(accessDenied())
 
   try {
     await tour.deleteOne()

@@ -62,6 +62,7 @@ async function createItem(
 
   try {
     const item = await Item.create(input)
+    // TODO: add to tour's item-list
     return Right(item)
   } catch (e) {
     return Left(dbError(undefined, () => JSON.stringify(e)))

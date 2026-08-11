@@ -2,7 +2,7 @@ import mongoose, { Schema, Document, Types } from 'mongoose'
 import { IGeoPosition } from '../shared/models.js'
 import z from 'zod'
 import { makeZodValidator, objectIdZod } from '../shared/validation.js'
-import { ShallowAny } from '../shared/utils.js'
+import { Projection } from '../shared/utils.js'
 
 export interface IDescription {
   level: 'simple' | 'normal' | 'advanced'
@@ -72,7 +72,8 @@ export const itemSchema = new Schema<IItem>(
   { discriminatorKey: 'itemType', collection: 'items', timestamps: true },
 )
 
-export const safeItemFields: ShallowAny<_Item> = {
+// NOTE: _id will always be returned (even if not specified)
+export const safeItemFields: Projection<_Item> = {
   name: 1,
   itemType: 1,
   itemAuthor: 1,

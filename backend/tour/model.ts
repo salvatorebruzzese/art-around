@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document, Types } from 'mongoose'
 import { makeZodValidator, objectIdZod } from '../shared/validation.js'
 import z from 'zod'
+import { Projection } from '../shared/utils.js'
 
 export interface IReview {
   user: Types.ObjectId
@@ -9,16 +10,18 @@ export interface IReview {
   createdAt?: Date
 }
 
-export interface ITour extends Document {
+interface _Tour {
   name: string
-  author?: Types.ObjectId
+  author: Types.ObjectId
   thumbnail?: Types.ObjectId
   images?: Types.ObjectId[]
-  items?: Types.ObjectId[]
+  items: Types.ObjectId[]
   description?: string
   reviews?: IReview[]
-  price?: number
+  price: number
 }
+
+export interface ITour extends Document, _Tour {}
 
 export const reviewSchema = new Schema<IReview>(
   {
@@ -102,3 +105,10 @@ export const TourQuery = { validate: makeZodValidator(TourQuerySchemaZod) }
 
 export type TourPatch = z.infer<typeof TourPatchSchemaZod>
 export const TourPatch = { validate: makeZodValidator(TourPatchSchemaZod) }
+
+export const safeTourFields: Projection<_Tour> = {
+  name: 1,
+  author: 1,
+  items: 1,
+  price: 1,
+}
