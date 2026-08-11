@@ -2,9 +2,6 @@ import express, { Request, Response } from 'express'
 import { ItemInput, ItemPatch, ItemQuery } from './model.js'
 import ItemService from './service.js'
 import mongoose from 'mongoose'
-import { Either } from 'purify-ts'
-import { IItem } from './model.js'
-import { DBError, NotFound } from '../shared/errors.js'
 import { ensureAuth } from '../accessControl.js'
 import { handleLeft } from '../shared/router.js'
 
@@ -18,8 +15,7 @@ router.get('/', async (req: Request, res: Response) => {
   }
 
   const query = validation.unsafeCoerce()
-  const result: Either<NotFound | DBError, IItem[]> =
-    await ItemService.listItems(query)
+  const result = await ItemService.listItems(query)
   result.caseOf({
     Right: (itemList) => res.json(itemList),
     Left: (e) => {

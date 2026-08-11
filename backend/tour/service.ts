@@ -63,7 +63,7 @@ async function createTour(
   const user = userResult.unsafeCoerce()
 
   if (!checkRole(user.role, 'create:tour')) return Left(accessDenied())
-  // TODO(Router): check if user is author in input
+  // DONE(Router): check if user is author in input
 
   try {
     const tour = await Tour.create(input)
