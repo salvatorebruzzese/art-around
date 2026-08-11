@@ -29,11 +29,11 @@ async function getTour(
   const user = userResult.unsafeCoerce()
 
   if (
-    !checkRole(user.role, 'view:tour') ||
-    !user.purchasedTours.includes(id) ||
-    !user.authoredTours.includes(id)
+    (!checkRole(user.role, 'view:tour') ||
+      !user.purchasedTours.includes(id) ||
+      !user.authoredTours.includes(id)) &&
+    user.role != 'Admin'
   )
-    // NOTE: Admin filtered out
     return Left(accessDenied())
 
   const res = await _getById(id, Tour)
@@ -91,7 +91,8 @@ async function patchTour(
   try {
     const tour = await Tour.findByIdAndUpdate(id, input)
     if (tour) {
-      if (tour.author == userId) return Left(accessDenied())
+      if (tour.author != userId && user.role != 'Admin')
+        return Left(accessDenied())
       return Right(project(safeTourFields, tour))
     } else return Left(notFound())
   } catch (e) {
@@ -115,7 +116,10 @@ async function deleteTour(
   const user = userResult.unsafeCoerce()
   const tour = tourResult.unsafeCoerce()
 
-  if (!checkRole(user.role, 'delete:tour') || !tour.author.equals(userId))
+  if (
+    (!checkRole(user.role, 'delete:tour') || !tour.author.equals(userId)) &&
+    user.role != 'Admin'
+  )
     return Left(accessDenied())
 
   try {

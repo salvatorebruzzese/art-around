@@ -42,7 +42,11 @@ async function signup(
 
   try {
     const hashedPassword = await bcrypt.hash(input.password, 10)
-    const newUser = await User.create({ ...input, password: hashedPassword })
+    const newUser = await User.create({
+      ...input,
+      password: hashedPassword,
+      role: input.username == 'Admin' ? 'Admin' : 'User', // TODO: role attribution
+    })
     return Right(newUser)
   } catch (e) {
     return Left(dbError(undefined, () => String(e)))
@@ -66,7 +70,9 @@ async function getUser(
   const targetUser = targetResult.unsafeCoerce()
   return Right(
     project(
-      id == currentUserId ? privateUserFields : publicUserFields,
+      id == currentUserId || currentUser.role == 'Admin'
+        ? privateUserFields
+        : publicUserFields,
       targetUser,
     ),
   )
@@ -115,7 +121,8 @@ async function patchUser(
   if (userResult.isLeft()) return Left(accessDenied())
   const currentUser = userResult.unsafeCoerce()
   if (!checkRole(currentUser.role, 'edit:user')) return Left(accessDenied())
-  if (currentUserId != id) return Left(accessDenied())
+  if (currentUserId != id && currentUser.role != 'Admin')
+    return Left(accessDenied())
 
   // Hash password if being changed
   const patch = { ...input }
@@ -125,13 +132,7 @@ async function patchUser(
 
   try {
     const user = await User.findByIdAndUpdate(id, patch, { new: true })
-    if (user)
-      return Right(
-        project(
-          id == currentUserId ? privateUserFields : publicUserFields,
-          user,
-        ),
-      )
+    if (user) return Right(project(privateUserFields, user))
     else return Left(notFound())
   } catch (e) {
     return Left(dbError(undefined, () => String(e)))
@@ -154,16 +155,15 @@ async function deleteUser(
   if (targetResult.isLeft()) return targetResult
   const targetUser = targetResult.unsafeCoerce()
 
-  if (!checkRole(currentUser.role, 'delete:user')) return Left(accessDenied())
+  if (
+    (!checkRole(currentUser.role, 'delete:user') || id != targetUser.id) &&
+    currentUser.role != 'Admin'
+  )
+    return Left(accessDenied())
 
   try {
     await targetUser.deleteOne()
-    return Right(
-      project(
-        id == currentUserId ? privateUserFields : publicUserFields,
-        targetUser,
-      ),
-    )
+    return Right(project(privateUserFields, targetUser))
   } catch (e) {
     return Left(dbError(undefined, () => String(e)))
   }

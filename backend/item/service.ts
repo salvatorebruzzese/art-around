@@ -30,7 +30,11 @@ async function getItem(
 
   if (!checkRole(user.role, 'view:item')) return Left(accessDenied())
 
-  if (user.authoredTours.includes(id) || user.purchasedTours.includes(id)) {
+  if (
+    user.authoredTours.includes(id) ||
+    user.purchasedTours.includes(id) ||
+    user.role == 'Admin'
+  ) {
     const itemResult = await _getById(id, Item)
     if (itemResult.isRight()) {
       const item = itemResult.unsafeCoerce()
@@ -65,9 +69,9 @@ async function createItem(
   const user = userResult.unsafeCoerce()
 
   if (!checkRole(user.role, 'create:item')) return Left(accessDenied())
-  if (!user.authoredTours.includes(new Types.ObjectId(input.tour))) {
-    return Left(accessDenied())
-  }
+  if (user.role != 'Admin')
+    if (!user.authoredTours.includes(new Types.ObjectId(input.tour)))
+      return Left(accessDenied())
 
   try {
     const item = await Item.create(input)
@@ -88,9 +92,9 @@ async function patchItem(
   const user = userResult.unsafeCoerce()
 
   if (!checkRole(user.role, 'edit:item')) return Left(accessDenied())
-  if (!user.authoredTours.includes(new Types.ObjectId(input.tour))) {
-    return Left(accessDenied())
-  }
+  if (user.role != 'Admin')
+    if (!user.authoredTours.includes(new Types.ObjectId(input.tour)))
+      return Left(accessDenied())
 
   try {
     const item = await Item.findByIdAndUpdate(id, input, { new: true })
@@ -117,8 +121,9 @@ async function deleteItem(
   const user = userResult.unsafeCoerce()
   const item = itemResult.unsafeCoerce()
 
-  if (!checkRole(user.role, 'delete:item') || !item.itemAuthor.equals(userId))
-    return Left(accessDenied())
+  if (!checkRole(user.role, 'delete:item')) return Left(accessDenied())
+  if (user.role != 'Admin')
+    if (!item.itemAuthor.equals(userId)) return Left(accessDenied())
 
   try {
     await item.deleteOne()
