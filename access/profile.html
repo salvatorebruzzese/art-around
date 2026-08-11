@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profile</title>
+    <link href="../styles.css" rel="stylesheet" type="text/css" />
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+    ></script>
+  </head>
+  <body
+    class="bg-p-light font-sans min-h-screen p-6 antialiased flex items-center justify-center"
+  >
+    <div class="aura aura-dual aura-sm text-p-soft rounded-[2rem]">
+      <main
+        class="grid lg:grid-cols-2 gap-12 items-center w-full max-w-5xl mx-auto bg-white p-8 rounded-[2rem] shadow-xl border border-p-soft"
+      >
+        <figure
+          class="w-full aspect-square rounded-3xl overflow-hidden shadow-md border border-p-soft relative group"
+        >
+          <img
+            src="https://dummyimage.com/600x600/efefef/a3a3a3.jpg&text=Image+Preview"
+            alt="Thumbnail"
+            class="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
+          />
+          <figcaption
+            class="absolute bottom-4 left-4 bg-p-light backdrop-blur-sm text-p-medium text-xs font-semibold px-4 py-2 rounded-full uppercase tracking-smaller"
+          >
+            Profile picture
+          </figcaption>
+        </figure>
+
+        <dl class="flex flex-col gap-6">
+          <div
+            class="flex flex-col gap-2 p-6 rounded-2xl bg-p-soft/10 border border-p-soft/50 shadow-sm"
+          >
+            <dt
+              class="text-sm font-sans font-semibold text-p-medium uppercase tracking-widest"
+            >
+              Nome utente
+            </dt>
+            <dd
+              class="text-4xl font-serif text-p-dark font-bold tracking-tight"
+            >
+              <data>Marco Rossi</data>
+            </dd>
+          </div>
+          <div
+            class="flex flex-col gap-2 p-6 rounded-2xl bg-p-soft/10 border border-p-soft/50 shadow-sm"
+          >
+            <dt
+              class="text-sm font-sans font-semibold text-p-medium uppercase tracking-widest"
+            >
+              Email
+            </dt>
+            <dd
+              class="text-4xl font-serif text-p-dark font-bold tracking-tight"
+            >
+              <data>marcorossi@esempio.com</data>
+            </dd>
+          </div>
+          <div class="flex justify-end mt-10 mr-4 rounded-2xl">
+            <button
+              class="btn bg-white text-p-medium shadow-md border-none mr-4 hover:bg-p-soft/20 active:bg-p-medium active:text-p-light"
+            >
+              Torna indietro
+            </button>
+            <button
+              class="btn bg-white text-p-warning border-none shadow-md hover:bg-p-warning/30 active:bg-p-warning active:text-p-light"
+            >
+              Esci
+            </button>
+          </div>
+        </dl>
+      </main>
+    </div>
+  </body>
+</html>

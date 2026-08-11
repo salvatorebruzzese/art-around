@@ -8,6 +8,7 @@
   --color-p-soft: #90caf9;
   --color-p-medium: #2196f3;
   --color-p-dark: #0d47a1;
+  --color-p-warning: red;
   --font-serif: 'Cormorant Garamond', serif;
   --font-sans: Inter, sans-serif;
 }
