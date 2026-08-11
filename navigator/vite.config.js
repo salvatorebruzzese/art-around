@@ -7,5 +7,10 @@ export default defineConfig({
   base: '/navigator/',
   build: {
     outDir: '../dist/navigator/',
+    rollupOptions: {
+      input: {
+        main: 'index.html',
+      },
+    },
   },
 })
