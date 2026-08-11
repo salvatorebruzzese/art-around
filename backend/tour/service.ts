@@ -23,7 +23,7 @@ import { project } from '../shared/utils.js'
 async function getTour(
   id: Types.ObjectId,
   userID: Types.ObjectId,
-): Promise<Either<NotFound | DBError | AccessDenied, ITour>> {
+): Promise<Either<NotFound | DBError | AccessDenied, Partial<ITour>>> {
   const userResult = await _getById(userID, User)
   if (userResult.isLeft()) return userResult
   const user = userResult.unsafeCoerce()
@@ -36,15 +36,19 @@ async function getTour(
     // NOTE: Admin filtered out
     return Left(accessDenied())
 
-  return _getById(id, Tour)
+  const res = await _getById(id, Tour)
+  if (res.isLeft()) return res
+  else return Right(project(safeTourFields, res.unsafeCoerce()))
 }
 
 async function listTours(
   query: TourQuery,
-): Promise<Either<NotFound | DBError, ITour[]>> {
+): Promise<Either<NotFound | DBError, Partial<ITour>[]>> {
   try {
     const tours = await Tour.find(query).lean().exec()
-    return tours ? Right(tours) : Left(notFound())
+    return tours
+      ? Right(tours.map((tour) => project(safeTourFields, tour))) // TODO: safeTourFields -> metaTourFields
+      : Left(notFound())
   } catch (e) {
     return Left(dbError(undefined, () => String(e)))
   }
@@ -62,11 +66,11 @@ async function createTour(
   // TODO(Router): check if user is author in input
 
   try {
-    const tour = project(safeTourFields, await Tour.create(input))
+    const tour = await Tour.create(input)
     await User.findByIdAndUpdate(userId, {
       $push: { authoredTours: tour._id },
     })
-    return Right(tour)
+    return Right(project(safeTourFields, tour))
   } catch (e) {
     return Left(dbError(undefined, () => JSON.stringify(e)))
   }
@@ -76,7 +80,7 @@ async function patchTour(
   id: Types.ObjectId,
   input: TourPatch,
   userId: Types.ObjectId,
-): Promise<Either<DBError | AccessDenied | NotFound, ITour>> {
+): Promise<Either<DBError | AccessDenied | NotFound, Partial<ITour>>> {
   const userResult = await _getById(userId, User)
   if (userResult.isLeft()) return Left(accessDenied())
   const user = userResult.unsafeCoerce()
@@ -88,7 +92,7 @@ async function patchTour(
     const tour = await Tour.findByIdAndUpdate(id, input)
     if (tour) {
       if (tour.author == userId) return Left(accessDenied())
-      return Right(tour)
+      return Right(project(safeTourFields, tour))
     } else return Left(notFound())
   } catch (e) {
     return Left(dbError(undefined, () => JSON.stringify(e)))
@@ -121,6 +125,8 @@ async function deleteTour(
     return Left(dbError(undefined, () => JSON.stringify(e)))
   }
 }
+
+// TODO: forkTour PUT(/tour/:id) (?)
 
 export default {
   createTour,

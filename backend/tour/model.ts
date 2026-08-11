@@ -111,4 +111,6 @@ export const safeTourFields: Projection<_Tour> = {
   author: 1,
   items: 1,
   price: 1,
+  description: 1,
+  // fill as needed
 }
