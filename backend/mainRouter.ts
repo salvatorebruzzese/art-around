@@ -3,10 +3,9 @@ import itemRouter from './item/router.js'
 import tourRouter from './tour/router.js'
 import museumRouter from './museum/router.js'
 import assetRouter from './asset/router.js'
+import userRouter from './asset/router.js'
 import passport from 'passport'
-import { SignupInput } from './user/model.js'
-import userService from './user/service.js'
-import { assertNever } from './shared/utils.js'
+import { signup } from './user/router.js'
 
 const router = express.Router()
 
@@ -19,35 +18,14 @@ router.use('/items', itemRouter)
 router.use('/tours', tourRouter)
 router.use('/museums', museumRouter)
 router.use('/assets', assetRouter)
+router.use('/users', userRouter)
 
 // NOTE: temporarily here!
 router.post('/login', passport.authenticate('local'), (req, res) => {
   res.json({ user: req.user })
 })
 
-router.post('/signup', async (req, res) => {
-  const validation = SignupInput.validate(req.body)
-  if (validation.isLeft()) {
-    const error = validation.extract() // ValidationError
-    return res.status(400).json({ error: error.message })
-  }
-
-  const signupResult = await userService.signup(validation.unsafeCoerce())
-
-  return signupResult.caseOf({
-    Right: (user) => res.status(201).json(user),
-    Left: (error) => {
-      switch (error.type) {
-        case 'ConflictError':
-          return res.status(409).json({ error: error.message })
-        case 'DBError':
-          return res.status(500).json({ error: error.message })
-        default:
-          assertNever(error)
-      }
-    },
-  })
-})
+router.post('/signup', signup)
 
 router.get('/profile', (_req, res) => {
   res.json({})

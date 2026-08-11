@@ -8,7 +8,7 @@ import { handleLeft } from '../shared/router.js'
 const router = express.Router()
 
 // Public signup endpoint (no auth required)
-router.post('/signup', async (req: Request, res: Response) => {
+export async function signup(req: Request, res: Response) {
   const validation = SignupInput.validate(req.body)
   if (validation.isLeft())
     return res.status(400).json({ error: validation.extract() })
@@ -28,7 +28,8 @@ router.post('/signup', async (req: Request, res: Response) => {
       }
     },
   })
-})
+}
+router.post('/signup', signup)
 
 router.get('/', async (req: Request, res: Response) => {
   const validation = UserQuery.validate(req.query)
