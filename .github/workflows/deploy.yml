@@ -20,7 +20,7 @@ jobs:
         run: npm run install:all
 
       - name: Build backend and frontends
-        run: npm run build
+        run: npm run dbuild
 
       - name: Create .env file
         run: |

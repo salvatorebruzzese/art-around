@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dbuild": "rm -rf dist && npx tsc && npm run build:marketplace && npm run build:navigator && npm run build:home && npm run build:access",
     "build": "rm -rf dist && npx tsc && cp .env dist && npm run build:marketplace && npm run build:navigator && npm run build:home && npm run build:access",
     "build:access": "cd access && npm run build",
     "build:home": "cd home && npm run build",
@@ -19,13 +20,8 @@
     "test": "npx vitest run"
   },
   "lint-staged": {
-    "*.{js,ts,jsx,tsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{css,scss,html}": [
-      "prettier --write"
-    ]
+    "*.{js,ts,jsx,tsx}": ["eslint --fix", "prettier --write"],
+    "*.{css,scss,html}": ["prettier --write"]
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
