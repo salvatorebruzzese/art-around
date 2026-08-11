@@ -12,5 +12,19 @@ export function project<T>(projection: Projection<T>, obj: T): Partial<T> {
       result[key] = obj[key]
     }
   }
+
+  if (
+    Object.prototype.hasOwnProperty.call(obj, '_id') &&
+    !('_id' in projection)
+  ) {
+    // _id not specified, so include it
+    result['_id' as keyof T] = obj['_id' as keyof T]
+  }
+
+  // If _id is explicitly 0/false, remove it
+  if ('_id' in projection && !projection['_id']) {
+    delete result['_id' as keyof T]
+  }
+
   return result
 }

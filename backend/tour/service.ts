@@ -82,12 +82,14 @@ async function patchTour(
   const user = userResult.unsafeCoerce()
 
   if (!checkRole(user.role, 'edit:tour')) return Left(accessDenied())
-  // TODO: only allow if user is author; needs loading the Tour (see below)
+  // DONE: only allow if user is author; needs loading the Tour (see below)
 
   try {
     const tour = await Tour.findByIdAndUpdate(id, input)
-    if (tour) return Right(tour)
-    else return Left(notFound())
+    if (tour) {
+      if (tour.author == userId) return Left(accessDenied())
+      return Right(tour)
+    } else return Left(notFound())
   } catch (e) {
     return Left(dbError(undefined, () => JSON.stringify(e)))
   }
@@ -96,7 +98,7 @@ async function patchTour(
 async function deleteTour(
   id: Types.ObjectId,
   userId: Types.ObjectId,
-): Promise<Either<AccessDenied | NotFound | DBError, ITour>> {
+): Promise<Either<AccessDenied | NotFound | DBError, Partial<ITour>>> {
   const userResult = await _getById(userId, User)
   if (userResult.isLeft()) {
     const error = userResult.extract()
@@ -109,12 +111,12 @@ async function deleteTour(
   const user = userResult.unsafeCoerce()
   const tour = tourResult.unsafeCoerce()
 
-  if (!checkRole(user.role, 'delete:tour')) return Left(accessDenied())
-  // TODO only allow author to delete: if (!tour.author.equals(userId)) return Left(accessDenied())
+  if (!checkRole(user.role, 'delete:tour') || !tour.author.equals(userId))
+    return Left(accessDenied())
 
   try {
     await tour.deleteOne()
-    return Right(tour)
+    return Right(project(safeTourFields, tour))
   } catch (e) {
     return Left(dbError(undefined, () => JSON.stringify(e)))
   }
