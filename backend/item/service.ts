@@ -18,11 +18,12 @@ import {
   NotFound,
 } from '../shared/errors.js'
 import { User } from '../user/model.js'
+import { project } from '../shared/utils.js'
 
 async function getItem(
   id: Types.ObjectId,
   userID: Types.ObjectId,
-): Promise<Either<NotFound | DBError | AccessDenied, IItem>> {
+): Promise<Either<NotFound | DBError | AccessDenied, Partial<IItem>>> {
   const userResult = await _getById(userID, User)
   if (userResult.isLeft()) return userResult
   const user = userResult.unsafeCoerce()
@@ -30,7 +31,13 @@ async function getItem(
   if (!checkRole(user.role, 'view:item')) return Left(accessDenied())
 
   if (user.authoredTours.includes(id) || user.purchasedTours.includes(id)) {
-    return _getById(id, Item)
+    const itemResult = await _getById(id, Item)
+    if (itemResult.isRight()) {
+      const item = itemResult.unsafeCoerce()
+      return Right(project(safeItemFields, item))
+    } else {
+      return itemResult
+    }
   } else {
     return Left(accessDenied())
   }
@@ -38,10 +45,12 @@ async function getItem(
 
 async function listItems(
   query: ItemQuery,
-): Promise<Either<NotFound | DBError, IItem[]>> {
+): Promise<Either<NotFound | DBError, Partial<IItem>[]>> {
   try {
-    const items = await Item.find(query, safeItemFields).lean().exec()
-    return items ? Right(items) : Left(notFound())
+    const items = await Item.find(query).lean().exec()
+    return items
+      ? Right(items.map((item) => project(safeItemFields, item)))
+      : Left(notFound())
   } catch (e) {
     return Left(dbError(undefined, () => String(e)))
   }
@@ -50,7 +59,7 @@ async function listItems(
 async function createItem(
   input: ItemInput,
   userId: Types.ObjectId,
-): Promise<Either<DBError | AccessDenied, IItem>> {
+): Promise<Either<DBError | AccessDenied, Partial<IItem>>> {
   const userResult = await _getById(userId, User)
   if (userResult.isLeft()) return Left(accessDenied())
   const user = userResult.unsafeCoerce()
@@ -63,7 +72,7 @@ async function createItem(
   try {
     const item = await Item.create(input)
     // TODO: add to tour's item-list
-    return Right(item)
+    return Right(project(safeItemFields, item))
   } catch (e) {
     return Left(dbError(undefined, () => JSON.stringify(e)))
   }
@@ -73,7 +82,7 @@ async function patchItem(
   id: Types.ObjectId,
   input: ItemPatch,
   userId: Types.ObjectId,
-): Promise<Either<DBError | AccessDenied | NotFound, IItem>> {
+): Promise<Either<DBError | AccessDenied | NotFound, Partial<IItem>>> {
   const userResult = await _getById(userId, User)
   if (userResult.isLeft()) return Left(accessDenied())
   const user = userResult.unsafeCoerce()
@@ -84,8 +93,8 @@ async function patchItem(
   }
 
   try {
-    const item = await Item.findByIdAndUpdate(id, input)
-    if (item) return Right(item)
+    const item = await Item.findByIdAndUpdate(id, input, { new: true })
+    if (item) return Right(project(safeItemFields, item))
     else return Left(notFound())
   } catch (e) {
     return Left(dbError(undefined, () => JSON.stringify(e)))
@@ -95,7 +104,7 @@ async function patchItem(
 async function deleteItem(
   id: Types.ObjectId,
   userId: Types.ObjectId,
-): Promise<Either<AccessDenied | NotFound | DBError, IItem>> {
+): Promise<Either<AccessDenied | NotFound | DBError, Partial<IItem>>> {
   const userResult = await _getById(userId, User)
   if (userResult.isLeft()) {
     const error = userResult.extract()
@@ -108,10 +117,15 @@ async function deleteItem(
   const user = userResult.unsafeCoerce()
   const item = itemResult.unsafeCoerce()
 
-  if (!checkRole(user.role, 'delete:item') && item.itemAuthor.equals(userId))
+  if (!checkRole(user.role, 'delete:item') || !item.itemAuthor.equals(userId))
     return Left(accessDenied())
 
-  return Right(item)
+  try {
+    await item.deleteOne()
+    return Right(project(safeItemFields, item))
+  } catch (e) {
+    return Left(dbError(undefined, () => JSON.stringify(e)))
+  }
 }
 
 export default {
