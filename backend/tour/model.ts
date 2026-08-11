@@ -92,8 +92,13 @@ const TourQuerySchemaZod = z.object({
   reviews: z.array(ReviewQuerySchemaZod).optional(), // TODO: Does this "work"?
 })
 
+const TourPatchSchemaZod = TourInputSchemaZod.partial()
+
 export type TourInput = z.infer<typeof TourInputSchemaZod>
 export const TourInput = { validate: makeZodValidator(TourInputSchemaZod) }
 
 export type TourQuery = z.infer<typeof TourQuerySchemaZod>
 export const TourQuery = { validate: makeZodValidator(TourQuerySchemaZod) }
+
+export type TourPatch = z.infer<typeof TourPatchSchemaZod>
+export const TourPatch = { validate: makeZodValidator(TourPatchSchemaZod) }
