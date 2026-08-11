@@ -10,6 +10,11 @@ export type ValidationError = {
   field: string | string[]
   message: string
 } & BaseError
+export type ConflictError = {
+  type: 'ConflictError'
+  message: string
+  field: string | string[]
+} & BaseError
 
 function mkdetails(detailsProvider?: () => string) {
   return process.env.DEBUG && detailsProvider ? detailsProvider() : undefined
@@ -49,6 +54,19 @@ export function validationError(
     type: 'ValidationError',
     field: field,
     message: message || 'Invalid input provided.',
+    details: mkdetails(detailsProvider),
+  }
+}
+
+export function conflictError(
+  field: string | string[],
+  message?: string,
+  detailsProvider?: () => string,
+): ConflictError {
+  return {
+    type: 'ConflictError',
+    field: field,
+    message: message || 'A field is conflicting.',
     details: mkdetails(detailsProvider),
   }
 }

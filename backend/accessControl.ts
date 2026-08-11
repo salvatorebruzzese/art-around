@@ -7,19 +7,18 @@ import { Model, Types, Document } from 'mongoose'
 // users who either created a tour or bought one and have the right to fork it
 export type Role = 'Guest' | 'User' | 'Teacher' | 'Admin'
 
+const _resources = ['item', 'museum', 'tour', 'user', 'metatour'] as const
+const _actions = ['view', 'purchase', 'create', 'edit', 'delete'] as const
+
+type Resource = (typeof _resources)[number]
+type Action = (typeof _actions)[number]
+
+// The cross-product type
+type _Permission = `${Action}:${Resource}`
+
 // Permission is a pair action:class
 export type Permission =
-  | 'view:item'
-  | 'view:museum'
-  | 'view:tour'
-  | 'view:metatour'
-  | 'purchase:tour'
-  | 'create:item'
-  | 'delete:item'
-  | 'create:tour'
-  | 'edit:item'
-  | 'edit:tour'
-  | 'delete:tour'
+  | _Permission
   | 'manage:group'
   | 'sync:navigator'
   | 'assign:quiz'

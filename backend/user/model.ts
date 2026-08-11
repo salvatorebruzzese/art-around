@@ -2,6 +2,7 @@ import mongoose, { Schema, Document, Types } from 'mongoose'
 import { Role } from '../accessControl.js'
 import { makeZodValidator, objectIdZod } from '../shared/validation.js'
 import z from 'zod'
+import { Projection } from '../shared/utils.js'
 
 export interface IUserCard {
   brand: string
@@ -51,7 +52,7 @@ export const userBillingDataSchema = new Schema<IUserBillingData>(
   { _id: false },
 )
 
-export interface IUser extends Document {
+interface _User {
   username: string
   password: string
   role: Role
@@ -60,6 +61,7 @@ export interface IUser extends Document {
   purchasedTours: Types.ObjectId[]
   billingData: IUserBillingData
 }
+export interface IUser extends Document, _User {}
 
 export type PublicUser = {
   username: string
@@ -98,11 +100,28 @@ const UserInputSchemaZod = UserBaseSchemaZod.extend({
   password: z.string(),
 })
 
+const UserPatchSchemaZod = UserInputSchemaZod.partial()
+
 export type UserQuery = z.infer<typeof UserQuerySchemaZod>
 export const UserQuery = { validate: makeZodValidator(UserQuerySchemaZod) }
 
+export type UserPatch = z.infer<typeof UserPatchSchemaZod>
+export const UserPatch = { validate: makeZodValidator(UserPatchSchemaZod) }
+
 export type UserInput = z.infer<typeof UserInputSchemaZod>
 export const UserInput = { validate: makeZodValidator(UserInputSchemaZod) }
+
+export const publicUserFields: Projection<_User> = {
+  username: 1,
+  profilePicture: 1,
+  authoredTours: 1,
+}
+
+export const privateUserFields: Projection<_User> = {
+  ...publicUserFields,
+  purchasedTours: 1,
+  billingData: 1,
+}
 
 export const UserCardSchema = z.object({
   // TODO: refine
