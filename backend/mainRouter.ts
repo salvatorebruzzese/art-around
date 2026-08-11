@@ -21,8 +21,20 @@ router.use('/assets', assetRouter)
 router.use('/users', userRouter)
 
 // NOTE: temporarily here!
-router.post('/login', passport.authenticate('local'), (req, res) => {
-  res.json({ user: req.user })
+router.post('/login', (req, res, next) => {
+  passport.authenticate(
+    'local',
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (err: any, user: Express.User, info: { message: any }) => {
+      if (err) return next(err)
+      if (!user)
+        return res.status(401).json({ error: info?.message || 'Unauthorized' })
+      req.logIn(user, (err) => {
+        if (err) return next(err)
+        res.json({ user })
+      })
+    },
+  )(req, res, next)
 })
 
 router.post('/signup', signup)
