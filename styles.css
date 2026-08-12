@@ -1,14 +1,110 @@
-@import url(https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&display=swap);
-@import url(https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap);
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Inter:wght@600&display=swap');
 @import 'tailwindcss';
 @plugin 'daisyui';
 
 @theme {
   --color-p-light: #fffffd;
   --color-p-soft: #90caf9;
-  --color-p-medium: #2196f3;
+  --color-p-medium: #1976d2;
   --color-p-dark: #0d47a1;
-  --color-p-warning: red;
+  --color-p-warning: #dd2224;
+
   --font-serif: 'Cormorant Garamond', serif;
-  --font-sans: Inter, sans-serif;
+  --font-sans: 'Inter', sans-serif;
+}
+
+/* Base button utility */
+@utility shared-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.5rem;
+  background-color: var(--color-p-light);
+  color: var(--color-p-medium);
+  font-family: var(--font-sans);
+  font-weight: 500;
+  box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
+  cursor: pointer;
+  transition:
+    background-color 150ms,
+    color 150ms;
+
+  &:hover {
+    background-color: var(--color-p-medium);
+    color: var(--color-p-light);
+  }
+
+  &:active {
+    background-color: var(--color-p-dark);
+  }
+}
+
+/* Variant utilities extending shared-button */
+@utility shared-button-full {
+  @apply shared-button w-full rounded-xl;
+}
+
+@utility shared-button-flex-primary {
+  @apply shared-button flex-1 rounded-sm;
+  background-color: var(--color-p-medium);
+  color: var(--color-p-light);
+  &:hover {
+    background-color: var(--color-p-dark);
+    color: var(--color-p-light);
+  }
+}
+
+@utility shared-button-flex-secondary {
+  @apply shared-button flex-1 rounded-sm;
+}
+
+@utility shared-form-button {
+  @apply shared-button w-full rounded-sm;
+  background-color: var(--color-p-medium);
+  color: var(--color-p-light);
+
+  &:hover {
+    background-color: var(--color-p-dark);
+    color: var(--color-p-light);
+  }
+}
+
+@utility shared-button-flex-warning {
+  @apply shared-button flex-1 rounded-sm;
+  color: var(--color-p-warning);
+
+  &:hover {
+    background-color: color-mix(
+      in srgb,
+      var(--color-p-warning) 20%,
+      transparent
+    );
+    color: var(--color-p-warning);
+  }
+
+  &:active {
+    background-color: var(--color-p-warning);
+    color: var(--color-p-light);
+  }
+}
+
+/* Navigation Component Utilities */
+@utility nav-icon-link {
+  @apply flex items-center justify-center w-10 h-10 border border-p-soft rounded-xl shadow-md text-2xl text-center transition-colors;
+
+  &:hover {
+    background-color: var(--color-p-soft);
+  }
+}
+
+@utility nav-avatar-trigger {
+  @apply w-14 h-14 rounded-full bg-white flex items-center justify-center overflow-hidden border-4 border-p-medium shadow-md cursor-pointer transition-transform;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
+@utility nav-dropdown-menu {
+  @apply menu w-40 dropdown-content rounded-xl bg-white text-sm font-sans text-p-dark shadow-lg border-none;
 }

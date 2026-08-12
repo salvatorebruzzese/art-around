@@ -20,35 +20,15 @@
       >
         <div class="flex flex-row justify-center items-center gap-3">
           <div class="flex items-center gap-2">
-            <a
-              class="w-10 h-10 border border-p-soft rounded-xl hover:bg-p-soft transition-colors shadow-md text-2xl text-center"
-              href="../home/"
-              >H</a
-            >
-            <a
-              class="w-10 h-10 border border-p-soft rounded-xl hover:bg-p-soft transition-colors shadow-md text-2xl text-center"
-              href="/marketplace/"
-              >M</a
-            >
-            <a
-              class="w-10 h-10 border border-p-soft rounded-xl hover:bg-p-soft transition-colors shadow-md text-2xl text-center"
-              href="/editor/"
-              >E</a
-            >
-            <a
-              class="w-10 h-10 border border-p-soft rounded-xl hover:bg-p-soft transition-colors shadow-md text-2xl text-center"
-              href="../navigator/"
-              >N</a
-            >
+            <a class="nav-icon-link" href="../home/">H</a>
+            <a class="nav-icon-link" href="/marketplace/">M</a>
+            <a class="nav-icon-link" href="/editor/">E</a>
+            <a class="nav-icon-link" href="../navigator/">N</a>
           </div>
-          <details class="avatar dropdown dropdown-end z-20">
-            <summary
-              class="w-14 h-14 rounded-full bg-white flex items-center justify-center overflow-hidden border-4 border-p-medium shadow-md cursor-pointer hover:scale-105 transition-transform"
-            ></summary>
 
-            <ul
-              class="menu w-40 dropdown-content rounded-xl bg-white text-sm font-sans text-p-dark shadow-lg border-none"
-            >
+          <details class="avatar dropdown dropdown-end z-20">
+            <summary class="nav-avatar-trigger"></summary>
+            <ul class="nav-dropdown-menu">
               <li>
                 <a class="hover:bg-p-soft/20 rounded-lg" href="../profile"
                   >Profilo</a

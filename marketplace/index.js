@@ -44,14 +44,10 @@ const cardHtml = `
     <h2 class="text-md text-p-medium/50">Museo</h2>
   </div>
   <div class="flex flex-row gap-4">
-    <button
-      class="w-full h-10 flex-1 bg-p-light text-p-medium hover:text-p-light hover:bg-p-medium active:bg-p-dark font-medium rounded-xl shadow-md transition-colors cursor-pointer font-sans"
-    >
+    <button class="shared-button-full">
       Apri
     </button>
-    <button
-      class="w-full h-10 flex-1 bg-p-light text-p-medium hover:text-p-light hover:bg-p-medium active:bg-p-dark font-medium rounded-xl shadow-md transition-colors cursor-pointer font-sans"
-    >
+    <button class="shared-button-full">
       Condividi
     </button>
   </div>

@@ -17,15 +17,15 @@
   <body
     class="bg-p-light text-p-dark min-h-screen flex items-center justify-center"
   >
-    <main class="font-serif px-4 w-full max-w-sm">
-      <h2 class="text-center text-5xl mb-8 text-p-dark tracking-wide">Login</h2>
+    <main class="px-4 w-full max-w-sm font-sans">
+      <h2 class="text-center text-4xl mb-8 text-p-dark tracking-wide">Login</h2>
       <form
         id="loginForm"
         class="flex flex-col gap-4 justify-items-start text-left"
       >
         <div class="form-control w-full">
           <label for="username" class="label"
-            ><span class="text-p-medium text-xl mb-2">Username</span></label
+            ><span class="text-p-medium text-md mb-2">Username</span></label
           >
           <input
             type="text"
@@ -38,7 +38,7 @@
         </div>
         <div class="form-control w-full">
           <label for="password" class="label"
-            ><span class="text-p-medium text-xl mb-2">Password</span></label
+            ><span class="text-p-medium text-md mb-2">Password</span></label
           >
           <input
             type="password"
@@ -46,20 +46,15 @@
             name="password"
             required
             autocomplete="current-password"
-            class="input input-bordered w-full text-p-dark bg-transparent"
+            class="input input-bordered w-full text-p-dark bg-transparent mb-8"
           />
         </div>
-        <button
-          type="submit"
-          class="btn btn-primary bg-p-medium text-p-light hover:text-white hover:bg-p-dark text-2xl border-none"
-        >
-          Login
-        </button>
+        <button type="submit" class="shared-form-button">Login</button>
       </form>
       <div id="error" class="text-red-500 mt-4"></div>
       <a
         href="/"
-        class="block text-center mt-6 text-p-medium hover:text-p-dark hover:underline text-lg"
+        class="block text-center mt-6 text-p-medium hover:text-p-dark hover:underline text-md"
         >Torna alla Home</a
       >
     </main>
