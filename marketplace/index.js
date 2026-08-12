@@ -37,18 +37,24 @@ const cardHtml = `
   </div>
 </div>
 <div
-  class="h-24 bg-p-soft/30 flex items-center justify-center gap-4 px-6 border-t text-p-dark border-p-soft/50"
+  class="h-36 bg-p-soft/20 flex flex-col flexitems-center justify-center gap-4 px-6 border-t text-p-dark border-p-soft/50"
 >
-  <button
-    class="h-10 flex-1 bg-white cursor-pointer border border-p-medium rounded-xl font-sans font-medium text-sm hover:bg-p-soft/50 transition-all duration-150 active:scale-95 shadow-sm"
-  >
-    Apri
-  </button>
-  <button
-    class="h-10 flex-1 bg-white cursor-pointer border border-p-medium rounded-xl font-sans font-medium text-sm hover:bg-p-soft/50 transition-all duration-150 active:scale-95 shadow-sm"
-  >
-    Condividi
-  </button>
+  <div class="flex flex-col font-sans">
+    <h1 class="text-2xl text-p-medium">Nome visita/item</h1>
+    <h2 class="text-md text-p-medium/50">Museo</h2>
+  </div>
+  <div class="flex flex-row gap-4">
+    <button
+      class="w-full h-10 flex-1 bg-p-light text-p-medium hover:text-p-light hover:bg-p-medium active:bg-p-dark font-medium rounded-xl shadow-md transition-colors cursor-pointer font-sans"
+    >
+      Apri
+    </button>
+    <button
+      class="w-full h-10 flex-1 bg-p-light text-p-medium hover:text-p-light hover:bg-p-medium active:bg-p-dark font-medium rounded-xl shadow-md transition-colors cursor-pointer font-sans"
+    >
+      Condividi
+    </button>
+  </div>
 </div>
 `
 const decorator = `w-full h-80 rounded-3xl flex flex-col overflow-hidden shadow-lg border border-p-soft bg-white group hover:-translate-y-1 hover:shadow-xl transition-all duration-300`
