@@ -1,6 +1,8 @@
 import express, { Request, Response } from 'express'
 const router = express.Router()
 
+// TODO: asset routing and validation
+
 router.get('/:id', (_req: Request, res: Response) => {
   res.json({})
 })

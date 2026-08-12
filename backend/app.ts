@@ -12,6 +12,8 @@ import path from 'path'
 import dotenv from 'dotenv'
 import { fileURLToPath } from 'url'
 
+// TODO: Fix the behaviour of the rootDir variable across modules,
+// preferably keeping either the rootdir.ts file or the following.
 declare global {
   // Add your custom types here
   var rootDir: string

@@ -16,6 +16,7 @@ type Action = (typeof _actions)[number]
 // The cross-product type
 type _Permission = `${Action}:${Resource}`
 
+// REVIEW: are view:user and view:users different?
 // Permission is a pair action:class
 export type Permission =
   | _Permission

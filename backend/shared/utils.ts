@@ -3,6 +3,8 @@ export function assertNever(x: never): never {
   throw new Error('Unexpected case: ' + JSON.stringify(x))
 }
 
+// TODO: add explanation of project function
+
 export type Projection<T> = Partial<Record<keyof T, boolean | 1 | 0>>
 
 export function project<T>(projection: Projection<T>, obj: T): Partial<T> {

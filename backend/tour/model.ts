@@ -92,7 +92,8 @@ const TourQuerySchemaZod = z.object({
   thumbnail: objectIdZod.optional(),
   images: z.array(objectIdZod).optional(),
   description: z.string().optional(),
-  reviews: z.array(ReviewQuerySchemaZod).optional(), // TODO: Does this "work"?
+  // REVIEW: check whether this is the correct way to validate reviews
+  reviews: z.array(ReviewQuerySchemaZod).optional(),
 })
 
 const TourPatchSchemaZod = TourInputSchemaZod.partial()

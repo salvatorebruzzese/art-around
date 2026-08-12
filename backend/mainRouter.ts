@@ -20,7 +20,8 @@ router.use('/museums', museumRouter)
 router.use('/assets', assetRouter)
 router.use('/users', userRouter)
 
-// NOTE: temporarily here!
+// REVIEW: I propose login and signup be located inside the user module and
+// handled by the userRouter
 router.post('/login', (req, res, next) => {
   passport.authenticate(
     'local',
