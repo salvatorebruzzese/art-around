@@ -8,6 +8,7 @@
   --color-p-medium: #1976d2;
   --color-p-dark: #0d47a1;
   --color-p-warning: #dd2224;
+  --color-p-warning-dark: #9c191b;
 
   --font-serif: 'Cormorant Garamond', serif;
   --font-sans: 'Inter', sans-serif;
@@ -74,16 +75,12 @@
   color: var(--color-p-warning);
 
   &:hover {
-    background-color: color-mix(
-      in srgb,
-      var(--color-p-warning) 20%,
-      transparent
-    );
-    color: var(--color-p-warning);
+    background-color: var(--color-p-warning);
+    color: var(--color-p-light);
   }
 
   &:active {
-    background-color: var(--color-p-warning);
+    background-color: var(--color-p-warning-dark);
     color: var(--color-p-light);
   }
 }
@@ -98,7 +95,7 @@
 }
 
 @utility nav-avatar-trigger {
-  @apply w-14 h-14 rounded-full bg-white flex items-center justify-center overflow-hidden border-4 border-p-medium shadow-md cursor-pointer transition-transform;
+  @apply w-14 h-14 rounded-full bg-white flex items-center justify-center overflow-hidden shadow-md cursor-pointer transition-transform;
 
   &:hover {
     transform: scale(1.05);
@@ -106,5 +103,5 @@
 }
 
 @utility nav-dropdown-menu {
-  @apply menu w-40 dropdown-content rounded-xl bg-white text-sm font-sans text-p-dark shadow-lg border-none;
+  @apply menu w-40 dropdown-content rounded-xl bg-white text-sm mt-16 font-sans text-p-dark shadow-lg border-none;
 }
