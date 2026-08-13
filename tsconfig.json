@@ -15,12 +15,6 @@
     "skipLibCheck": true,
     "isolatedModules": true
   },
-  "include": [
-    "*.ts",
-    "./**/*.ts",
-    "marketplace/router.js",
-    "marketplace/index.js",
-    "marketplace/form.js"
-  ],
+  "include": ["*.ts", "./**/*.ts"],
   "exclude": ["*.test.ts", "src/**/*.test.ts"]
 }
