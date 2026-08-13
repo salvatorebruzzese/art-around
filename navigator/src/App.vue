@@ -1,7 +1,14 @@
+<script setup>
+import { ref } from 'vue'
+
+const isMapView = ref(false)
+</script>
+
 <template>
   <div class="h-screen flex flex-col p-4 bg-p-background-50 gap-4">
     <!-- Top Half: Museum/Visit/Viewer (Detail View) -->
     <div
+      v-if="!isMapView"
       class="flex-[2] min-h-0 mx-auto grid w-full max-w-4xl grid-cols-1 md:grid-cols-2 gap-6 bg-white rounded-3xl shadow-lg border border-p-soft p-6"
     >
       <!-- Image Container -->
@@ -48,12 +55,26 @@
       </div>
     </div>
 
+    <!-- Map View -->
+    <div
+      v-else
+      class="flex-[2] min-h-0 mx-auto w-full max-w-4xl bg-white rounded-3xl shadow-lg border border-p-soft p-6 flex items-center justify-center"
+    >
+      <div class="text-center">
+        <h2 class="text-2xl font-bold text-p-medium">Mappa del Museo</h2>
+        <p class="text-p-dark mt-2">Visualizzazione del percorso</p>
+      </div>
+    </div>
+
     <!-- Bottom Half: Navigation & Voice Buttons -->
     <div
       class="flex-none h-auto mx-auto w-full max-w-4xl flex flex-col gap-4 items-center px-4 pb-4"
     >
       <!-- Top Layer: Move Buttons -->
-      <div class="flex items-center justify-center gap-4 w-full">
+      <div
+        v-if="!isMapView"
+        class="flex items-center justify-center gap-4 w-full"
+      >
         <!-- Previous Button -->
         <button
           class="shared-button-flex-secondary rounded-md w-16 h-16 shadow-lg border border-p-soft hover:border-transparent flex items-center justify-center"
@@ -137,7 +158,9 @@
 
         <!-- Map Button -->
         <button
+          @click="isMapView = !isMapView"
           class="shared-button-flex-secondary rounded-full w-12 h-12 shadow-md border border-p-soft hover:border-transparent flex items-center justify-center"
+          :class="{ 'bg-p-soft': isMapView }"
         >
           <svg
             width="20"
