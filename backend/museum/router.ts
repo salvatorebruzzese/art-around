@@ -1,9 +1,8 @@
 import express, { Request, Response } from 'express'
-import { NotFound, DBError } from '../shared/errors.js'
-import { IMuseum, MuseumQuery } from './model.js'
+import { MuseumQuery } from './model.js'
 import MuseumService from './service.js'
-import { Either } from 'purify-ts'
 import mongoose from 'mongoose'
+import { handleLeft } from '../shared/router.js'
 
 const router = express.Router()
 
@@ -14,18 +13,10 @@ router.get('/', async (req: Request, res: Response) => {
   }
 
   const query = validation.unsafeCoerce()
-  const result: Either<DBError | NotFound, IMuseum[]> =
-    await MuseumService.listMuseums(query)
+  const result = await MuseumService.listMuseums(query)
   result.caseOf({
     Right: (museumList) => res.json(museumList),
-    Left: (e) => {
-      switch (e.type) {
-        case 'DBError':
-          return res.status(500).json({ error: e })
-        case 'NotFound':
-          return res.status(404).json({ error: e })
-      }
-    },
+    Left: handleLeft(res),
   })
 })
 
