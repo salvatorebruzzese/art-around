@@ -16,35 +16,40 @@ import {
   DBError,
   notFound,
   NotFound,
+  validationError,
+  ValidationError,
 } from '../shared/errors.js'
 import { User } from '../user/model.js'
 import { project } from '../shared/utils.js'
+import { Tour } from '../tour/model.js'
 
 async function getItem(
   id: Types.ObjectId,
   userID: Types.ObjectId,
-): Promise<Either<NotFound | DBError | AccessDenied, Partial<IItem>>> {
+): Promise<
+  Either<NotFound | DBError | AccessDenied | ValidationError, Partial<IItem>>
+> {
   const userResult = await _getById(userID, User)
   if (userResult.isLeft()) return userResult
   const user = userResult.unsafeCoerce()
 
   if (!checkRole(user.role, 'view:item')) return Left(accessDenied())
 
+  const itemResult = await _getById(id, Item)
+  if (itemResult.isLeft()) return itemResult
+  const item = itemResult.unsafeCoerce()
+
+  // Check if user is author, purchaser, or admin
+  const tourId = new Types.ObjectId(item.tour)
   if (
-    user.authoredTours.includes(id) ||
-    user.purchasedTours.includes(id) ||
-    user.role == 'Admin'
-  ) {
-    const itemResult = await _getById(id, Item)
-    if (itemResult.isRight()) {
-      const item = itemResult.unsafeCoerce()
-      return Right(project(safeItemFields, item))
-    } else {
-      return itemResult
-    }
-  } else {
-    return Left(accessDenied())
-  }
+    user.authoredTours.includes(tourId) ||
+    user.purchasedTours.includes(tourId) ||
+    user.role === 'Admin' ||
+    item.itemAuthor.equals(userID)
+  )
+    return Right(project(safeItemFields, item))
+
+  return Left(accessDenied())
 }
 
 async function listItems(
@@ -63,15 +68,33 @@ async function listItems(
 async function createItem(
   input: ItemInput,
   userId: Types.ObjectId,
-): Promise<Either<DBError | AccessDenied, Partial<IItem>>> {
+): Promise<Either<DBError | AccessDenied | ValidationError, Partial<IItem>>> {
   const userResult = await _getById(userId, User)
   if (userResult.isLeft()) return Left(accessDenied())
   const user = userResult.unsafeCoerce()
 
   if (!checkRole(user.role, 'create:item')) return Left(accessDenied())
-  if (user.role != 'Admin')
-    if (!user.authoredTours.includes(new Types.ObjectId(input.tour)))
-      return Left(accessDenied())
+
+  const tourId = new Types.ObjectId(input.tour)
+  // Check referenced Tour exists first
+  const tourResult = await _getById(tourId, Tour)
+  if (tourResult.isLeft())
+    return Left(validationError('tour', 'Tour not found.'))
+
+  // Check referenced itemAuthor exists
+  const authResult = await _getById(new Types.ObjectId(input.itemAuthor), User)
+  if (authResult.isLeft())
+    return Left(validationError('itemAuthor', 'Item author not found.'))
+
+  // Ownership & authoring rules
+  if (user.role !== 'Admin') {
+    if (!new Types.ObjectId(input.itemAuthor).equals(userId))
+      return Left(
+        validationError('itemAuthor', 'Logged user is not the author.'),
+      )
+    if (!user.authoredTours.includes(tourId))
+      return Left(validationError('tour', "Tour isn't authored."))
+  }
 
   try {
     const item = await Item.create(input)
@@ -86,15 +109,41 @@ async function patchItem(
   id: Types.ObjectId,
   input: ItemPatch,
   userId: Types.ObjectId,
-): Promise<Either<DBError | AccessDenied | NotFound, Partial<IItem>>> {
+): Promise<
+  Either<DBError | AccessDenied | NotFound | ValidationError, Partial<IItem>>
+> {
   const userResult = await _getById(userId, User)
   if (userResult.isLeft()) return Left(accessDenied())
   const user = userResult.unsafeCoerce()
 
   if (!checkRole(user.role, 'edit:item')) return Left(accessDenied())
-  if (user.role != 'Admin')
-    if (!user.authoredTours.includes(new Types.ObjectId(input.tour)))
+
+  // Must load the item to check authorship and ownership
+  const itemResult = await _getById(id, Item)
+  if (itemResult.isLeft()) return itemResult
+  const item = itemResult.unsafeCoerce()
+
+  // Only admin or author can edit
+  if (user.role !== 'Admin') {
+    if (!item.itemAuthor.equals(userId)) {
       return Left(accessDenied())
+    }
+    // If patch includes 'tour', check user authorship of updated tour
+    if ('tour' in input && input.tour) {
+      const patchTourId = new Types.ObjectId(input.tour)
+      // Check the new tour exists
+      const tourResult = await _getById(patchTourId, Tour)
+      if (tourResult.isLeft())
+        return Left(validationError('tour', 'Tour not found.'))
+      if (
+        !user.authoredTours
+          .map((t) => t.toString())
+          .includes(patchTourId.toString())
+      ) {
+        return Left(validationError('tour', "Tour isn't authored."))
+      }
+    }
+  }
 
   try {
     const item = await Item.findByIdAndUpdate(id, input, { new: true })
@@ -108,7 +157,9 @@ async function patchItem(
 async function deleteItem(
   id: Types.ObjectId,
   userId: Types.ObjectId,
-): Promise<Either<AccessDenied | NotFound | DBError, Partial<IItem>>> {
+): Promise<
+  Either<AccessDenied | NotFound | DBError | ValidationError, Partial<IItem>>
+> {
   const userResult = await _getById(userId, User)
   if (userResult.isLeft()) {
     const error = userResult.extract()
@@ -117,13 +168,16 @@ async function deleteItem(
 
   const itemResult = await _getById(id, Item)
   if (itemResult.isLeft()) return itemResult
-
-  const user = userResult.unsafeCoerce()
   const item = itemResult.unsafeCoerce()
+  const user = userResult.unsafeCoerce()
 
   if (!checkRole(user.role, 'delete:item')) return Left(accessDenied())
-  if (user.role != 'Admin')
-    if (!item.itemAuthor.equals(userId)) return Left(accessDenied())
+
+  if (user.role !== 'Admin') {
+    // Only author can delete
+    if (!item.itemAuthor || !item.itemAuthor.equals(userId))
+      return Left(accessDenied())
+  }
 
   try {
     await item.deleteOne()

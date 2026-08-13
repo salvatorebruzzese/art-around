@@ -7,7 +7,14 @@ import { Model, Types, Document } from 'mongoose'
 // users who either created a tour or bought one and have the right to fork it
 export type Role = 'Guest' | 'User' | 'Teacher' | 'Admin'
 
-const _resources = ['item', 'museum', 'tour', 'user', 'metatour'] as const
+const _resources = [
+  'item',
+  'asset',
+  'museum',
+  'tour',
+  'user',
+  'metatour',
+] as const
 const _actions = ['view', 'purchase', 'create', 'edit', 'delete'] as const
 
 type Resource = (typeof _resources)[number]
