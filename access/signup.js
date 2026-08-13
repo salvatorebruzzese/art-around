@@ -20,7 +20,7 @@ document
         // Optionally redirect:
         // window.location.href = '/profile';
       } else {
-        alert(data.error || 'Signup failed')
+        alert(data.error.message || 'Signup failed')
       }
     } catch (err) {
       alert('An error occurred during signup.')

@@ -37,7 +37,9 @@ async function signup(
   }
 
   if (existingUser) {
-    return Left(conflictError('username', 'Username is taken.'))
+    return Left(
+      conflictError('username', `Username ${input.username} is taken.`),
+    )
   }
 
   try {
