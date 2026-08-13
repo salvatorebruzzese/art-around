@@ -1,0 +1,16 @@
+# Dependencies and lockfiles
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Logs & Environment
+*.log
+.env*
+.git/
