@@ -10,23 +10,16 @@ import './passportConfig.js'
 import cors from 'cors'
 import path from 'path'
 import dotenv from 'dotenv'
-import { fileURLToPath } from 'url'
+import rootDir from './rootdir.js'
 
-// TODO: Fix the behaviour of the rootDir variable across modules,
-// preferably keeping either the rootdir.ts file or the following.
 declare global {
   // Add your custom types here
-  var rootDir: string
   var startDate: Date | null
 }
-export {}
 
 // NOTE: Non possiamo fare assunzioni su quale sia la rootDir, o il percorso relativo
 // Per ciò usiamo ricaviamo dalla posizione di app.js la 'root'
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-global.rootDir = path.join(__dirname, '..')
-dotenv.config({ path: path.join(global.rootDir, '.env') }) // Load .env
+dotenv.config({ path: path.join(rootDir, '.env') }) // Load .env
 
 const requiredEnv = ['MONGO_USR', 'MONGO_PWD', 'MONGO_SITE', 'SESSION_SECRET']
 const missing = requiredEnv.filter((envVar) => !process.env[envVar])
