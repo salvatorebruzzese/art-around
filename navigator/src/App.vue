@@ -23,7 +23,9 @@ const isMapView = ref(false)
       </figure>
 
       <!-- Item Info -->
-      <div class="flex flex-col justify-center gap-4 h-full overflow-y-auto">
+      <div
+        class="flex flex-col justify-start md:justify-center gap-4 h-full overflow-y-auto"
+      >
         <h1 class="font-serif text-4xl text-p-medium font-bold">
           La notte stellata
         </h1>
