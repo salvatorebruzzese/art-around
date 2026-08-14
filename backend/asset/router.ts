@@ -22,16 +22,19 @@ router.get('/', async (req: Request, res: Response) => {
   })
 })
 
-router.get('/:id', ensureAuth, async (req, res) => {
+router.get('/:id', async (req, res) => {
   const assetID = Array.isArray(req.params.id)
     ? req.params.id[0]
     : req.params.id
-  const userID = req.user!._id
+
   if (!mongoose.Types.ObjectId.isValid(assetID))
     return res.status(400).json({ message: 'Malformed asset ID' })
-
   const id = mongoose.Types.ObjectId.createFromHexString(assetID)
-  const result = await AssetService.getAsset(id, userID)
+
+  const result = req.user
+    ? await AssetService.getAsset(id, req.user!._id)
+    : await AssetService.getAsset(id)
+
   result.caseOf({
     Right: (value) => res.json(value),
     Left: handleLeft(res),

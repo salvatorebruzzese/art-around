@@ -5,7 +5,7 @@ import { Projection } from '../shared/utils.js'
 
 export interface IAsset extends Document {
   author: Types.ObjectId
-  tour: Types.ObjectId
+  tour?: Types.ObjectId
   data: Buffer
   datatype: string
   public?: boolean
@@ -14,9 +14,10 @@ export interface IAsset extends Document {
 export const assetSchema = new Schema<IAsset>(
   {
     author: { type: Schema.ObjectId, ref: 'User', required: true },
-    tour: { type: Schema.ObjectId, ref: 'Tour', required: true },
+    tour: { type: Schema.ObjectId, ref: 'Tour' },
     data: { type: Buffer, required: true },
     datatype: { type: String, required: true },
+    public: { type: Boolean },
   },
   { timestamps: true },
 )

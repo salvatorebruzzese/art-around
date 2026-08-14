@@ -25,19 +25,19 @@ import { project } from '../shared/utils.js'
 
 async function getAsset(
   id: Types.ObjectId,
-  userID: Types.ObjectId,
+  userID?: Types.ObjectId,
 ): Promise<Either<NotFound | DBError | AccessDenied, Partial<IAsset>>> {
-  const userResult = await _getById(userID, User)
-  if (userResult.isLeft()) return userResult
-  const user = userResult.unsafeCoerce()
-  if (!checkRole(user.role, 'view:asset')) return Left(accessDenied())
   const assetResult = await _getById(id, Asset)
-
   if (assetResult.isRight()) {
     const asset = assetResult.unsafeCoerce()
     if (asset.public) return Right(asset)
+    if (!userID) return Left(accessDenied())
+    const userResult = await _getById(userID, User)
+    if (userResult.isLeft()) return userResult
+    const user = userResult.unsafeCoerce()
+    if (!checkRole(user.role, 'view:asset')) return Left(accessDenied())
     if (asset.author.equals(userID)) return Right(asset)
-    return user.purchasedTours.includes(asset.tour)
+    return !asset.tour || user.purchasedTours.includes(asset.tour)
       ? Right(project(safeAssetFields, asset))
       : Left(accessDenied())
   } else return assetResult
