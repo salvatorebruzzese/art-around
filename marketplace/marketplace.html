@@ -18,7 +18,7 @@
       <header
         class="flex flex-wrap justify-end items-start mb-10 gap-6 font-sans"
         x-data="{ museums: [], selectedMuseum: '' }"
-        x-init="fetch('/api/museum').then(res => res.json()).then(data => museums = data)"
+        x-init="fetch('/api/museums').then(res => res.json()).then(data => museums = data)"
       >
         <div class="flex flex-wrap gap-6 items-center flex-1 min-w-[300px]">
           <div class="relative flex-1 max-w-lg min-w-[250px]">
@@ -48,17 +48,19 @@
             </button>
           </div>
 
-          <select
-            x-model="selectedMuseum"
-            class="select select-bordered rounded-full w-56 border-p-soft bg-white text-p-dark focus:border-p-medium focus:ring-2 focus:ring-p-soft focus:outline-none font-medium shadow-sm cursor-pointer transition-all"
+          <div
+            x-bind:class="{ 'aura aura-dual aura-md text-p-soft rounded-full': !selectedMuseum }"
           >
-            <option disabled selected value="" class="text-p-medium">
-              Museo
-            </option>
-            <template x-for="museum in museums" :key="museum._id">
-              <option x-bind:value="museum._id" x-text="museum.name"></option>
-            </template>
-          </select>
+            <select
+              x-model="selectedMuseum"
+              class="select select-bordered rounded-full w-56 border-p-soft bg-white text-p-dark focus:border-p-medium focus:ring-2 focus:ring-p-soft focus:outline-none font-medium shadow-sm cursor-pointer transition-all"
+            >
+              <option disabled selected value="">Seleziona museo</option>
+              <template x-for="museum in museums" :key="museum._id">
+                <option x-bind:value="museum._id" x-text="museum.name"></option>
+              </template>
+            </select>
+          </div>
 
           <!-- Toggle Container con ID dedicato -->
           <div

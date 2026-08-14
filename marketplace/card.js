@@ -1,4 +1,4 @@
-export function makeCard(museum) {
+export function makeCard(museum, title) {
   return `
 <div
   class="flex-1 relative overflow-hidden bg-gradient-to-br from-p-light to-p-soft/20"
@@ -22,7 +22,7 @@ export function makeCard(museum) {
         </svg>
       </summary>
       <ul
-        class="p-2 shadow-lg menu dropdown-content bg-white rounded-xl w-40 text-p-dark font-sans text-sm border border-p-soft/40 mt-1"
+        class="nav-dropdown-menu p-2"
       >
         <li><a class="hover:bg-p-soft/20 rounded-lg">Modifica visita</a></li>
         <li>
@@ -39,7 +39,7 @@ export function makeCard(museum) {
   class="h-36 bg-p-soft/20 flex flex-col flexitems-center justify-center gap-4 px-6 border-t text-p-dark border-p-soft/50"
 >
   <div class="flex flex-col font-sans">
-    <h1 class="text-2xl text-p-medium">Nome visita/item</h1>
+    <h1 class="text-2xl text-p-medium">${title}</h1>
   <h2 class="text-md text-p-medium/50">${museum.name}</h2>
   </div>
   <div class="flex flex-row gap-4">
