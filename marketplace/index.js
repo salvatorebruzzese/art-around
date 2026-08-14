@@ -1,17 +1,28 @@
-import { makeCard } from './card.js'
+import { injectCard, makeStaticCard } from './card.js'
 
 const container = document.getElementById('item-container')
 
 const decorator = `w-full h-80 rounded-3xl flex flex-col overflow-hidden shadow-lg border border-p-soft bg-white group hover:-translate-y-1 hover:shadow-xl transition-all duration-300`
 
-async function addCard(item, museumName) {
+async function addCard(tour) {
   if (container === null) return
   const card = document.createElement('div')
   card.className = decorator
-  // Pass museum name (or similar context) as requested
-  card.innerHTML = makeCard({ name: museumName }, item.name)
+  card.innerHTML = makeStaticCard(tour)
   container.appendChild(card)
+  injectCard(tour) // async
 }
+
+document.addEventListener('DOMContentLoaded', async () => {
+  fetch('/api/tours/')
+    .then((res) => res.json())
+    .then((tours) => {
+      tours.map(addCard)
+    })
+    .catch((err) => {
+      alert(err.message)
+    })
+})
 
 // Gestione Toggle Switch
 document.addEventListener('DOMContentLoaded', () => {

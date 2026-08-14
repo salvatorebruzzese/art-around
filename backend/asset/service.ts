@@ -35,6 +35,7 @@ async function getAsset(
 
   if (assetResult.isRight()) {
     const asset = assetResult.unsafeCoerce()
+    if (asset.public) return Right(asset)
     if (asset.author.equals(userID)) return Right(asset)
     return user.purchasedTours.includes(asset.tour)
       ? Right(project(safeAssetFields, asset))

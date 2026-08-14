@@ -17,9 +17,7 @@ async function seed() {
     console.log('Connected to MongoDB and switched to "artaround" database.')
 
     // Clear existing data (optional, remove in production)
-    await User.deleteMany({})
-    await Museum.deleteMany({})
-    await Tour.deleteMany({})
+    db.dropDatabase()
     console.log('Cleared existing data.')
 
     // 1. Create a user

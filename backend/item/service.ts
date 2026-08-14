@@ -68,7 +68,9 @@ async function listItems(
 async function createItem(
   input: ItemInput,
   userId: Types.ObjectId,
-): Promise<Either<DBError | AccessDenied | ValidationError, Partial<IItem>>> {
+): Promise<
+  Either<DBError | AccessDenied | ValidationError | NotFound, Partial<IItem>>
+> {
   const userResult = await _getById(userId, User)
   if (userResult.isLeft()) return Left(accessDenied())
   const user = userResult.unsafeCoerce()
@@ -98,7 +100,10 @@ async function createItem(
 
   try {
     const item = await Item.create(input)
-    // TODO: add to tour's item-list
+    if (!item) return Left(notFound())
+    await Tour.findByIdAndUpdate(item.tour, {
+      $push: { items: item._id },
+    })
     return Right(project(safeItemFields, item))
   } catch (e) {
     return Left(dbError(undefined, () => JSON.stringify(e)))

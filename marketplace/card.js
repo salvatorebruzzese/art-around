@@ -1,13 +1,41 @@
-export function makeCard(museum, title) {
+export async function injectCard(tour) {
+  const imgId = `${tour._id}/img`
+  if (tour.thumbnail) {
+    fetch('/api/assets/${tour.thumbnail}')
+      .then((res) => res.json())
+      .then((img) => {
+        document.getElementById(imgId).innerHtml = makeImage(
+          `data:${img.datatype}:base64,${img.data}`,
+        )
+      })
+  } else {
+    document.getElementById(imgId).innerHtml = makeImage(
+      'https://dummyimage.com/600x400/efefef/a3a3a3.jpg&text=Image+Not+Found',
+    )
+  }
+}
+
+function makeImage(img_src) {
+  return `<img
+  src="${img_src}"
+    alt="Thumbnail not found"
+    class="absolute inset-0 w-full h-full object-cover mix-blend-multiply"
+  />`
+}
+
+export function makeStaticCard(tour) {
   return `
 <div
+  id="${tour._id}"
   class="flex-1 relative overflow-hidden bg-gradient-to-br from-p-light to-p-soft/20"
 >
+  <div id="${tour._id}/img">
   <img
-    src="https://dummyimage.com/600x400/efefef/a3a3a3.jpg&text=Image+Not+Found"
+    src="https://dummyimage.com/600x400/efefef/a3a3a3.jpg&text=Image+Loading"
     alt="Thumbnail not found"
     class="absolute inset-0 w-full h-full object-cover mix-blend-multiply"
   />
+  </div>
 
   <!-- Dropdown Menu Tre Punti -->
   <div class="absolute top-3 right-3 z-10">
@@ -39,8 +67,8 @@ export function makeCard(museum, title) {
   class="h-36 bg-p-soft/20 flex flex-col flexitems-center justify-center gap-4 px-6 border-t text-p-dark border-p-soft/50"
 >
   <div class="flex flex-col font-sans">
-    <h1 class="text-2xl text-p-medium">${title}</h1>
-  <h2 class="text-md text-p-medium/50">${museum.name}</h2>
+    <h1 class="text-2xl text-p-medium">${tour.name}</h1>
+  <h2 class="text-md text-p-medium/50">${tour.price}</h2>
   </div>
   <div class="flex flex-row gap-4">
     <button class="shared-button-full">

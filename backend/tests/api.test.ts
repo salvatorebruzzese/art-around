@@ -4,6 +4,7 @@ import request from 'supertest'
 import app from '../app.js'
 import mongoose from 'mongoose'
 import { Item } from '../item/model.js'
+import { Museum } from '../museum/model.js'
 
 dotenv.config({ path: '../../.env' })
 
@@ -14,6 +15,33 @@ const mongo_credentials = {
 }
 
 const mongouri = `mongodb://${mongo_credentials.user}:${mongo_credentials.pwd}@${mongo_credentials.site}`
+
+describe('Populate', () => {
+  beforeAll(async () => {
+    await mongoose.connect(mongouri)
+    mongoose.connection.useDb('artaround')
+    Museum.deleteMany({})
+
+    Museum.insertMany([
+      { name: 'Alcatraz', description: 'Una prigione brutta e cattiva' },
+      {
+        name: 'Museo di Storia Naturale',
+        description:
+          'Pocahontas, Ben Stiller, Robin Williams in questa avvenutura adatta a tutte le età',
+      },
+    ])
+  })
+  it('Create Users', () => {
+    // TODO
+  })
+  it('Create Tours', () => {
+    // TODO
+  })
+
+  it('Create Items', () => {
+    // TODO
+  })
+})
 
 describe('Items API', () => {
   beforeAll(async () => {

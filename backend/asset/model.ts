@@ -8,6 +8,7 @@ export interface IAsset extends Document {
   tour: Types.ObjectId
   data: Buffer
   datatype: string
+  public?: boolean
 }
 
 export const assetSchema = new Schema<IAsset>(
@@ -38,12 +39,14 @@ const AssetInputSchemaZod = z.object({
   tour: objectIdZod,
   data: z.any(), // or z.instanceof(Buffer)
   datatype: z.string(),
+  public: z.boolean().optional(),
 })
 
 const AssetQuerySchemaZod = z.object({
   author: objectIdZod.optional(),
   tour: objectIdZod.optional(),
   datatype: z.string().optional(),
+  public: z.boolean().optional(),
 })
 
 const AssetPatchSchemaZod = AssetInputSchemaZod.partial()

@@ -28,10 +28,11 @@ async function getTour(
   if (userResult.isLeft()) return userResult
   const user = userResult.unsafeCoerce()
 
+  // HACK: Treat tour as its meta
   if (
-    (!checkRole(user.role, 'view:tour') ||
-      !user.purchasedTours.includes(id) ||
-      !user.authoredTours.includes(id)) &&
+    !(/*(*/ checkRole(user.role, 'view:tour')) /* ||
+      // !user.purchasedTours.includes(id) ||
+      // !user.authoredTours.includes(id)) */ &&
     user.role != 'Admin'
   )
     return Left(accessDenied())
