@@ -17,6 +17,8 @@
     <main class="flex-1 flex flex-col p-10 overflow-y-auto w-full">
       <header
         class="flex flex-wrap justify-end items-start mb-10 gap-6 font-sans"
+        x-data="{ museums: [], selectedMuseum: '' }"
+        x-init="fetch('/api/museum').then(res => res.json()).then(data => museums = data)"
       >
         <div class="flex flex-wrap gap-6 items-center flex-1 min-w-[300px]">
           <div class="relative flex-1 max-w-lg min-w-[250px]">
@@ -47,25 +49,30 @@
           </div>
 
           <select
+            x-model="selectedMuseum"
             class="select select-bordered rounded-full w-56 border-p-soft bg-white text-p-dark focus:border-p-medium focus:ring-2 focus:ring-p-soft focus:outline-none font-medium shadow-sm cursor-pointer transition-all"
           >
-            <option disabled selected>Museo</option>
-            <option>Museum 1</option>
-            <option>Museum 2</option>
+            <option disabled selected value="" class="text-p-medium">
+              Museo
+            </option>
+            <template x-for="museum in museums" :key="museum._id">
+              <option x-bind:value="museum._id" x-text="museum.name"></option>
+            </template>
           </select>
 
           <!-- Toggle Container con ID dedicato -->
           <div
             id="toggle-switch"
+            x-show="selectedMuseum"
             class="flex items-center border border-p-soft rounded-full h-12 p-1 bg-white shadow-sm w-64"
           >
             <button
-              class="flex-1 h-full rounded-full bg-p-medium text-white font-semibold text-sm transition-all duration-150 active:scale-95 shadow-sm"
+              class="flex-1 h-full rounded-full bg-p-medium text-white font-semibold text-sm transition-all duration-150 active:scale-95 shadow-sm cursor-pointer"
             >
               VISITE
             </button>
             <button
-              class="flex-1 h-full rounded-full bg-transparent text-p-medium hover:bg-p-soft/20 font-semibold text-sm transition-all duration-150 active:scale-95"
+              class="flex-1 h-full rounded-full bg-transparent text-p-medium hover:bg-p-soft/20 font-semibold text-sm transition-all duration-150 active:scale-95 cursor-pointer"
             >
               ITEM
             </button>
