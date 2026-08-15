@@ -36,7 +36,8 @@ router.get('/:id', async (req, res) => {
     : await AssetService.getAsset(id)
 
   result.caseOf({
-    Right: (value) => res.json(value),
+    // TODO(maybe): separate endopoint for metadata
+    Right: (value) => res.set('Content-Type', value.datatype).send(value.data),
     Left: handleLeft(res),
   })
 })

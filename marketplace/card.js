@@ -1,41 +1,14 @@
-export async function injectCard(tour) {
-  const imgId = `${tour._id}/img`
-  if (tour.thumbnail) {
-    fetch('/api/assets/${tour.thumbnail}')
-      .then((res) => res.json())
-      .then((img) => {
-        document.getElementById(imgId).innerHtml = makeImage(
-          `data:${img.datatype}:base64,${img.data}`,
-        )
-      })
-  } else {
-    document.getElementById(imgId).innerHtml = makeImage(
-      'https://dummyimage.com/600x400/efefef/a3a3a3.jpg&text=Image+Not+Found',
-    )
-  }
-}
-
-function makeImage(img_src) {
-  return `<img
-  src="${img_src}"
-    alt="Thumbnail not found"
-    class="absolute inset-0 w-full h-full object-cover mix-blend-multiply"
-  />`
-}
-
 export function makeStaticCard(tour) {
   return `
 <div
   id="${tour._id}"
   class="flex-1 relative overflow-hidden bg-gradient-to-br from-p-light to-p-soft/20"
 >
-  <div id="${tour._id}/img">
   <img
-    src="https://dummyimage.com/600x400/efefef/a3a3a3.jpg&text=Image+Loading"
+    src="/api/assets/${tour.thumbnail}"
     alt="Thumbnail not found"
     class="absolute inset-0 w-full h-full object-cover mix-blend-multiply"
   />
-  </div>
 
   <!-- Dropdown Menu Tre Punti -->
   <div class="absolute top-3 right-3 z-10">

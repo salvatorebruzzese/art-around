@@ -20,8 +20,13 @@
     "test": "npx vitest run"
   },
   "lint-staged": {
-    "*.{js,ts,jsx,tsx}": ["eslint --fix", "prettier --write"],
-    "*.{css,scss,html}": ["prettier --write"]
+    "*.{js,ts,jsx,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{css,scss,html}": [
+      "prettier --write"
+    ]
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
@@ -33,6 +38,7 @@
     "handlebars": "^4.7.7",
     "mongodb": "^4.5.0",
     "mongoose": "^7.1.0",
+    "node-fetch": "^3.3.2",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
     "path": "^0.12.7",
