@@ -103,5 +103,5 @@
 }
 
 @utility nav-dropdown-menu {
-  @apply menu w-40 dropdown-content rounded-xl bg-white text-sm mt-16 font-sans text-p-dark shadow-lg border-none;
+  @apply menu w-40 dropdown-content rounded-xl bg-white text-sm mt-2 font-sans text-p-dark shadow-lg border-none;
 }
