@@ -72,12 +72,18 @@
             class="flex items-center border border-p-soft rounded-full h-12 p-1 bg-white shadow-sm w-64"
           >
             <button
-              class="flex-1 h-full rounded-full bg-p-medium text-white font-semibold text-sm transition-all duration-150 active:scale-95 shadow-sm cursor-pointer"
+              @click="selectedView = 'VISITE'"
+              :class="selectedView === 'VISITE'
+             ? 'flex-1 h-full rounded-full bg-p-medium text-white font-semibold text-sm transition-all duration-150 active:scale-95 shadow-sm cursor-pointer'
+             : 'flex-1 h-full rounded-full bg-transparent text-p-medium hover:bg-p-soft/20 font-semibold text-sm transition-all duration-150 active:scale-95 cursor-pointer'"
             >
               VISITE
             </button>
             <button
-              class="flex-1 h-full rounded-full bg-transparent text-p-medium hover:bg-p-soft/20 font-semibold text-sm transition-all duration-150 active:scale-95 cursor-pointer"
+              @click="selectedView = 'ITEM'"
+              :class="selectedView === 'ITEM'
+             ? 'flex-1 h-full rounded-full bg-p-medium text-white font-semibold text-sm transition-all duration-150 active:scale-95 shadow-sm cursor-pointer'
+             : 'flex-1 h-full rounded-full bg-transparent text-p-medium hover:bg-p-soft/20 font-semibold text-sm transition-all duration-150 active:scale-95 cursor-pointer'"
             >
               ITEM
             </button>
@@ -217,9 +223,9 @@
         id="item-container"
         class="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-8"
       >
-        <template x-for="tour in filteredTours" :key="tour._id">
+        <template x-for="thing in filtered" :key="thing._id">
           <!-- Call your card-building function here, or render markup directly -->
-          <div :class="decorator" x-html="makeStaticCard(tour)"></div>
+          <div :class="decorator" x-html="makeStaticCard(thing)"></div>
         </template>
       </div>
     </main>
@@ -230,20 +236,29 @@
           museums: [],
           selectedMuseum: '',
           allTours: [],
+          selectedView: 'VISITE', // or 'ITEM'
           get filteredTours() {
-            console.log(
-              'filteredTours runs!',
-              this.selectedMuseum,
-              this.allTours,
-            )
             return this.selectedMuseum
-              ? this.allTours.filter((t) => t.museum == this.selectedMuseum)
+              ? this.allTours.filter((t) => t.museum === this.selectedMuseum)
               : this.allTours
+          },
+          get filteredItems() {
+            return this.selectedMuseum
+              ? this.allItems.filter(
+                  (item) => item.museum === this.selectedMuseum,
+                )
+              : this.allItems
+          },
+          get filtered() {
+            // This getter can drive your template rendering.
+            return this.selectedView === 'VISITE'
+              ? this.filteredTours
+              : this.filteredItems
           },
           async init() {
             this.museums = await fetch('/api/museums/').then((r) => r.json())
             this.allTours = await fetch('/api/tours/').then((r) => r.json())
-            console.log('initialized', this.museums, this.allTours)
+            this.allItems = await fetch('/api/items/').then((r) => r.json())
           },
         }))
       })
