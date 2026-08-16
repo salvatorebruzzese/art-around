@@ -22,6 +22,7 @@ router.use('/users', userRouter)
 
 // REVIEW: I propose login and signup be located inside the user module and
 // handled by the userRouter
+// Response: I am retarded
 router.post('/login', (req, res, next) => {
   passport.authenticate(
     'local',
@@ -40,8 +41,9 @@ router.post('/login', (req, res, next) => {
 
 router.post('/signup', signup)
 
-router.get('/profile', (_req, res) => {
-  res.json({})
+router.get('/profile', (req, res) => {
+  if (req.user) res.json(req.user)
+  else res.status(401)
 })
 
 export default router
