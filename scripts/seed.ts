@@ -7,16 +7,15 @@ import path from 'path'
 import fetch from 'node-fetch'
 import { Asset } from '../backend/asset/model.js'
 import { Item } from '../backend/item/model.js'
+import bcrypt from 'bcrypt'
 
 async function fetchRandomImageBuffer() {
-  // Example random image URL
   const url = 'https://picsum.photos/200/300'
   const response = await fetch(url)
   const buffer = await response.arrayBuffer()
-  return Buffer.from(buffer) // This is a Buffer containing the image data
+  return Buffer.from(buffer)
 }
 
-// Load .env from root directory
 dotenv.config({ path: path.join(process.cwd(), '.env') })
 
 const mongouri = `mongodb://${process.env.MONGO_USR}:${process.env.MONGO_PWD}@${process.env.MONGO_SITE}`
@@ -27,7 +26,7 @@ async function seed() {
     mongoose.connection.useDb('artaround')
     console.log('Connected to MongoDB and switched to "artaround" database.')
 
-    // Clear existing data (optional, remove in production)
+    // Clear existing data
     await Museum.deleteMany({})
     await Item.deleteMany({})
     await Asset.deleteMany({})
@@ -35,10 +34,15 @@ async function seed() {
     await Tour.deleteMany({})
     console.log('Cleared existing data.')
 
-    // Create a user
+    // Hash the password for Passport/bcrypt authentication compatibility
+    const saltRounds = 10
+    const hashedPassword = await bcrypt.hash('password123', saltRounds)
+
+    // Create a user with hashed password
     const user = await User.create({
       username: 'testuser',
-      password: 'password123', // Note: This should be hashed in real apps
+      email: 'me@example.com',
+      password: hashedPassword,
       role: 'User',
       authoredTours: [],
       purchasedTours: [],
@@ -88,7 +92,6 @@ async function seed() {
         description: `Explore the best of ${museum.name}.`,
       })
       console.log('Tour created:', tour.name)
-      console.log('with thumbnail: ', tour.thumbnail)
 
       // Add tour to museum
       await Museum.findByIdAndUpdate(museum._id, { $push: { tours: tour._id } })

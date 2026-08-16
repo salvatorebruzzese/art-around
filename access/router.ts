@@ -11,6 +11,10 @@ router.get('/', (req, res) => {
     res.sendFile(join(rootDir, 'access/signup.html'))
   } else if (req.baseUrl === '/profile') {
     res.sendFile(join(rootDir, 'access/profile.html'))
+  } else if (req.baseUrl === '/credentials') {
+    const email = req.user?.email
+    const username = req.user?.username
+    res.json({ email, username })
   }
 })
 

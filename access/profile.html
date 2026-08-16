@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Profile</title>
     <link href="../styles.css" rel="stylesheet" type="text/css" />
+    <script type="module" src="./profile.js"></script>
     <script
       defer
       src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
@@ -44,7 +45,7 @@
             <dd
               class="text-4xl font-serif text-p-dark font-bold tracking-tight"
             >
-              <data>Marco Rossi</data>
+              <data id="username"></data>
             </dd>
           </div>
           <div
@@ -58,7 +59,7 @@
             <dd
               class="text-4xl font-serif text-p-dark font-bold tracking-tight"
             >
-              <data>marcorossi@esempio.com</data>
+              <data id="email"></data>
             </dd>
           </div>
           <div class="flex justify-end mt-10 mr-4 rounded-2xl">

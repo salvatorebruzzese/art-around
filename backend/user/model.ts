@@ -55,6 +55,7 @@ export const userBillingDataSchema = new Schema<IUserBillingData>(
 interface _User {
   username: string
   password: string
+  email: string
   role: Role
   profilePicture?: Types.ObjectId
   authoredTours: Types.ObjectId[]
@@ -65,17 +66,19 @@ export interface IUser extends Document, _User {}
 
 export type PublicUser = {
   username: string
+  email: string
   _id: Types.ObjectId
 }
 
 export function toPublicUser(user: IUser): PublicUser {
-  return { username: user.username, _id: user._id }
+  return { username: user.username, email: user.email, _id: user._id }
 }
 
 export const userSchema = new Schema<IUser>(
   {
     username: { type: String, required: true },
     password: { type: String, required: true },
+    email: { type: String, required: true },
     profilePicture: { type: Schema.Types.ObjectId, ref: 'Asset' },
     authoredTours: [{ type: Schema.Types.ObjectId, ref: 'Tour' }],
     purchasedTours: [{ type: Schema.Types.ObjectId, ref: 'Tour' }],
@@ -88,6 +91,7 @@ export const User = mongoose.model<IUser>('User', userSchema)
 
 const UserBaseSchemaZod = z.object({
   username: z.string(),
+  email: z.string(),
   profilePicture: objectIdZod.optional(),
 })
 
@@ -113,6 +117,7 @@ export const UserInput = { validate: makeZodValidator(UserInputSchemaZod) }
 
 export const publicUserFields: Projection<_User> = {
   username: 1,
+  email: 1,
   profilePicture: 1,
   authoredTours: 1,
 }
@@ -148,6 +153,7 @@ export const UserBillingDataSchema = z.object({
 
 export const SignupInputSchema = z.object({
   username: z.string(),
+  email: z.string(),
   password: z.string(),
   profilePicture: z.any().optional(),
   billingData: UserBillingDataSchema.optional(),
