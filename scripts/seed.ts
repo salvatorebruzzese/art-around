@@ -1,13 +1,15 @@
 import mongoose from 'mongoose'
-import { Museum } from '../backend/museum/model.js'
-import { Tour } from '../backend/tour/model.js'
-import { User } from '../backend/user/model.js'
 import dotenv from 'dotenv'
 import path from 'path'
 import fetch from 'node-fetch'
+import bcrypt from 'bcrypt'
+
+import { Museum } from '../backend/museum/model.js'
+import { Tour } from '../backend/tour/model.js'
+import { User } from '../backend/user/model.js'
 import { Asset } from '../backend/asset/model.js'
 import { Item } from '../backend/item/model.js'
-import bcrypt from 'bcrypt'
+import { generateItemsForTour } from './data.js'
 
 async function fetchRandomImageBuffer() {
   const url = 'https://picsum.photos/200/300'
@@ -24,21 +26,20 @@ async function seed() {
   try {
     await mongoose.connect(mongouri)
     mongoose.connection.useDb('artaround')
-    console.log('Connected to MongoDB and switched to "artaround" database.')
+    console.log('Connected to MongoDB.')
 
-    // Clear existing data
-    await Museum.deleteMany({})
-    await Item.deleteMany({})
-    await Asset.deleteMany({})
-    await User.deleteMany({})
-    await Tour.deleteMany({})
+    // Pulizia database
+    await Promise.all([
+      Museum.deleteMany({}),
+      Item.deleteMany({}),
+      Asset.deleteMany({}),
+      User.deleteMany({}),
+      Tour.deleteMany({}),
+    ])
     console.log('Cleared existing data.')
 
-    // Hash the password for Passport/bcrypt authentication compatibility
-    const saltRounds = 10
-    const hashedPassword = await bcrypt.hash('password123', saltRounds)
-
-    // Create a user with hashed password
+    // Creazione Utente
+    const hashedPassword = await bcrypt.hash('password123', 10)
     const user = await User.create({
       username: 'testuser',
       email: 'me@example.com',
@@ -48,54 +49,69 @@ async function seed() {
       purchasedTours: [],
       billingData: { cards: [], addresses: [] },
     })
-    console.log('User created:', user.username)
 
-    // Create museums
+    // Creazione pool di Asset condivisi
+    const assetPromises = Array.from({ length: 5 }).map(async () =>
+      Asset.create({
+        author: user._id,
+        data: await fetchRandomImageBuffer(),
+        datatype: 'image/jpeg',
+        public: true,
+      }),
+    )
+    const assets = await Promise.all(assetPromises)
+    const assetIds = assets.map((a) => a._id as mongoose.Types.ObjectId)
+
     const museumsData = [
       {
         name: 'Louvre Museum',
-        description: 'World-famous art museum in Paris.',
         address: 'Rue de Rivoli, 75001 Paris, France',
+        description: 'World-famous art museum in Paris.',
       },
       {
         name: 'The Metropolitan Museum of Art',
-        description: 'The Met in New York City.',
         address: '1000 5th Ave, New York, NY 10028, USA',
+        description: 'The Met in New York City.',
       },
       {
         name: 'Uffizi Gallery',
-        description: 'Prominent art museum in Florence.',
         address: 'Piazzale degli Uffizi, 6, 50122 Firenze FI, Italy',
+        description: 'Prominent art museum in Florence.',
       },
     ]
 
     for (const data of museumsData) {
       const museum = await Museum.create({ ...data, tours: [] })
-      console.log('Museum created:', museum.name)
 
-      // Create asset
-      const thumbnail = await Asset.create({
-        author: user._id,
-        data: await fetchRandomImageBuffer(),
-        datatype: 'image/jpeg',
-        public: true,
-      })
-
-      // Create a tour for this museum
       const tour = await Tour.create({
         name: `Highlights of ${museum.name}`,
         author: user._id,
-        thumbnail: thumbnail._id,
+        thumbnail: assetIds[0],
         museum: museum._id,
         price: 15,
         items: [],
         description: `Explore the best of ${museum.name}.`,
       })
-      console.log('Tour created:', tour.name)
 
-      // Add tour to museum
+      // Generazione di 10 item per tour tramite modulo helper
+      const itemsData = generateItemsForTour(
+        museum.name,
+        user._id as mongoose.Types.ObjectId,
+        tour._id as mongoose.Types.ObjectId,
+        assetIds,
+        10,
+      )
+      const createdItems = await Item.insertMany(itemsData)
+
+      // Aggiornamento riferimenti nel tour e nel museo
+      const itemIds = createdItems.map((i) => i._id)
+      tour.items = itemIds as mongoose.Types.ObjectId[]
+      await tour.save()
+
       await Museum.findByIdAndUpdate(museum._id, { $push: { tours: tour._id } })
-      console.log(`Tour added to ${museum.name}.`)
+      console.log(
+        `Seeded ${museum.name} with Tour and ${createdItems.length} items.`,
+      )
     }
 
     console.log('Seeding completed successfully!')
