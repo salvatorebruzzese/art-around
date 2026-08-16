@@ -2,7 +2,10 @@
 import { ref } from 'vue'
 
 const isMapView = ref(false)
-const wasVisitChosen = ref(false)
+const wasVisitChosen = ref(localStorage.getItem('wasVisitChosen') === 'true')
+
+localStorage.removeItem('wasVisitChosen')
+localStorage.removeItem('selectedTourId')
 </script>
 
 <template>

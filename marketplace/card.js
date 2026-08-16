@@ -1,3 +1,9 @@
+window.selectTour = function (tourId) {
+  localStorage.setItem('wasVisitChosen', 'true')
+  localStorage.setItem('selectedTourId', tourId)
+  window.location.href = '../navigator/'
+}
+
 export function makeStaticCard(tour) {
   return `
 <div
@@ -22,16 +28,10 @@ export function makeStaticCard(tour) {
           />
         </svg>
       </summary>
-      <ul
-        class="nav-dropdown-menu p-2"
-      >
+      <ul class="nav-dropdown-menu p-2">
         <li><a class="shared-button-flex-secondary shadow-none">Modifica visita</a></li>
-        <li>
-          <a class="shared-button-flex-secondary shadow-none">Modifica item</a>
-        </li>
-        <li>
-          <a class="shared-button-flex-warning shadow-none">Elimina</a>
-        </li>
+        <li><a class="shared-button-flex-secondary shadow-none">Modifica item</a></li>
+        <li><a class="shared-button-flex-warning shadow-none">Elimina</a></li>
       </ul>
     </details>
   </div>
@@ -41,10 +41,11 @@ export function makeStaticCard(tour) {
 >
   <div class="flex flex-col font-sans">
     <h1 class="text-2xl text-p-medium truncate">${tour.name}</h1>
-  <h2 class="text-md text-p-medium/50">${tour.price}</h2>
+    <h2 class="text-md text-p-medium/50">${tour.price}</h2>
   </div>
   <div class="flex flex-row gap-4">
-    <button class="shared-button-full">
+    <!-- Use inline onclick calling window.selectTour -->
+    <button class="shared-button-full" onclick="selectTour('${tour._id}')">
       Apri
     </button>
     <button class="shared-button-full">
