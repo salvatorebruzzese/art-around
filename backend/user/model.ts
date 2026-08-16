@@ -64,13 +64,13 @@ interface _User {
 }
 export interface IUser extends Document, _User {}
 
-export type PublicUser = {
+export type PrivateUser = {
   username: string
   email: string
   _id: Types.ObjectId
 }
 
-export function toPublicUser(user: IUser): PublicUser {
+export function toPrivateUser(user: IUser): PrivateUser {
   return { username: user.username, email: user.email, _id: user._id }
 }
 

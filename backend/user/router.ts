@@ -1,9 +1,15 @@
 import express, { Request, Response } from 'express'
-import { UserPatch, UserQuery, SignupInput } from './model.js'
+import {
+  UserPatch,
+  UserQuery,
+  SignupInput,
+  privateUserFields,
+} from './model.js'
 import UserService from './service.js'
 import mongoose from 'mongoose'
 import { ensureAuth } from '../accessControl.js'
 import { handleLeft } from '../shared/router.js'
+import { project } from '../shared/utils.js'
 
 const router = express.Router()
 
@@ -16,7 +22,7 @@ export async function signup(req: Request, res: Response) {
 
   const result = await UserService.signup(input)
   result.caseOf({
-    Right: (user) => res.status(201).json(user),
+    Right: (user) => res.status(201).json(project(privateUserFields, user)),
     Left: (error) => {
       switch (error.type) {
         case 'DBError':

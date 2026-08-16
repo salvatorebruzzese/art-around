@@ -6,6 +6,7 @@ import assetRouter from './asset/router.js'
 import userRouter from './asset/router.js'
 import passport from 'passport'
 import { signup } from './user/router.js'
+import { IUser, toPrivateUser } from './user/model.js'
 
 const router = express.Router()
 
@@ -30,7 +31,7 @@ router.post('/login', (req, res, next) => {
         return res.status(401).json({ error: info?.message || 'Unauthorized' })
       req.logIn(user, (err) => {
         if (err) return next(err)
-        res.json({ user })
+        res.json({ user: toPrivateUser(user as IUser) })
       })
     },
   )(req, res, next)
@@ -51,8 +52,8 @@ router.post('/logout', (req, res, next) => {
 })
 
 router.get('/profile', (req, res) => {
-  if (req.user) res.json(req.user)
-  else res.status(401)
+  if (req.user) return res.json(req.user)
+  else return res.json(null)
 })
 
 export default router

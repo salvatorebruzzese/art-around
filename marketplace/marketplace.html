@@ -56,7 +56,6 @@
           >
             <select
               x-model="selectedMuseum"
-              @change="console.log('selectedMuseum:', selectedMuseum)"
               class="select select-bordered rounded-full w-56 border-p-soft bg-white text-p-dark focus:border-p-medium focus:ring-2 focus:ring-p-soft focus:outline-none font-medium shadow-sm cursor-pointer transition-all"
             >
               <option disabled selected value="">Seleziona museo</option>
@@ -204,16 +203,28 @@
             <ul class="nav-dropdown-menu mt-16">
               <li>
                 <a
+                  x-show="user"
                   class="shared-button-flex-secondary shadow-none"
                   href="../profile"
                   >Profilo</a
                 >
               </li>
               <li>
-                <a
+                <button
+                  x-show="user"
                   class="shared-button-flex-warning shadow-none mt-2"
                   href="../home"
-                  >Esci</a
+                  @click="logout"
+                >
+                  Esci
+                </button>
+              </li>
+              <li>
+                <a
+                  x-show="!user"
+                  class="shared-button-flex-secondary shadow-none"
+                  href="../login"
+                  >Accedi</a
                 >
               </li>
             </ul>
@@ -231,7 +242,7 @@
         </template>
       </div>
     </main>
-    <script>
+    <script defer>
       document.addEventListener('alpine:init', () => {
         Alpine.data('marketplaceComponent', () => ({
           decorator: `w-full h-80 rounded-3xl flex flex-col overflow-hidden shadow-lg border border-p-soft bg-white group hover:-translate-y-1 hover:shadow-xl transition-all duration-300`,
@@ -239,6 +250,14 @@
           selectedMuseum: '',
           allTours: [],
           selectedView: 'VISITE', // or 'ITEM'
+          user: null,
+          async logout() {
+            await fetch('/api/logout', {
+              method: 'POST',
+              credentials: 'include',
+            })
+            window.location.href = '../home/'
+          },
           get filteredTours() {
             return this.selectedMuseum
               ? this.allTours.filter((t) => t.museum === this.selectedMuseum)
@@ -261,6 +280,9 @@
             this.museums = await fetch('/api/museums/').then((r) => r.json())
             this.allTours = await fetch('/api/tours/').then((r) => r.json())
             this.allItems = await fetch('/api/items/').then((r) => r.json())
+            this.user = await fetch('/api/profile/')
+              .then((r) => (r.ok ? r.json() : null))
+              .catch((_) => null)
           },
         }))
       })
