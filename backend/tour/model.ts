@@ -13,6 +13,7 @@ export interface IReview {
 interface _Tour {
   name: string
   author: Types.ObjectId
+  museum: Types.ObjectId
   thumbnail?: Types.ObjectId
   images?: Types.ObjectId[]
   items: Types.ObjectId[]
@@ -37,6 +38,7 @@ export const tourSchema = new Schema<ITour>(
   {
     name: { type: String, required: true },
     author: { type: Schema.Types.ObjectId, ref: 'User' },
+    museum: { type: Schema.Types.ObjectId, ref: 'Museum' },
     thumbnail: { type: Schema.Types.ObjectId, ref: 'Asset' },
     images: [{ type: Schema.Types.ObjectId, ref: 'Asset' }],
     items: [{ type: Schema.Types.ObjectId, ref: 'Item' }],
@@ -78,6 +80,7 @@ const TourInputSchemaZod = z.object({
   name: z.string(),
   author: objectIdZod,
   price: z.number(),
+  museum: objectIdZod,
   items: z.array(objectIdZod),
   thumbnail: objectIdZod.optional(),
   images: z.array(objectIdZod).optional(),
@@ -88,6 +91,7 @@ const TourQuerySchemaZod = z.object({
   name: z.string().optional(),
   author: objectIdZod.optional(),
   price: z.number().optional(), // TODO: make into range
+  museum: objectIdZod.optional(),
   items: z.array(objectIdZod).optional(),
   thumbnail: objectIdZod.optional(),
   images: z.array(objectIdZod).optional(),
@@ -112,6 +116,7 @@ export const safeTourFields: Projection<_Tour> = {
   author: 1,
   items: 1,
   price: 1,
+  museum: 1,
   description: 1,
   thumbnail: 1,
   images: 1,

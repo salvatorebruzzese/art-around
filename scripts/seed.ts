@@ -82,6 +82,7 @@ async function seed() {
         name: `Highlights of ${museum.name}`,
         author: user._id,
         thumbnail: thumbnail._id,
+        museum: museum._id,
         price: 15,
         items: [],
         description: `Explore the best of ${museum.name}.`,

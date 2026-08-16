@@ -14,11 +14,13 @@
   <body
     class="flex h-screen bg-p-light text-p-dark font-serif selection:bg-p-soft"
   >
-    <main class="flex-1 flex flex-col p-10 overflow-y-auto w-full">
+    <main
+      x-data="marketplaceComponent"
+      x-init="init()"
+      class="flex-1 flex flex-col p-10 overflow-y-auto w-full"
+    >
       <header
         class="flex flex-wrap justify-end items-start mb-10 gap-6 font-sans"
-        x-data="{ museums: [], selectedMuseum: '' }"
-        x-init="fetch('/api/museums').then(res => res.json()).then(data => museums = data)"
       >
         <div class="flex flex-wrap gap-6 items-center flex-1 min-w-[300px]">
           <div class="relative flex-1 max-w-lg min-w-[250px]">
@@ -53,6 +55,7 @@
           >
             <select
               x-model="selectedMuseum"
+              @change="console.log('selectedMuseum:', selectedMuseum)"
               class="select select-bordered rounded-full w-56 border-p-soft bg-white text-p-dark focus:border-p-medium focus:ring-2 focus:ring-p-soft focus:outline-none font-medium shadow-sm cursor-pointer transition-all"
             >
               <option disabled selected value="">Seleziona museo</option>
@@ -213,9 +216,38 @@
       <div
         id="item-container"
         class="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-8"
-      ></div>
+      >
+        <template x-for="tour in filteredTours" :key="tour._id">
+          <!-- Call your card-building function here, or render markup directly -->
+          <div :class="decorator" x-html="makeStaticCard(tour)"></div>
+        </template>
+      </div>
     </main>
-
+    <script>
+      document.addEventListener('alpine:init', () => {
+        Alpine.data('marketplaceComponent', () => ({
+          decorator: `w-full h-80 rounded-3xl flex flex-col overflow-hidden shadow-lg border border-p-soft bg-white group hover:-translate-y-1 hover:shadow-xl transition-all duration-300`,
+          museums: [],
+          selectedMuseum: '',
+          allTours: [],
+          get filteredTours() {
+            console.log(
+              'filteredTours runs!',
+              this.selectedMuseum,
+              this.allTours,
+            )
+            return this.selectedMuseum
+              ? this.allTours.filter((t) => t.museum == this.selectedMuseum)
+              : this.allTours
+          },
+          async init() {
+            this.museums = await fetch('/api/museums/').then((r) => r.json())
+            this.allTours = await fetch('/api/tours/').then((r) => r.json())
+            console.log('initialized', this.museums, this.allTours)
+          },
+        }))
+      })
+    </script>
     <script src="index.js" type="module" defer></script>
   </body>
 </html>

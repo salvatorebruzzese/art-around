@@ -1,28 +1,5 @@
 import { makeStaticCard } from './card.js'
-
-const container = document.getElementById('item-container')
-
-const decorator = `w-full h-80 rounded-3xl flex flex-col overflow-hidden shadow-lg border border-p-soft bg-white group hover:-translate-y-1 hover:shadow-xl transition-all duration-300`
-
-async function addCard(tour) {
-  console.log(tour)
-  if (container === null) return
-  const card = document.createElement('div')
-  card.className = decorator
-  card.innerHTML = makeStaticCard(tour)
-  container.appendChild(card)
-}
-
-document.addEventListener('DOMContentLoaded', async () => {
-  fetch('/api/tours/')
-    .then((res) => res.json())
-    .then((tours) => {
-      tours.map(addCard)
-    })
-    .catch((err) => {
-      alert(err.message)
-    })
-})
+window.makeStaticCard = makeStaticCard
 
 // Gestione Toggle Switch
 document.addEventListener('DOMContentLoaded', () => {
