@@ -2,10 +2,11 @@
 import { ref } from 'vue'
 
 const isMapView = ref(false)
+const wasVisitChosen = ref(false)
 </script>
 
 <template>
-  <div class="h-screen flex flex-col p-4 bg-p-background-50 gap-4">
+  <div v-if="wasVisitChosen" class="h-screen flex flex-col p-4 gap-4">
     <!-- Top Half: Museum/Visit/Viewer (Detail View) -->
     <div
       v-if="!isMapView"
@@ -60,7 +61,7 @@ const isMapView = ref(false)
     <!-- Map View -->
     <div
       v-else
-      class="flex-[2] min-h-0 mx-auto w-full max-w-4xl bg-white rounded-3xl shadow-lg border border-p-soft p-6 flex items-center justify-center"
+      class="flex-[2] min-h-0 mx-auto w-full max-w-4xl bg-white rounded-3xl shadow-lg border border-p-soft p-6 flex items-start justify-center"
     >
       <div class="text-center">
         <h2 class="text-2xl font-bold text-p-medium">Mappa del Museo</h2>
@@ -180,6 +181,16 @@ const isMapView = ref(false)
           </svg>
         </button>
       </div>
+    </div>
+  </div>
+  <div v-else class="flex h-screen items-center justify-center">
+    <div
+      class="rounded-xl border border-p-soft shadow-xl p-8 gap-4 text-center"
+    >
+      <h1 class="text-4xl text-p-medium mb-4">Scegli un visita</h1>
+      <a class="shared-form-button" href="../../marketplace/"
+        >Torna al marketplace</a
+      >
     </div>
   </div>
 </template>
