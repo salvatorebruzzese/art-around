@@ -68,15 +68,32 @@
             >
               Torna indietro
             </a>
-            <a
+
+            <button
+              x-data="logoutComponent"
+              type="button"
               class="shared-button-flex-warning flex-none w-fit px-4"
-              href="../home/"
+              @click="logout"
             >
               Esci
-            </a>
+            </button>
           </div>
         </dl>
       </main>
     </div>
+    <script>
+      document.addEventListener('alpine:init', () => {
+        Alpine.data('logoutComponent', () => ({
+          // ...other state
+          async logout() {
+            await fetch('/api/logout', {
+              method: 'POST',
+              credentials: 'include',
+            })
+            window.location.href = '../home/'
+          },
+        }))
+      })
+    </script>
   </body>
 </html>

@@ -41,6 +41,18 @@ router.post('/login', (req, res, next) => {
 
 router.post('/signup', signup)
 
+router.post('/logout', (req, res, next) => {
+  req.logout(function (err) {
+    if (err) {
+      return next(err)
+    }
+    req.session.destroy(() => {
+      res.clearCookie('connect.sid') // Default cookie name for express-session
+      res.json({ message: 'Logged out' })
+    })
+  })
+})
+
 router.get('/profile', (req, res) => {
   if (req.user) res.json(req.user)
   else res.status(401)
