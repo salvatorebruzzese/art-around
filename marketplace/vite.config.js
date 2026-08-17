@@ -10,6 +10,7 @@ export default defineConfig({
       input: {
         marketplace: 'marketplace.html',
         editor: 'editor.html',
+        profile: 'profile.html',
       },
     },
   },
