@@ -6,6 +6,7 @@
     <title>Profile</title>
     <link href="../styles.css" rel="stylesheet" type="text/css" />
     <script type="module" src="./profile.js"></script>
+    <script type="module" src="./alpinecomponents.js" defer></script>
     <script
       defer
       src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
@@ -82,19 +83,5 @@
         </dl>
       </main>
     </div>
-    <script>
-      document.addEventListener('alpine:init', () => {
-        Alpine.data('logoutComponent', () => ({
-          // ...other state
-          async logout() {
-            await fetch('/api/logout', {
-              method: 'POST',
-              credentials: 'include',
-            })
-            window.location.href = '../home/'
-          },
-        }))
-      })
-    </script>
   </body>
 </html>
