@@ -41,7 +41,7 @@ window.makeStaticCard = async function makeStaticCard(tour) {
   </div>
 </div>
 <div
-  class="h-36 bg-p-soft/20 flex flex-col justify-center gap-4 px-6 border-t text-p-dark border-p-soft/50"
+  class="h-48 bg-p-soft/20 flex flex-col justify-center gap-4 px-6 border-t text-p-dark border-p-soft/50"
 >
   <div class="flex flex-col font-sans">
     <h1 class="text-2xl text-p-medium truncate">${tour.name}</h1>
@@ -49,13 +49,14 @@ window.makeStaticCard = async function makeStaticCard(tour) {
   </div>
   <div class="flex gap-4">
     <!-- Use inline onclick calling window.selectTour -->
-    <button class="shared-button-full" onclick="selectTour('${tour._id}')">
+    <button class="shared-button-full-secondary" onclick="selectTour('${tour._id}')">
       Apri
     </button>
-    <button class="shared-button-full">
+    <button class="shared-button-full-secondary">
       Modifica
     </button>
   </div>
+  <button class="shared-button-full-primary">Acquista</button>
 </div>
 `
 }

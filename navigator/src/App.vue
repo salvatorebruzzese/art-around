@@ -189,7 +189,9 @@ localStorage.removeItem('selectedTourId')
       class="rounded-xl border border-p-soft shadow-xl p-8 gap-4 text-center"
     >
       <h1 class="text-4xl text-p-medium mb-4">Scegli un visita</h1>
-      <a class="shared-form-button" href="../../marketplace/"
+      <a
+        class="shared-button-full-secondary-secondary-primary"
+        href="../../marketplace/"
         >Torna al marketplace</a
       >
     </div>

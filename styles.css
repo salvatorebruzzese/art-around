@@ -41,8 +41,19 @@
 }
 
 /* Variant utilities extending shared-button */
-@utility shared-button-full {
-  @apply shared-button w-full rounded-xl;
+@utility shared-button-full-primary {
+  @apply shared-button w-full rounded-sm;
+  background-color: var(--color-p-medium);
+  color: var(--color-p-light);
+
+  &:hover {
+    background-color: var(--color-p-dark);
+    color: var(--color-p-light);
+  }
+}
+
+@utility shared-button-full-secondary {
+  @apply shared-button w-full rounded-sm;
 }
 
 @utility shared-button-flex-primary {
@@ -57,17 +68,6 @@
 
 @utility shared-button-flex-secondary {
   @apply shared-button flex-1 rounded-sm;
-}
-
-@utility shared-form-button {
-  @apply shared-button w-full rounded-sm;
-  background-color: var(--color-p-medium);
-  color: var(--color-p-light);
-
-  &:hover {
-    background-color: var(--color-p-dark);
-    color: var(--color-p-light);
-  }
 }
 
 @utility shared-button-flex-warning {
