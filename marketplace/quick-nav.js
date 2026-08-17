@@ -34,10 +34,11 @@ class QuickNav extends HTMLElement {
         </div>
 
         <!-- Dropdown Utente -->
-        <details class="avatar dropdown dropdown-end z-20">
-          <summary class="nav-avatar-trigger list-none cursor-pointer"></summary>
-          <ul class="nav-dropdown-menu mt-16">
-            <template x-if="$store?.marketplaceComponent?.user">
+        <div x-data="{open: false}" class="avatar dropdown dropdown-end z-20">
+        <button @click="open = !open" class="nav-avatar-trigger list-none cursor-pointer"></button>
+        <div x-show="open" @click.outside="open = false">
+          <ul  class="nav-dropdown-menu mt-16">
+            <template x-if="$store?.marketplace?.user">
               <div>
                 <li>
                   <a class="shared-button-flex-secondary shadow-none" href="../profile">Profilo</a>
@@ -52,13 +53,13 @@ class QuickNav extends HTMLElement {
                 </li>
               </div>
             </template>
-            <template x-if="$store?.marketplaceComponent && !$store.marketplaceComponent.user">
+            <template x-if="$store?.marketplace && !$store.marketplace.user">
               <li>
                 <a class="shared-button-flex-secondary shadow-none" href="../login">Accedi</a>
               </li>
             </template>
           </ul>
-        </details>
+        </div>
       </div>
     `
 

@@ -21,8 +21,8 @@ window.makeStaticCard = async function makeStaticCard(tour) {
 
   <!-- Dropdown Menu Tre Punti -->
   <div class="absolute top-3 right-3 z-10">
-    <details class="dropdown dropdown-end">
-      <summary
+    <div x-data="{open:false}" class="dropdown dropdown-end">
+      <button @click="open = !open"
         class="btn btn-sm btn-circle bg-white/80 hover:bg-white text-p-dark border-none shadow-md backdrop-blur-sm focus:outline-none list-none"
       >
         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -30,12 +30,14 @@ window.makeStaticCard = async function makeStaticCard(tour) {
             d="M10 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4z"
           />
         </svg>
-      </summary>
+      </button>
+      <div x-show="open" @click.outside="open = false">
       <ul class="nav-dropdown-menu p-2">
         <li><a class="shared-button-flex-secondary shadow-none">Condividi</a></li>
         <li><a class="shared-button-flex-warning shadow-none">Elimina</a></li>
       </ul>
-    </details>
+      </div>
+    </div>
   </div>
 </div>
 <div
