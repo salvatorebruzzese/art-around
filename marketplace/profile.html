@@ -6,11 +6,7 @@
     <title>Profile</title>
     <link href="../styles.css" rel="stylesheet" type="text/css" />
     <script type="module" src="./profile.js"></script>
-    <script type="module" src="./alpinecomponents.js" defer></script>
-    <script
-      defer
-      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
-    ></script>
+    <script type="module" src="./alpinecomponents.js"></script>
   </head>
   <body
     class="bg-p-light font-sans min-h-screen p-6 antialiased flex items-center justify-center"
@@ -70,12 +66,10 @@
             >
               Torna indietro
             </a>
-
             <button
-              x-data="logoutComponent"
-              type="button"
+              x-data
               class="shared-button-flex-warning flex-none w-fit px-4"
-              @click="logout"
+              @click="$store.accessComponent.logout()"
             >
               Esci
             </button>
