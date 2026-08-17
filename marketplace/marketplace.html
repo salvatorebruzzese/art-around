@@ -65,10 +65,10 @@
             </select>
           </div>
 
-          <!-- Switch Toggle (Visibile solo se un museo è selezionato) -->
+          <!-- Switch Toggle (Visibile solo se un museo è selezionato, e si è loggati) -->
           <div
             id="toggle-switch"
-            x-show="$store.marketplace.filters.museum"
+            x-show="$store.marketplace.filters.museum && $store.marketplace.user"
             class="flex items-center border border-p-soft rounded-full h-12 p-1 bg-white shadow-sm w-64"
           >
             <button
@@ -105,7 +105,7 @@
           x-for="tour in $store.marketplace.filteredTours"
           :key="tour._id"
         >
-          <div>
+          <div :class="$store.marketplace.cardDecorator">
             <div
               class="h-full flex-1 relative overflow-hidden bg-gradient-to-br from-p-light to-p-soft/20"
             >
@@ -158,8 +158,13 @@
                   x-text="tour.name"
                 ></h1>
                 <h2
+                  x-init="init"
+                  x-data="{
+                            museumName: '',
+                            async init() {this.museumName = (await fetch('/api/museums/'+tour.museum).then(r => r.json())).name},
+                          }"
                   class="text-md text-p-medium/50 truncate"
-                  x-text="fetch('/api/museums/'+tour.museum).then((r) => r.json().name).catch(_ => 'Museum name not found.')"
+                  x-text="museumName"
                 ></h2>
               </div>
               <div class="flex gap-4">
@@ -172,10 +177,6 @@
               </div>
             </div>
           </div>
-          <!-- <div
-                    :class="$store.marketplace.cardDecorator"
-                    x-html="window.makeStaticCard ? window.makeStaticCard(thing) : thing.name"
-                  ></div> -->
         </template>
       </div>
     </main>
