@@ -120,24 +120,22 @@ localStorage.removeItem('selectedTourId')
 
       <!-- Bottom Layer: Home, Voice, Map Buttons -->
       <div class="flex items-center justify-center gap-4">
-        <!-- Home Button -->
+        <!-- Marketplace Button -->
         <a
-          href="/"
-          class="shared-button-flex-secondary rounded-full w-12 h-12 shadow-md border border-p-soft hover:border-transparent flex items-center justify-center"
+          href="/marketplace"
+          class="shared-button-flex-secondary rounded-full w-12 h-12 shadow-md border border-p-soft hover:border-transparent flex items-center justify-center group"
         >
           <svg
-            width="28"
-            height="28"
+            width="36"
+            height="36"
             viewBox="0 0 48 48"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+            xmlns="http://www.w3.org/2000/svg"
           >
+            <rect width="48" height="48" rx="12" fill="none" stroke="none" />
             <path
-              d="M24 12 L10 24 H14 V36 H22 V28 H26 V36 H34 V24 H38 Z"
-              fill="currentColor"
+              d="M12 20 L15 12 H33 L36 20 V24 H34 V36 H14 V24 H12 V20 Z M18 24 V34 H30 V24 H18 Z M16 18 H32 L30 14 H18 L16 18 Z"
+              fill="var(--color-p-medium)"
+              class="group-hover:fill-[var(--color-p-light)] transition-colors"
             />
           </svg>
         </a>
