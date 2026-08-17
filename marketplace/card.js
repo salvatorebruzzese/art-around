@@ -4,7 +4,10 @@ window.selectTour = function (tourId) {
   window.location.href = '../navigator/'
 }
 
-window.makeStaticCard = function makeStaticCard(tour) {
+window.makeStaticCard = async function makeStaticCard(tour) {
+  const response = await fetch('/api/museums/' + tour.museum)
+  const museum = await response.json()
+  const museumName = museum.name
   return `
 <div
   id="${tour._id}"
@@ -29,8 +32,7 @@ window.makeStaticCard = function makeStaticCard(tour) {
         </svg>
       </summary>
       <ul class="nav-dropdown-menu p-2">
-        <li><a class="shared-button-flex-secondary shadow-none">Modifica visita</a></li>
-        <li><a class="shared-button-flex-secondary shadow-none">Modifica item</a></li>
+        <li><a class="shared-button-flex-secondary shadow-none">Condividi</a></li>
         <li><a class="shared-button-flex-warning shadow-none">Elimina</a></li>
       </ul>
     </details>
@@ -41,15 +43,15 @@ window.makeStaticCard = function makeStaticCard(tour) {
 >
   <div class="flex flex-col font-sans">
     <h1 class="text-2xl text-p-medium truncate">${tour.name}</h1>
-    <h2 class="text-md text-p-medium/50">${tour.price}</h2>
+    <h2 class="text-md text-p-medium/50 truncate">${museumName}</h2>
   </div>
-  <div class="flex flex-row gap-4">
+  <div class="flex gap-4">
     <!-- Use inline onclick calling window.selectTour -->
     <button class="shared-button-full" onclick="selectTour('${tour._id}')">
       Apri
     </button>
     <button class="shared-button-full">
-      Condividi
+      Modifica
     </button>
   </div>
 </div>

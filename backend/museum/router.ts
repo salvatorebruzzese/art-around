@@ -28,9 +28,7 @@ router.get('/:id', async (req: Request, res: Response) => {
     return res.status(400).json({ error: validation.extract() })
   }
 
-  const raw = validation.extract()
-
-  const museumID = Array.isArray(raw) ? raw[0] : raw
+  const museumID: string = req.params.id as string
 
   if (!mongoose.Types.ObjectId.isValid(museumID))
     return res.status(400).json({ message: 'Malformed museum ID' })

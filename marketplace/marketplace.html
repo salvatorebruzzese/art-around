@@ -10,9 +10,9 @@
     <script type="module" src="./alpinecomponents.js" defer></script>
   </head>
   <body
-    class="flex h-screen bg-p-light text-p-dark font-serif selection:bg-p-soft"
+    class="flex justify-center h-screen bg-p-light text-p-dark font-serif selection:bg-p-soft overflow-y-auto"
   >
-    <main class="flex-1 flex flex-col p-10 overflow-y-auto w-full" x-data>
+    <main class="flex-1 flex flex-col p-10 max-w-[70%]" x-data>
       <!-- HEADER CON FILTRI E ICONE SVG -->
       <header
         class="flex flex-wrap justify-end items-center mb-10 gap-6 font-sans"
@@ -99,7 +99,7 @@
       <!-- GRIGLIA DI RENDER CARDS -->
       <div
         id="item-container"
-        class="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-8"
+        class="grid grid-cols-[repeat(auto-fit,minmax(280px,0.5fr))] justify-center gap-8"
       >
         <template
           x-for="thing in $store.marketplaceComponent.filtered"
