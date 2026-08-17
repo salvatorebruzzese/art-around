@@ -13,7 +13,7 @@ router.all('/', (req, res) => {
   } else if (req.baseUrl === '/editor') {
     res.sendFile(join(rootDir, 'marketplace/editor.html'))
   } else if (req.baseUrl === '/profile') {
-    res.sendFile(join(rootDir, 'access/profile.html'))
+    res.sendFile(join(rootDir, 'marketplace/profile.html'))
   }
 })
 
