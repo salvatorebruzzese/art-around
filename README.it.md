@@ -8,9 +8,9 @@ Un'applicazione web full-stack e responsive per gestire le visite ai musei, svil
 
 Il sistema adotta un approccio basato sul goal-oriented design ed è suddiviso in due moduli principali:
 
-- Marketplace: Piattaforma desktop-first per la creazione, l'editing (con supporto LLM per la generazione di percorsi) e la distribuzione delle visite.
+- Marketplace: Piattaforma desktop-first per la creazione, la visione, l'editing e la distribuzione delle visite.
 
-- Navigator: Web-app mobile-first per l'utente finale e le guide (sincronizzazione in tempo reale). Offre geolocalizzazione indoor, lettura con sintesi vocale e interazione tramite comandi vocali aperti mappati su comandi di sistema tramite LLM.
+- Navigator: Web-app mobile-first per l'utente finale e le guide (sincronizzazione in tempo reale). Offre una vista della mappa del museo, lettura con sintesi vocale e interazione tramite comandi vocali mappati su comandi di sistema tramite LLM.
 
 ## Tecnologie utilizzate
 
@@ -24,7 +24,7 @@ Database: MongoDB
 
 Styling / UI: Tailwind CSS, DaisyUI
 
-Utility & AI: Zod (type validation), Purify (error handling), instructor-js (strutturazione output LLM)
+Utility & AI: Zod (type validation), Purify (error handling)
 
 ## Come avviare l'applicazione
 

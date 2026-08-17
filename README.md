@@ -2,47 +2,54 @@
 
 # Art around
 
-A full-stack, responsive web application for managing museum visits, developed as a project for the Web Technologies course (A.Y. 2025/2026) at the University of Bologna.
+A full-stack and responsive web application to manage museum visits, developed as a project for the Web Technologies course A.Y. 2025/2026 of the University of Bologna.
 
 ## Architecture and Modules
 
-The system adopts a goal-oriented design approach and is divided into two main modules:
+The system adopts an approach based on goal-oriented design and is divided into two main modules:
 
-- **Marketplace**: A desktop-first platform for creating, editing (with LLM support for tour generation), and publishing visits.
-- **Navigator**: A mobile-first web app for end-users and guides (featuring real-time synchronization). It offers indoor geolocation, text-to-speech capabilities, and interaction via open-vocabulary voice commands mapped to system commands through an LLM.
+- Marketplace: Desktop-first platform for creating, viewing, editing, and distributing visits.
 
-## Tech Stack
+- Navigator: Mobile-first web-app for the end user and guides (real-time synchronization). It offers a view of the museum map, reading with speech synthesis, and interaction via voice commands mapped to system commands through LLM.
 
-- **Frontend (Marketplace)**: Vanilla JavaScript, Alpine.js
-- **Frontend (Navigator)**: TypeScript, Vue.js
-- **Backend & API**: Node.js, Express, Passport (Auth)
-- **Database**: MongoDB
-- **Styling / UI**: Tailwind CSS, DaisyUI
-- **Utilities & AI**: Zod (runtime type validation), Purify (functional error handling), instructor-js (LLM structured output extraction)
+## Technologies used
 
-## How to Start the Application
+Frontend (Marketplace): Vanilla JavaScript, Alpine.js
 
-Ensure Docker and Node.js are installed on your host machine.
+Frontend (Navigator): TypeScript, Vue.js
 
-To provision the MongoDB container:
+Backend & API: Node.js, Express, Passport (Auth)
+
+Database: MongoDB
+
+Styling / UI: Tailwind CSS, DaisyUI
+
+Utility & AI: Zod (type validation), Purify (error handling)
+
+## How to start the application
+
+Check that you have Docker and Node.js or install them if necessary.
+
+To create the Mongo container:
 
 ```sh
 docker run --name mongodb -d -p 27017:27017 -e MONGO_INITDB_ROOT_USERNAME=user -e MONGO_INITDB_ROOT_PASSWORD=pass -v mongodata:/data/db mongo
 ```
 
-Next, create the `.env` file in the project root:
+Subsequently, create the .env file in the root of the project:
 
-```env
+```sh
+#!/usr/bin/env bash
 MONGO_USR=user
 MONGO_PWD=pass
 MONGO_SITE=localhost:27017
 SESSION_SECRET=secret
 ```
 
-Finally, execute the build and start script:
+Finally, execute the following npm command:
 
 ```sh
 npm run build:start
 ```
 
-Navigate to `https://localhost:8000` in your browser to access the application.
+Go to the browser at the URL `https://localhost:8000` to use the application.
