@@ -12,7 +12,7 @@ import { Item } from '../backend/item/model.js'
 import { generateItemsForTour } from './data.js'
 
 async function fetchRandomImageBuffer() {
-  const url = 'https://picsum.photos/200/300'
+  const url = 'https://picsum.photos/600/600'
   const response = await fetch(url)
   const buffer = await response.arrayBuffer()
   return Buffer.from(buffer)
