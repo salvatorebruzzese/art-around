@@ -1,30 +1,24 @@
 <!doctype html>
-<html lang="en">
+<html lang="it">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Marketplace</title>
-
     <link href="../styles.css" rel="stylesheet" type="text/css" />
     <script type="module" src="./card.js" defer></script>
-    <script
-      defer
-      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
-    ></script>
+    <script type="module" src="./alpinecomponents.js" defer></script>
   </head>
   <body
     class="flex h-screen bg-p-light text-p-dark font-serif selection:bg-p-soft"
   >
-    <main
-      x-data="marketplaceComponent"
-      x-init="init()"
-      class="flex-1 flex flex-col p-10 overflow-y-auto w-full"
-    >
+    <main class="flex-1 flex flex-col p-10 overflow-y-auto w-full" x-data>
+      <!-- HEADER CON FILTRI E ICONE SVG -->
       <header
         class="flex flex-wrap justify-end items-center mb-10 gap-6 font-sans"
       >
-        <!-- Controls -->
+        <!-- Controls: Search, Select Museo e Toggle -->
         <div class="flex flex-wrap gap-6 items-center flex-1 min-w-[300px]">
+          <!-- Search Bar -->
           <div class="relative flex-1 max-w-lg min-w-[250px]">
             <input
               type="text"
@@ -52,48 +46,53 @@
             </button>
           </div>
 
+          <!-- Dropdown Musei -->
           <div
-            x-bind:class="{ 'aura aura-dual aura-md text-p-soft rounded-full': !selectedMuseum }"
+            :class="{ 'aura aura-dual aura-md text-p-soft rounded-full': !$store.marketplaceComponent.selectedMuseum }"
           >
             <select
-              x-model="selectedMuseum"
+              x-model="$store.marketplaceComponent.selectedMuseum"
               class="select select-bordered rounded-full w-56 border-p-soft bg-white text-p-dark focus:border-p-medium focus:ring-2 focus:ring-p-soft focus:outline-none font-medium shadow-sm cursor-pointer transition-all"
             >
-              <option disabled selected value="">Seleziona museo</option>
-              <template x-for="museum in museums" :key="museum._id">
-                <option x-bind:value="museum._id" x-text="museum.name"></option>
+              <option value="">Tutti i musei</option>
+              <template
+                x-for="museum in $store.marketplaceComponent.museums"
+                :key="museum._id"
+              >
+                <option :value="museum._id" x-text="museum.name"></option>
               </template>
             </select>
           </div>
 
-          <!-- Toggle Container con ID dedicato -->
+          <!-- Switch Toggle (Visibile solo se un museo è selezionato) -->
           <div
             id="toggle-switch"
-            x-show="selectedMuseum"
+            x-show="$store.marketplaceComponent.selectedMuseum"
             class="flex items-center border border-p-soft rounded-full h-12 p-1 bg-white shadow-sm w-64"
           >
             <button
-              @click="selectedView = 'VISITE'"
-              :class="selectedView === 'VISITE'
-             ? 'flex-1 h-full rounded-full bg-p-medium text-white font-semibold text-sm transition-all duration-150 active:scale-95 shadow-sm cursor-pointer'
-             : 'flex-1 h-full rounded-full bg-transparent text-p-medium hover:bg-p-soft/20 font-semibold text-sm transition-all duration-150 active:scale-95 cursor-pointer'"
+              @click="$store.marketplaceComponent.selectedView = 'VISITE'"
+              :class="$store.marketplaceComponent.selectedView === 'VISITE'
+                ? 'flex-1 h-full rounded-full bg-p-medium text-white font-semibold text-sm transition-all duration-150 active:scale-95 shadow-sm cursor-pointer'
+                : 'flex-1 h-full rounded-full bg-transparent text-p-medium hover:bg-p-soft/20 font-semibold text-sm transition-all duration-150 active:scale-95 cursor-pointer'"
             >
               VISITE
             </button>
             <button
-              @click="selectedView = 'ITEM'"
-              :class="selectedView === 'ITEM'
-             ? 'flex-1 h-full rounded-full bg-p-medium text-white font-semibold text-sm transition-all duration-150 active:scale-95 shadow-sm cursor-pointer'
-             : 'flex-1 h-full rounded-full bg-transparent text-p-medium hover:bg-p-soft/20 font-semibold text-sm transition-all duration-150 active:scale-95 cursor-pointer'"
+              @click="$store.marketplaceComponent.selectedView = 'ITEM'"
+              :class="$store.marketplaceComponent.selectedView === 'ITEM'
+                ? 'flex-1 h-full rounded-full bg-p-medium text-white font-semibold text-sm transition-all duration-150 active:scale-95 shadow-sm cursor-pointer'
+                : 'flex-1 h-full rounded-full bg-transparent text-p-medium hover:bg-p-soft/20 font-semibold text-sm transition-all duration-150 active:scale-95 cursor-pointer'"
             >
               ITEM
             </button>
           </div>
         </div>
 
-        <!-- SVG Items -->
+        <!-- SVG Navigation & User Dropdown -->
         <div class="flex flex-row justify-center items-center gap-3">
           <div class="flex items-center gap-2">
+            <!-- Home -->
             <a
               class="nav-icon-link group !p-0 !border-none shadow-sm rounded-xl hover:!bg-transparent"
               href="../home/"
@@ -109,7 +108,6 @@
                   height="48"
                   rx="12"
                   fill="white"
-                  stroke="none"
                   class="group-hover:fill-[var(--color-p-medium)] transition-colors"
                 />
                 <path
@@ -119,6 +117,7 @@
                 />
               </svg>
             </a>
+            <!-- Marketplace -->
             <a
               class="nav-icon-link group !p-0 !border-none shadow-sm rounded-xl hover:!bg-transparent"
               href="/marketplace/"
@@ -134,7 +133,6 @@
                   height="48"
                   rx="12"
                   fill="white"
-                  stroke="none"
                   class="group-hover:fill-[var(--color-p-medium)] transition-colors"
                 />
                 <path
@@ -144,6 +142,7 @@
                 />
               </svg>
             </a>
+            <!-- Editor -->
             <a
               class="nav-icon-link group !p-0 !border-none shadow-sm rounded-xl hover:!bg-transparent"
               href="/editor/"
@@ -159,7 +158,6 @@
                   height="48"
                   rx="12"
                   fill="white"
-                  stroke="none"
                   class="group-hover:fill-[var(--color-p-medium)] transition-colors"
                 />
                 <path
@@ -170,6 +168,7 @@
                 />
               </svg>
             </a>
+            <!-- Navigator -->
             <a
               class="nav-icon-link group !p-0 !border-none shadow-sm rounded-xl hover:!bg-transparent"
               href="../navigator/"
@@ -185,7 +184,6 @@
                   height="48"
                   rx="12"
                   fill="white"
-                  stroke="none"
                   class="group-hover:fill-[var(--color-p-medium)] transition-colors"
                 />
                 <path
@@ -197,96 +195,60 @@
             </a>
           </div>
 
+          <!-- Dropdown Utente -->
           <details class="avatar dropdown dropdown-end z-20">
             <summary
               class="nav-avatar-trigger list-none cursor-pointer"
             ></summary>
             <ul class="nav-dropdown-menu mt-16">
-              <li>
-                <a
-                  x-show="user"
-                  class="shared-button-flex-secondary shadow-none"
-                  href="../profile"
-                  >Profilo</a
-                >
-              </li>
-              <li>
-                <button
-                  x-show="user"
-                  class="shared-button-flex-warning shadow-none mt-2"
-                  href="../home"
-                  @click="logout"
-                >
-                  Esci
-                </button>
-              </li>
-              <li>
-                <a
-                  x-show="!user"
-                  class="shared-button-flex-secondary shadow-none"
-                  href="../login"
-                  >Accedi</a
-                >
-              </li>
+              <template x-if="$store.marketplaceComponent.user">
+                <div>
+                  <li>
+                    <a
+                      class="shared-button-flex-secondary shadow-none"
+                      href="../profile"
+                      >Profilo</a
+                    >
+                  </li>
+                  <li>
+                    <button
+                      class="shared-button-flex-warning shadow-none mt-2"
+                      @click="$store.accessComponent.logout()"
+                    >
+                      Esci
+                    </button>
+                  </li>
+                </div>
+              </template>
+              <template x-if="!$store.marketplaceComponent.user">
+                <li>
+                  <a
+                    class="shared-button-flex-secondary shadow-none"
+                    href="../login"
+                    >Accedi</a
+                  >
+                </li>
+              </template>
             </ul>
           </details>
         </div>
       </header>
 
+      <!-- GRIGLIA DI RENDER CARDS -->
       <div
         id="item-container"
         class="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-8"
       >
-        <template x-for="thing in filtered" :key="thing._id">
-          <!-- Call your card-building function here, or render markup directly -->
-          <div :class="decorator" x-html="window.makeStaticCard(thing)"></div>
+        <template
+          x-for="thing in $store.marketplaceComponent.filtered"
+          :key="thing._id"
+        >
+          <div
+            :class="$store.marketplaceComponent.decorator"
+            x-html="window.makeStaticCard ? window.makeStaticCard(thing) : thing.name"
+          ></div>
         </template>
       </div>
     </main>
-    <script defer>
-      document.addEventListener('alpine:init', () => {
-        Alpine.data('marketplaceComponent', () => ({
-          decorator: `w-full h-80 rounded-3xl flex flex-col overflow-hidden shadow-lg border border-p-soft bg-white group hover:-translate-y-1 hover:shadow-xl transition-all duration-300`,
-          museums: [],
-          selectedMuseum: '',
-          allTours: [],
-          selectedView: 'VISITE', // or 'ITEM'
-          user: null,
-          async logout() {
-            await fetch('/api/logout', {
-              method: 'POST',
-              credentials: 'include',
-            })
-            window.location.href = '../home/'
-          },
-          get filteredTours() {
-            return this.selectedMuseum
-              ? this.allTours.filter((t) => t.museum === this.selectedMuseum)
-              : this.allTours
-          },
-          get filteredItems() {
-            return this.selectedMuseum
-              ? this.allItems.filter(
-                  (item) => item.museum === this.selectedMuseum,
-                )
-              : this.allItems
-          },
-          get filtered() {
-            // This getter can drive your template rendering.
-            return this.selectedView === 'VISITE'
-              ? this.filteredTours
-              : this.filteredItems
-          },
-          async init() {
-            this.museums = await fetch('/api/museums/').then((r) => r.json())
-            this.allTours = await fetch('/api/tours/').then((r) => r.json())
-            this.allItems = await fetch('/api/items/').then((r) => r.json())
-            this.user = await fetch('/api/profile/')
-              .then((r) => (r.ok ? r.json() : null))
-              .catch((_) => null)
-          },
-        }))
-      })
-    </script>
   </body>
 </html>
