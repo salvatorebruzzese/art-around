@@ -7,7 +7,7 @@
     <link href="../styles.css" rel="stylesheet" type="text/css" />
     <script type="module" src="./card.js" defer></script>
     <script type="module" src="./quick-nav.js" defer></script>
-    <script type="module" src="./alpinecomponents.js" defer></script>
+    <script type="module" src="./marketplace.js" defer></script>
   </head>
   <body
     class="flex justify-center h-screen bg-p-light text-p-dark font-serif selection:bg-p-soft overflow-y-auto"
@@ -49,15 +49,15 @@
 
           <!-- Dropdown Musei -->
           <div
-            :class="{ 'aura aura-dual aura-md text-p-soft rounded-full': !$store.marketplaceComponent.selectedMuseum }"
+            :class="{ 'aura aura-dual aura-md text-p-soft rounded-full': !$store.marketplace.selectedMuseum }"
           >
             <select
-              x-model="$store.marketplaceComponent.selectedMuseum"
+              x-model="$store.marketplace.filters.museum"
               class="select select-bordered rounded-full w-56 border-p-soft bg-white text-p-dark focus:border-p-medium focus:ring-2 focus:ring-p-soft focus:outline-none font-medium shadow-sm cursor-pointer transition-all"
             >
               <option value="">Tutti i musei</option>
               <template
-                x-for="museum in $store.marketplaceComponent.museums"
+                x-for="museum in $store.marketplace.museums"
                 :key="museum._id"
               >
                 <option :value="museum._id" x-text="museum.name"></option>
@@ -68,20 +68,20 @@
           <!-- Switch Toggle (Visibile solo se un museo è selezionato) -->
           <div
             id="toggle-switch"
-            x-show="$store.marketplaceComponent.selectedMuseum"
+            x-show="$store.marketplace.filters.museum"
             class="flex items-center border border-p-soft rounded-full h-12 p-1 bg-white shadow-sm w-64"
           >
             <button
-              @click="$store.marketplaceComponent.selectedView = 'VISITE'"
-              :class="$store.marketplaceComponent.selectedView === 'VISITE'
+              @click="$store.marketplace.selectedView = 'tour'"
+              :class="$store.marketplace.selectedView === 'tour'
                 ? 'flex-1 h-full rounded-full bg-p-medium text-white font-semibold text-sm transition-all duration-150 active:scale-95 shadow-sm cursor-pointer'
                 : 'flex-1 h-full rounded-full bg-transparent text-p-medium hover:bg-p-soft/20 font-semibold text-sm transition-all duration-150 active:scale-95 cursor-pointer'"
             >
-              VISITE
+              TOURS
             </button>
             <button
-              @click="$store.marketplaceComponent.selectedView = 'ITEM'"
-              :class="$store.marketplaceComponent.selectedView === 'ITEM'
+              @click="$store.marketplace.selectedView = 'ITEM'"
+              :class="$store.marketplace.selectedView === 'ITEM'
                 ? 'flex-1 h-full rounded-full bg-p-medium text-white font-semibold text-sm transition-all duration-150 active:scale-95 shadow-sm cursor-pointer'
                 : 'flex-1 h-full rounded-full bg-transparent text-p-medium hover:bg-p-soft/20 font-semibold text-sm transition-all duration-150 active:scale-95 cursor-pointer'"
             >
@@ -101,12 +101,9 @@
         id="item-container"
         class="grid grid-cols-[repeat(auto-fit,minmax(280px,0.5fr))] justify-center gap-8"
       >
-        <template
-          x-for="thing in $store.marketplaceComponent.filtered"
-          :key="thing._id"
-        >
+        <template x-for="thing in $store.marketplace.filtered" :key="thing._id">
           <div
-            :class="$store.marketplaceComponent.decorator"
+            :class="$store.marketplace.cardDecorator"
             x-html="window.makeStaticCard ? window.makeStaticCard(thing) : thing.name"
           ></div>
         </template>

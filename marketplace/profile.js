@@ -1,3 +1,5 @@
+import Alpine from 'alpinejs'
+
 document.addEventListener('DOMContentLoaded', async (e) => {
   e.preventDefault()
 
@@ -20,3 +22,6 @@ document.addEventListener('DOMContentLoaded', async (e) => {
     console.log(err)
   }
 })
+
+window.Alpine = Alpine
+Alpine.start()

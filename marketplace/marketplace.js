@@ -1,29 +1,42 @@
 import Alpine from 'alpinejs'
 
-Alpine.store('marketplaceComponent', {
-  decorator:
+Alpine.store('marketplace', {
+  cardDecorator:
     'w-full h-80 rounded-3xl flex flex-col overflow-hidden shadow-lg border border-p-soft bg-white group hover:-translate-y-1 hover:shadow-xl transition-all duration-300',
   museums: [],
-  selectedMuseum: '',
+  filters: {
+    museum: null,
+    purchased: false,
+    search: '',
+  },
   allTours: [],
   allItems: [], // Dichiarato per evitare ReferenceError
-  selectedView: 'VISITE',
+  view: 'tour', // | 'item'
   user: null,
 
   get filteredTours() {
-    return this.selectedMuseum
-      ? this.allTours.filter((t) => t.museum === this.selectedMuseum)
-      : this.allTours
+    const fmus = this.filters.museum
+    const fpur = this.filters.purchased
+    const user = this.user
+    return this.allTours
+      .filter((t) => (fmus ? t.museum === fmus : true))
+      .filter((t) => (user && fpur ? user.purchasedTours.includes(t) : true))
+      .filter((t) => t.name.startsWith(this.filters.search))
   },
 
+  // TODO: refactor into user-logged component
   get filteredItems() {
-    return this.selectedMuseum
-      ? this.allItems.filter((item) => item.museum === this.selectedMuseum)
-      : this.allItems
+    const fmus = this.filters.museum
+    const fpur = this.filters.purchased
+    const user = this.user
+    return this.allTours
+      .filter((i) => (fmus ? i.museum === fmus : true))
+      .filter((i) => (user && fpur ? user.purchasedTours.includes(i) : true))
+      .filter((i) => i.name.startsWith(this.filters.search))
   },
 
   get filtered() {
-    return this.selectedView === 'VISITE'
+    return this.selectedView === 'tour'
       ? this.filteredTours
       : this.filteredItems
   },
@@ -42,16 +55,6 @@ Alpine.store('marketplaceComponent', {
     this.allTours = tours
     this.allItems = items
     this.user = user
-  },
-})
-
-Alpine.store('accessComponent', {
-  async logout() {
-    await fetch('/api/logout', {
-      method: 'POST',
-      credentials: 'include',
-    })
-    window.location.href = '../home/'
   },
 })
 
