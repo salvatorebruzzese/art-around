@@ -6,6 +6,7 @@
     <title>Marketplace</title>
 
     <link href="../styles.css" rel="stylesheet" type="text/css" />
+    <script type="module" src="./card.js" defer></script>
     <script
       defer
       src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
@@ -238,7 +239,7 @@
       >
         <template x-for="thing in filtered" :key="thing._id">
           <!-- Call your card-building function here, or render markup directly -->
-          <div :class="decorator" x-html="makeStaticCard(thing)"></div>
+          <div :class="decorator" x-html="window.makeStaticCard(thing)"></div>
         </template>
       </div>
     </main>
@@ -287,6 +288,5 @@
         }))
       })
     </script>
-    <script src="index.js" type="module" defer></script>
   </body>
 </html>

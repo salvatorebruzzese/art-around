@@ -4,7 +4,7 @@ window.selectTour = function (tourId) {
   window.location.href = '../navigator/'
 }
 
-export function makeStaticCard(tour) {
+window.makeStaticCard = function makeStaticCard(tour) {
   return `
 <div
   id="${tour._id}"
