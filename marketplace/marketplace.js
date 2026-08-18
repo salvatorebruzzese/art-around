@@ -22,7 +22,12 @@ Alpine.store('marketplace', {
     const user = this.user
     return this.allTours
       .filter((t) => (fmus ? t.museum === fmus : true))
-      .filter((t) => (user && fpur ? user.purchasedTours.includes(t) : true))
+      .filter((t) =>
+        user && fpur
+          ? user.purchasedTours.includes(t._id) ||
+            user.authoredTours.includes(t._id)
+          : true,
+      )
       .filter((t) => fuzzysearch(this.filters.search, t.name))
   },
 
@@ -30,7 +35,11 @@ Alpine.store('marketplace', {
     const fmus = this.filters.museum
     const user = this.user
     return this.allItems
-      .filter((i) => user?.purchasedTours.includes(i.tour))
+      .filter(
+        (i) =>
+          user?.purchasedTours.includes(i.tour) ||
+          user?.authoredTours.includes(i.tour),
+      )
       .filter((i) => (fmus ? i.museum === fmus : true))
       .filter((i) => fuzzysearch(this.filters.search, i.name))
   },

@@ -71,6 +71,7 @@ async function createTour(
     await User.findByIdAndUpdate(userId, {
       $push: { authoredTours: tour._id },
     })
+    /* TODO: check findByIdAndUpdate */
     return Right(project(safeTourFields, tour))
   } catch (e) {
     return Left(dbError(undefined, () => JSON.stringify(e)))

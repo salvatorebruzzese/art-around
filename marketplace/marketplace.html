@@ -89,30 +89,29 @@
               ITEM
             </button>
           </div>
-        </div>
-
-        <!-- purchased tours -->
-        <div
-          id="toggle-purchased"
-          x-show="$store.marketplace.user"
-          class="flex items-center border border-p-soft rounded-full h-12 p-1 bg-white shadow-sm w-64"
-        >
-          <button
-            @click="$store.marketplace.filters.purchased = false"
-            :class="!$store.marketplace.filters.purchased
+          <!-- purchased tours -->
+          <div
+            id="toggle-purchased"
+            x-show="$store.marketplace.user"
+            class="flex items-center border border-p-soft rounded-full h-12 p-1 bg-white shadow-sm w-64"
+          >
+            <button
+              @click="$store.marketplace.filters.purchased = false"
+              :class="!$store.marketplace.filters.purchased
                 ? 'flex-1 h-full rounded-full bg-p-medium text-white font-semibold text-sm transition-all duration-150 active:scale-95 shadow-sm cursor-pointer'
                 : 'flex-1 h-full rounded-full bg-transparent text-p-medium hover:bg-p-soft/20 font-semibold text-sm transition-all duration-150 active:scale-95 cursor-pointer'"
-          >
-            ALL
-          </button>
-          <button
-            @click="$store.marketplace.filters.purchased = true"
-            :class="$store.marketplace.filters.purchased
+            >
+              ALL
+            </button>
+            <button
+              @click="$store.marketplace.filters.purchased = true"
+              :class="$store.marketplace.filters.purchased
                 ? 'flex-1 h-full rounded-full bg-p-medium text-white font-semibold text-sm transition-all duration-150 active:scale-95 shadow-sm cursor-pointer'
                 : 'flex-1 h-full rounded-full bg-transparent text-p-medium hover:bg-p-soft/20 font-semibold text-sm transition-all duration-150 active:scale-95 cursor-pointer'"
-          >
-            PURCHASED
-          </button>
+            >
+              PURCHASED
+            </button>
+          </div>
         </div>
 
         <!-- SVG Navigation & User Dropdown -->
@@ -129,85 +128,98 @@
           class="grid grid-cols-[repeat(auto-fit,minmax(280px,0.5fr))] justify-center gap-8"
         >
           <template
-            x-for="item in $store.marketplace.filteredItems"
-            :key="item._id"
+            x-for="itemMeta in $store.marketplace.filteredItems"
+            :key="itemMeta._id"
           >
-            <div :class="$store.marketplace.cardDecorator">
-              <div
-                class="h-full flex-1 relative bg-gradient-to-br from-p-light to-p-soft/20"
-              >
-                <img
-                  x-bind:src="'/api/assets/'+item.thumbnail"
-                  alt="Thumbnail not found"
-                  class="absolute inset-0 w-full h-full object-cover mix-blend-multiply"
-                />
+            <div
+              x-data="{ item: null }"
+              x-init="fetch('/api/items/' + itemMeta._id)
+                        .then(r => r.json())
+                        .then(data => { item = data })"
+            >
+              <template x-if="!item">
+                <p>Error loading</p>
+              </template>
+              <template x-if="item">
+                <div :class="$store.marketplace.cardDecorator">
+                  <div
+                    class="h-full flex-1 relative bg-gradient-to-br from-p-light to-p-soft/20"
+                  >
+                    <img
+                      x-bind:src="'/api/assets/'+item.image"
+                      alt="Thumbnail not found"
+                      class="absolute inset-0 w-full h-full object-cover mix-blend-multiply"
+                    />
 
-                <!-- Dropdown Menu Tre Punti -->
-                <!-- TODO: refactor into template -->
-                <div class="absolute top-3 right-3 z-10">
-                  <div x-data="{open:false}" class="dropdown dropdown-end">
-                    <button
-                      @click="open = !open"
-                      class="btn btn-sm btn-circle bg-white/80 hover:bg-white text-p-dark border-none shadow-md backdrop-blur-sm focus:outline-none list-none"
-                    >
-                      <svg
-                        class="w-5 h-5"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          d="M10 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4z"
-                        />
-                      </svg>
-                    </button>
-                    <div
-                      x-show="open"
-                      x-transition
-                      @click.outside="open = false"
-                    >
-                      <ul class="nav-dropdown-menu p-2">
-                        <li>
-                          <a class="shared-button-flex-secondary shadow-none"
-                            >Condividi</a
+                    <!-- Dropdown Menu Tre Punti -->
+                    <!-- TODO: refactor into template -->
+                    <div class="absolute top-3 right-3 z-10">
+                      <div x-data="{open:false}" class="dropdown dropdown-end">
+                        <button
+                          @click="open = !open"
+                          class="btn btn-sm btn-circle bg-white/80 hover:bg-white text-p-dark border-none shadow-md backdrop-blur-sm focus:outline-none list-none"
+                        >
+                          <svg
+                            class="w-5 h-5"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
                           >
-                        </li>
-                        <li>
-                          <a class="shared-button-flex-warning shadow-none"
-                            >Elimina</a
-                          >
-                        </li>
-                      </ul>
+                            <path
+                              d="M10 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4z"
+                            />
+                          </svg>
+                        </button>
+                        <div
+                          x-show="open"
+                          x-transition
+                          @click.outside="open = false"
+                        >
+                          <ul class="nav-dropdown-menu p-2">
+                            <li>
+                              <a
+                                class="shared-button-flex-secondary shadow-none"
+                                >Condividi</a
+                              >
+                            </li>
+                            <li>
+                              <a class="shared-button-flex-warning shadow-none"
+                                >Elimina</a
+                              >
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-              <div
-                class="h-36 bg-p-soft/20 flex flex-col justify-center gap-4 px-6 border-t text-p-dark border-p-soft/50"
-              >
-                <div class="flex flex-col font-sans">
-                  <h1
-                    class="text-2xl text-p-medium truncate"
-                    x-text="item.name"
-                  ></h1>
-                  <h2
-                    x-init="init"
-                    x-data="{
+                  <div
+                    class="h-36 bg-p-soft/20 flex flex-col justify-center gap-4 px-6 border-t text-p-dark border-p-soft/50"
+                  >
+                    <div class="flex flex-col font-sans">
+                      <h1
+                        class="text-2xl text-p-medium truncate"
+                        x-text="item.name"
+                      ></h1>
+                      <h2
+                        x-init="init"
+                        x-data="{
                             tourName: '',
                             async init() {this.tourName = (await fetch('/api/tours/'+item.tour).then(r => r.json())).name},
                           }"
-                    class="text-md text-p-medium/50 truncate"
-                    x-text="tourName"
-                  ></h2>
+                        class="text-md text-p-medium/50 truncate"
+                        x-text="tourName"
+                      ></h2>
+                    </div>
+                    <div class="flex gap-4">
+                      <!-- Use inline onclick calling window.selectItem -->
+                      <button class="shared-button-full">
+                        <!-- onclick="selectItem('${item._id}')" -->
+                        Apri
+                      </button>
+                      <button class="shared-button-full">Modifica</button>
+                    </div>
+                  </div>
                 </div>
-                <div class="flex gap-4">
-                  <!-- Use inline onclick calling window.selectItem -->
-                  <button class="shared-button-full">
-                    <!-- onclick="selectItem('${item._id}')" -->
-                    Apri
-                  </button>
-                  <button class="shared-button-full">Modifica</button>
-                </div>
-              </div>
+              </template>
             </div>
           </template>
         </div>

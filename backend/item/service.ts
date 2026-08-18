@@ -5,6 +5,7 @@ import {
   ItemInput,
   safeItemFields,
   ItemPatch,
+  metaItemFields,
 } from './model.js'
 import { Either, Left, Right } from 'purify-ts/Either'
 import { Types } from 'mongoose'
@@ -58,7 +59,7 @@ async function listItems(
   try {
     const items = await Item.find(query).lean().exec()
     return items
-      ? Right(items.map((item) => project(safeItemFields, item)))
+      ? Right(items.map((item) => project(metaItemFields, item)))
       : Left(notFound())
   } catch (e) {
     return Left(dbError(undefined, () => String(e)))
@@ -101,9 +102,17 @@ async function createItem(
   try {
     const item = await Item.create(input)
     if (!item) return Left(notFound())
-    await Tour.findByIdAndUpdate(item.tour, {
-      $push: { items: item._id },
-    })
+    const res = await Tour.findByIdAndUpdate(
+      item.tour,
+      {
+        $push: { items: item._id },
+      },
+      { new: true },
+    )
+    if (!res) {
+      await Item.findByIdAndDelete(item._id)
+      return Left(dbError('Could not create item.'))
+    }
     return Right(project(safeItemFields, item))
   } catch (e) {
     return Left(dbError(undefined, () => JSON.stringify(e)))

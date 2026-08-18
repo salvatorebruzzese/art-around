@@ -125,6 +125,10 @@ async function seed() {
         description: `Explore the best of ${museum.name}.`,
       })
 
+      await User.findByIdAndUpdate(user._id, {
+        $push: { authoredTours: tour._id },
+      })
+
       // Generazione di 10 item per tour tramite modulo helper
       const itemsData = generateItemsForTour(
         museum.name,

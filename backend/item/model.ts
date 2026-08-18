@@ -79,8 +79,18 @@ export const safeItemFields: (keyof _Item)[] = [
   'tour',
   'explanations',
   'license',
+  'tags',
+  'image',
+  'position',
 ]
 
+export const metaItemFields: (keyof _Item)[] = [
+  'name',
+  'itemType',
+  'itemAuthor',
+  'tour',
+  'license',
+]
 export const Item = mongoose.model<IItem>('Item', itemSchema)
 
 // ---------------------
