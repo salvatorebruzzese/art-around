@@ -51,7 +51,20 @@ async function seed() {
       billingData: { cards: [], addresses: [] },
     })
 
-    console.debug(user)
+    // Creazione Utente Admin
+    const adminPassword = await bcrypt.hash('admin123', 10)
+    const admin = await User.create({
+      username: 'admin',
+      email: 'admin@example.com',
+      password: adminPassword,
+      role: Role['Admin'],
+      authoredTours: [],
+      purchasedTours: [],
+      billingData: { cards: [], addresses: [] },
+    })
+
+    console.debug('Created user:', user)
+    console.debug('Created admin:', admin)
 
     // Creazione pool di Asset condivisi
     const assetPromises = Array.from({ length: 5 }).map(async () =>
