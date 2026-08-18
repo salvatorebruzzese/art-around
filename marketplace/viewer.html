@@ -1,80 +1,163 @@
 <!doctype html>
-<html lang="en">
+<html lang="it">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Viewer</title>
+    <link href="../styles.css" rel="stylesheet" type="text/css" />
     <script src="viewer.js" type="module"></script>
   </head>
-  <body>
-    <div
-      x-data="viewer"
-      class="h-screen border border-p-soft max-w-[70%] max-h-[90%]"
-    >
+  <body class="bg-gray-100">
+    <div x-data="viewer" class="h-screen flex flex-col p-4 gap-4">
       <template x-if="item">
-        <div class="h-full">
-          <figure>
-            <img
-              :src="'/api/assets/' + item.image"
-              class="absolute inset-0 w-full h-full object-cover mix-blend-multiply"
-            />
-          </figure>
-
+        <div class="contents">
+          <!-- Main Detail View Card -->
           <div
-            class="flex flex-col justify-start md:justify-center gap-4 h-full overflow-y-auto"
+            class="flex-[2] min-h-0 mx-auto grid w-full max-w-4xl grid-cols-1 md:grid-cols-2 gap-6 bg-white rounded-3xl shadow-lg border border-p-soft p-6"
           >
-            <h1 class="text-lg text-p-dark" x-text="item.name"></h1>
+            <!-- Image Container -->
+            <figure
+              class="w-full max-h-full aspect-square rounded-2xl overflow-hidden justify-self-center self-center"
+            >
+              <img
+                :src="'/api/assets/' + item.image"
+                :alt="item.name"
+                class="object-cover w-full h-full"
+              />
+            </figure>
 
-            <div class="grid grid-cols-2 gap-4">
-              <div class="flex flex-col">
-                <h2 class="text-xs font-semibold text-p-medium uppercase">
-                  Museo
-                </h2>
-                <p class="text-p-dark" x-text="item.museum"></p>
+            <!-- Item Info -->
+            <div
+              class="flex flex-col justify-start md:justify-center gap-4 h-full overflow-y-auto"
+            >
+              <h1
+                class="font-serif text-4xl text-p-medium font-bold"
+                x-text="item.name"
+              ></h1>
+              <p
+                class="text-lg text-p-dark"
+                x-text="item.author || item.artist"
+              ></p>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div class="flex flex-col">
+                  <h2 class="text-xs font-semibold text-p-medium uppercase">
+                    Museo
+                  </h2>
+                  <p class="text-p-dark" x-text="item.museum"></p>
+                </div>
+                <div class="flex flex-col">
+                  <h2 class="text-xs font-semibold text-p-medium uppercase">
+                    Data
+                  </h2>
+                  <p class="text-p-dark" x-text="item.date"></p>
+                </div>
               </div>
-              <div class="flex flex-col">
+
+              <div class="flex flex-col gap-2">
                 <h2 class="text-xs font-semibold text-p-medium uppercase">
-                  Data
+                  Descrizione
                 </h2>
-                <p class="text-p-dark" x-text="item.date"></p>
+
+                <template x-if="item.explanations?.[0]">
+                  <div>
+                    <span
+                      class="text-xs font-semibold text-p-medium/70 uppercase"
+                      >Livello semplice</span
+                    >
+                    <p
+                      class="text-p-dark font-sans mt-0.5"
+                      x-text="item.explanations[0].text"
+                    ></p>
+                  </div>
+                </template>
+
+                <template x-if="item.explanations?.[1]">
+                  <div>
+                    <span
+                      class="text-xs font-semibold text-p-medium/70 uppercase"
+                      >Livello normale</span
+                    >
+                    <p
+                      class="text-p-dark font-sans mt-0.5"
+                      x-text="item.explanations[1].text"
+                    ></p>
+                  </div>
+                </template>
+
+                <template x-if="item.explanations?.[2]">
+                  <div>
+                    <span
+                      class="text-xs font-semibold text-p-medium/70 uppercase"
+                      >Livello avanzato</span
+                    >
+                    <p
+                      class="text-p-dark font-sans mt-0.5"
+                      x-text="item.explanations[2].text"
+                    ></p>
+                  </div>
+                </template>
               </div>
             </div>
+          </div>
 
-            <div class="flex flex-col">
-              <h2 class="text-xs font-semibold text-p-medium uppercase">
-                Descrizioni disponibili
-              </h2>
+          <!-- Navigation Controls (Only Prev & Next) -->
+          <div
+            class="flex-none h-auto mx-auto w-full max-w-4xl flex justify-center items-center px-4 pb-4"
+          >
+            <div class="flex items-center justify-center gap-4 w-full">
+              <!-- Previous Button -->
+              <button
+                @click="prev()"
+                class="shared-button-flex-secondary rounded-md w-16 h-16 shadow-lg border border-p-soft hover:border-transparent flex items-center justify-center"
+              >
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M15 18l-6-6 6-6" />
+                </svg>
+              </button>
 
-              <template x-if="item.explanations?.[0]">
-                <div>
-                  <span>Livello semplice</span>
-                  <p
-                    class="text-p-dark font-sans mt-1"
-                    x-text="item.explanations[0].text"
-                  ></p>
-                </div>
-              </template>
-
-              <template x-if="item.explanations?.[1]">
-                <div>
-                  <span>Livello normale</span>
-                  <p
-                    class="text-p-dark font-sans mt-1"
-                    x-text="item.explanations[1].text"
-                  ></p>
-                </div>
-              </template>
-
-              <template x-if="item.explanations?.[2]">
-                <div>
-                  <span>Livello avanzato</span>
-                  <p
-                    class="text-p-dark font-sans mt-1"
-                    x-text="item.explanations[2].text"
-                  ></p>
-                </div>
-              </template>
+              <!-- Next Button -->
+              <button
+                @click="next()"
+                class="shared-button-flex-secondary rounded-md w-16 h-16 shadow-lg border border-p-soft hover:border-transparent flex items-center justify-center"
+              >
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </button>
             </div>
+          </div>
+        </div>
+      </template>
+
+      <!-- Empty State / Fallback -->
+      <template x-if="!item">
+        <div class="flex h-screen items-center justify-center w-full">
+          <div
+            class="rounded-xl border border-p-soft shadow-xl p-8 gap-4 text-center bg-white"
+          >
+            <h1 class="text-4xl text-p-medium mb-4">Scegli una visita</h1>
+            <a class="shared-button-full-secondary" href="../../marketplace/"
+              >Torna al marketplace</a
+            >
           </div>
         </div>
       </template>
