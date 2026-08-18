@@ -1,4 +1,5 @@
 import Alpine from 'alpinejs'
+import fuzzysearch from 'fuzzysearch'
 
 Alpine.store('marketplace', {
   cardDecorator:
@@ -22,17 +23,16 @@ Alpine.store('marketplace', {
     return this.allTours
       .filter((t) => (fmus ? t.museum === fmus : true))
       .filter((t) => (user && fpur ? user.purchasedTours.includes(t) : true))
-      .filter((t) => t.name.startsWith(this.filters.search))
+      .filter((t) => fuzzysearch(this.filters.search, t.name))
   },
 
-  // TODO: refactor into user-logged component
   get filteredItems() {
     const fmus = this.filters.museum
     const user = this.user
     return this.allItems
       .filter((i) => user?.purchasedTours.includes(i.tour))
       .filter((i) => (fmus ? i.museum === fmus : true))
-      .filter((i) => i.name.startsWith(this.filters.search))
+      .filter((i) => fuzzysearch(this.filters.search, i.name))
   },
 
   get filtered() {

@@ -22,6 +22,7 @@
           <!-- Search Bar -->
           <div class="relative flex-1 max-w-lg min-w-[250px]">
             <input
+              x-model="$store.marketplace.filters.search"
               type="text"
               placeholder="Cerca..."
               class="input input-bordered rounded-full w-full pr-12 border-p-soft bg-white text-p-dark placeholder-p-medium focus:border-p-medium focus:ring-2 focus:ring-p-soft focus:outline-none transition-all shadow-sm"

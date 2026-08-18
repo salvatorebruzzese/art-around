@@ -12,5 +12,8 @@
     "daisyui": "^5.7.16",
     "tailwindcss": "^4.2.1",
     "vite": "^6.4.1"
+  },
+  "dependencies": {
+    "fuzzysearch": "^1.0.3"
   }
 }
