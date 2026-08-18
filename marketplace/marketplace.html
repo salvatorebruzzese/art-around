@@ -8,11 +8,12 @@
     <script type="module" src="./quick-nav.js" defer></script>
     <script type="module" src="./marketplace.js" defer></script>
     <script type="module" src="./shared.js" defer></script>
+    <script type="module" src="./userManager.js" defer></script>
   </head>
   <body
     class="flex justify-center h-screen bg-p-light text-p-dark font-serif selection:bg-p-soft overflow-y-auto"
   >
-    <main class="flex-1 flex flex-col p-10 max-w-[70%]" x-data>
+    <main x-data="marketplace()" class="flex-1 flex flex-col p-10 max-w-[70%]">
       <!-- HEADER CON FILTRI E ICONE SVG -->
       <header
         class="flex flex-wrap justify-end items-center mb-10 gap-6 font-sans"
@@ -22,7 +23,7 @@
           <!-- Search Bar -->
           <div class="relative flex-1 max-w-lg min-w-[250px]">
             <input
-              x-model="$store.marketplace.filters.search"
+              x-model="filters.search"
               type="text"
               placeholder="Cerca..."
               class="input input-bordered rounded-full w-full pr-12 border-p-soft bg-white text-p-dark placeholder-p-medium focus:border-p-medium focus:ring-2 focus:ring-p-soft focus:outline-none transition-all shadow-sm"
@@ -50,17 +51,14 @@
 
           <!-- Dropdown Musei -->
           <div
-            :class="{ 'aura aura-dual aura-md text-p-soft rounded-full': !$store.marketplace.filters.museum }"
+            :class="{ 'aura aura-dual aura-md text-p-soft rounded-full': !filters.museum }"
           >
             <select
-              x-model="$store.marketplace.filters.museum"
+              x-model="filters.museum"
               class="select select-bordered rounded-full w-56 border-p-soft bg-white text-p-dark focus:border-p-medium focus:ring-2 focus:ring-p-soft focus:outline-none font-medium shadow-sm cursor-pointer transition-all"
             >
               <option value="">Tutti i musei</option>
-              <template
-                x-for="museum in $store.marketplace.museums"
-                :key="museum._id"
-              >
+              <template x-for="museum in museums" :key="museum._id">
                 <option :value="museum._id" x-text="museum.name"></option>
               </template>
             </select>
@@ -73,16 +71,18 @@
             class="flex items-center border border-p-soft rounded-full h-12 p-1 bg-white shadow-sm w-64"
           >
             <button
-              @click="$store.marketplace.view = 'tour'"
-              :class="$store.marketplace.view === 'tour'
+              x-data
+              @click="view = 'tour'"
+              :class="view === 'tour'
                 ? 'flex-1 h-full rounded-full bg-p-medium text-white font-semibold text-sm transition-all duration-150 active:scale-95 shadow-sm cursor-pointer'
                 : 'flex-1 h-full rounded-full bg-transparent text-p-medium hover:bg-p-soft/20 font-semibold text-sm transition-all duration-150 active:scale-95 cursor-pointer'"
             >
               TOURS
             </button>
             <button
-              @click="$store.marketplace.view = 'item'"
-              :class="$store.marketplace.view === 'item'
+              x-data
+              @click="view = 'item'"
+              :class="view === 'item'
                 ? 'flex-1 h-full rounded-full bg-p-medium text-white font-semibold text-sm transition-all duration-150 active:scale-95 shadow-sm cursor-pointer'
                 : 'flex-1 h-full rounded-full bg-transparent text-p-medium hover:bg-p-soft/20 font-semibold text-sm transition-all duration-150 active:scale-95 cursor-pointer'"
             >
@@ -91,22 +91,23 @@
           </div>
           <!-- purchased tours -->
           <div
+            x-data
             id="toggle-purchased"
-            x-show="$store.marketplace.user && $store.marketplace.view == 'tour'"
+            x-show="$store.userManager.user && view == 'tour'"
             x-transition
             class="flex items-center border border-p-soft rounded-full h-12 p-1 bg-white shadow-sm w-64"
           >
             <button
-              @click="$store.marketplace.filters.purchased = false"
-              :class="!$store.marketplace.filters.purchased
+              @click="filters.purchased = false"
+              :class="!filters.purchased
                 ? 'flex-1 h-full rounded-full bg-p-medium text-white font-semibold text-sm transition-all duration-150 active:scale-95 shadow-sm cursor-pointer'
                 : 'flex-1 h-full rounded-full bg-transparent text-p-medium hover:bg-p-soft/20 font-semibold text-sm transition-all duration-150 active:scale-95 cursor-pointer'"
             >
               ALL
             </button>
             <button
-              @click="$store.marketplace.filters.purchased = true"
-              :class="$store.marketplace.filters.purchased
+              @click="filters.purchased = true"
+              :class="filters.purchased
                 ? 'flex-1 h-full rounded-full bg-p-medium text-white font-semibold text-sm transition-all duration-150 active:scale-95 shadow-sm cursor-pointer'
                 : 'flex-1 h-full rounded-full bg-transparent text-p-medium hover:bg-p-soft/20 font-semibold text-sm transition-all duration-150 active:scale-95 cursor-pointer'"
             >
@@ -125,13 +126,10 @@
       <div id="cards-container">
         <!-- Item card -->
         <div
-          x-show="$store.marketplace.view == 'item'"
+          x-show="view == 'item'"
           class="grid grid-cols-[repeat(auto-fit,minmax(280px,0.5fr))] justify-center gap-8"
         >
-          <template
-            x-for="itemMeta in $store.marketplace.filteredItems"
-            :key="itemMeta._id"
-          >
+          <template x-for="itemMeta in filteredItems" :key="itemMeta._id">
             <div
               x-data="{ item: null }"
               x-init="fetch('/api/items/' + itemMeta._id)
@@ -142,7 +140,7 @@
                 <p>Error loading</p>
               </template>
               <template x-if="item">
-                <div :class="$store.marketplace.cardDecorator">
+                <div :class="cardDecorator">
                   <div
                     class="h-full flex-1 relative bg-gradient-to-br from-p-light to-p-soft/20"
                   >
@@ -232,15 +230,17 @@
         </div>
         <!-- Tour card -->
         <div
-          x-show="$store.marketplace.view == 'tour'"
+          x-data
+          x-show="view == 'tour'"
           class="grid grid-cols-[repeat(auto-fit,minmax(280px,0.5fr))] justify-center gap-8"
         >
           <template
-            x-show="$store.marketplace.view == 'tour'"
-            x-for="tour in $store.marketplace.filteredTours"
+            x-data
+            x-show="view == 'tour'"
+            x-for="tour in filteredTours"
             :key="tour._id"
           >
-            <div :class="$store.marketplace.cardDecorator">
+            <div :class="cardDecorator">
               <div
                 class="h-full flex-1 relative bg-gradient-to-br from-p-light to-p-soft/20"
               >

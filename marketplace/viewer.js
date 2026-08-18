@@ -1,6 +1,7 @@
 import Alpine from 'alpinejs'
 
 Alpine.data('viewer', () => ({
+  /* TODO: handle non-logged case / unauthorized case */
   tour: null,
   item: null,
   curr: 0,
