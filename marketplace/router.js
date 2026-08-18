@@ -7,7 +7,7 @@ const router = express.Router()
 
 router.use('/assets', express.static(join(rootDir, 'marketplace/assets')))
 
-router.all('/', (req, res) => {
+router.get('/', (req, res) => {
   if (req.baseUrl === '/marketplace') {
     res.sendFile(join(rootDir, 'marketplace/marketplace.html'))
   } else if (req.baseUrl === '/editor') {
@@ -15,6 +15,10 @@ router.all('/', (req, res) => {
   } else if (req.baseUrl === '/profile') {
     res.sendFile(join(rootDir, 'marketplace/profile.html'))
   }
+})
+
+router.get('/:id', async (req, res) => {
+  res.sendFile(join(rootDir, './viewer.html'))
 })
 
 export default router
