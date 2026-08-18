@@ -72,10 +72,9 @@ async function getUser(
   if (targetResult.isLeft()) return targetResult
   const targetUser = targetResult.unsafeCoerce()
 
-  console.log(targetUser, '\n---\n', project(privateUserFields, targetUser))
   return Right(
     project(
-      id == currentUserId || currentUser.role == Role['Admin']
+      id.equals(currentUserId) || currentUser.role == Role['Admin']
         ? privateUserFields
         : publicUserFields,
       targetUser,

@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express'
 import { AssetInput, AssetPatch, AssetQuery } from './model.js'
 import AssetService from './service.js'
-import mongoose from 'mongoose'
+import mongoose, { Types } from 'mongoose'
 import { ensureAuth } from '../accessControl.js'
 import { handleLeft } from '../shared/router.js'
 
@@ -29,7 +29,7 @@ router.get('/:id', async (req, res) => {
 
   if (!mongoose.Types.ObjectId.isValid(assetID))
     return res.status(400).json({ message: 'Malformed asset ID' })
-  const id = mongoose.Types.ObjectId.createFromHexString(assetID)
+  const id = new Types.ObjectId(assetID)
 
   const result = req.user
     ? await AssetService.getAsset(id, req.user!._id)
@@ -72,7 +72,7 @@ router.patch('/:id', ensureAuth, async (req: Request, res: Response) => {
   if (!mongoose.Types.ObjectId.isValid(assetID))
     return res.status(400).json({ message: 'Malformed asset ID' })
 
-  const id = mongoose.Types.ObjectId.createFromHexString(assetID)
+  const id = new Types.ObjectId(assetID)
 
   // Validate input
   const validation = AssetPatch.validate(req.body)
@@ -96,7 +96,7 @@ router.delete('/:id', ensureAuth, async (req: Request, res: Response) => {
   if (!mongoose.Types.ObjectId.isValid(assetID))
     return res.status(400).json({ message: 'Malformed asset ID' })
 
-  const id = mongoose.Types.ObjectId.createFromHexString(assetID)
+  const id = new Types.ObjectId(assetID)
   const result = await AssetService.deleteAsset(id, userID)
   result.caseOf({
     Right: (asset) => res.json(asset),

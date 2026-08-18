@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express'
 import { ItemInput, ItemPatch, ItemQuery } from './model.js'
 import ItemService from './service.js'
-import mongoose from 'mongoose'
+import mongoose, { Types } from 'mongoose'
 import { ensureAuth } from '../accessControl.js'
 import { handleLeft } from '../shared/router.js'
 
@@ -33,7 +33,7 @@ router.get('/:id', ensureAuth, async (req, res) => {
   if (!mongoose.Types.ObjectId.isValid(itemID))
     return res.status(400).json({ message: 'Malformed item ID' })
 
-  const id = mongoose.Types.ObjectId.createFromHexString(itemID)
+  const id = new Types.ObjectId(itemID)
   const result = await ItemService.getItem(id, userID)
   result.caseOf({
     Right: (value) => res.json(value),
@@ -65,7 +65,7 @@ router.patch('/:id', ensureAuth, async (req: Request, res: Response) => {
   if (!mongoose.Types.ObjectId.isValid(itemID))
     return res.status(400).json({ message: 'Malformed item ID' })
 
-  const id = mongoose.Types.ObjectId.createFromHexString(itemID)
+  const id = new Types.ObjectId(itemID)
 
   // Validate input
   const validation = ItemPatch.validate(req.body)
@@ -87,7 +87,7 @@ router.delete('/:id', ensureAuth, async (req: Request, res: Response) => {
   if (!mongoose.Types.ObjectId.isValid(itemID))
     return res.status(400).json({ message: 'Malformed item ID' })
 
-  const id = mongoose.Types.ObjectId.createFromHexString(itemID)
+  const id = new Types.ObjectId(itemID)
   const result = await ItemService.deleteItem(id, userID)
   result.caseOf({
     Right: (item) => res.json(item),

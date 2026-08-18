@@ -82,7 +82,7 @@ router.patch('/:id', ensureAuth, async (req: Request, res: Response) => {
   const currentUserId = req.user!._id
   if (!mongoose.Types.ObjectId.isValid(userID))
     return res.status(400).json({ message: 'Malformed user ID' })
-  const id = mongoose.Types.ObjectId.createFromHexString(userID)
+  const id = new Types.ObjectId(userID)
 
   const validation = UserPatch.validate(req.body)
   if (validation.isLeft())
@@ -101,7 +101,7 @@ router.delete('/:id', ensureAuth, async (req: Request, res: Response) => {
   const currentUserId = req.user!._id
   if (!mongoose.Types.ObjectId.isValid(userID))
     return res.status(400).json({ message: 'Malformed user ID' })
-  const id = mongoose.Types.ObjectId.createFromHexString(userID)
+  const id = new Types.ObjectId(userID)
 
   const result = await UserService.deleteUser(id, currentUserId)
   result.caseOf({

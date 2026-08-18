@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express'
 import { MuseumQuery } from './model.js'
 import MuseumService from './service.js'
-import mongoose from 'mongoose'
+import mongoose, { Types } from 'mongoose'
 import { handleLeft } from '../shared/router.js'
 
 const router = express.Router()
@@ -33,7 +33,7 @@ router.get('/:id', async (req: Request, res: Response) => {
   if (!mongoose.Types.ObjectId.isValid(museumID))
     return res.status(400).json({ message: 'Malformed museum ID' })
 
-  const id = mongoose.Types.ObjectId.createFromHexString(museumID)
+  const id = new Types.ObjectId(museumID)
   const result = await MuseumService.getMuseum(id)
   result.caseOf({
     Right: (value) => res.json(value),

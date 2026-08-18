@@ -27,11 +27,11 @@ Alpine.store('marketplace', {
 
   // TODO: refactor into user-logged component
   get filteredItems() {
+    console.log(this.allItems)
     // const fmus = this.filters.museum
-    // const fpur = this.filters.purchased
-    // const user = this.user
-    console.log('purchasedTours: ', this.user)
-    return null
+    const user = this.user
+    return this.allItems.filter((i) => user?.purchasedTours.includes(i.tour))
+
     // .filter((i) => (fmus ? i.museum === fmus : true))
     // .filter((i) => (user && fpur ? user.purchasedTours.includes(i) : true))
     // .filter((i) => i.name.startsWith(this.filters.search))

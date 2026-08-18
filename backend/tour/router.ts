@@ -33,7 +33,7 @@ router.get('/:id', ensureAuth, async (req, res) => {
   if (!mongoose.Types.ObjectId.isValid(tourID))
     return res.status(400).json({ message: 'Malformed tour ID' })
 
-  const id = mongoose.Types.ObjectId.createFromHexString(tourID)
+  const id = new Types.ObjectId(tourID)
   const result = await TourService.getTour(id, userID)
   result.caseOf({
     Right: (value) => res.json(value),
@@ -69,7 +69,7 @@ router.patch('/:id', ensureAuth, async (req: Request, res: Response) => {
   if (!mongoose.Types.ObjectId.isValid(tourID))
     return res.status(400).json({ message: 'Malformed tour ID' })
 
-  const id = mongoose.Types.ObjectId.createFromHexString(tourID)
+  const id = new Types.ObjectId(tourID)
   const validation = TourPatch.validate(req.body)
   if (validation.isLeft()) {
     return res.status(400).json({ error: validation.extract() })
@@ -89,7 +89,7 @@ router.delete('/:id', ensureAuth, async (req: Request, res: Response) => {
   if (!mongoose.Types.ObjectId.isValid(tourID))
     return res.status(400).json({ message: 'Malformed tour ID' })
 
-  const id = mongoose.Types.ObjectId.createFromHexString(tourID)
+  const id = new Types.ObjectId(tourID)
   const result = await TourService.deleteTour(id, userID)
   result.caseOf({
     Right: (tour) => res.json(tour),
