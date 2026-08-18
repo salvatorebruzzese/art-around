@@ -6,11 +6,20 @@ Alpine.data('viewer', () => ({
   curr: 0,
 
   async init() {
-    const id = window.location.pathname.split('/').pop()
-    const response = await fetch('/api/tours/' + id)
+    const url = new URL(window.location.href)
+    const tourId = url.pathname.split('/').filter(Boolean).at(1)
+    const itemId = url.searchParams.get('item')
+
+    const response = await fetch('/api/tours/' + tourId)
     if (response.ok) {
       this.tour = await response.json()
-      await this.getItem()
+      if (itemId) {
+        this.item = await fetch('/api/items/' + itemId).then((r) =>
+          r.ok ? r.json() : null,
+        )
+        this.curr = this.tour.items.indexOf(itemId)
+        if (!this.item) await this.getItem()
+      } else await this.getItem()
     }
   },
 
@@ -26,6 +35,7 @@ Alpine.data('viewer', () => ({
     if (this.curr > 0) {
       this.curr--
       await this.getItem()
+      this.updateURL()
     }
   },
 
@@ -33,7 +43,13 @@ Alpine.data('viewer', () => ({
     if (this.tour?.items && this.curr < this.tour.items.length - 1) {
       this.curr++
       await this.getItem()
+      this.updateURL()
     }
+  },
+  updateURL() {
+    const url = new URL(window.location)
+    url.searchParams.set('item', this.item._id) // newItemId is your updated ID
+    history.pushState({}, '', url)
   },
 }))
 
