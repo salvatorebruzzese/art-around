@@ -104,6 +104,7 @@ export function generateItemsForTour(
       license: 'CC-BY-4.0',
       tags: template.tags,
       explanations: selectedExplanations,
+      imageUrl: `https://dummyimage.com/600x600/efefef/a3a3a3.jpg&text=Image+Preview`,
     }
   })
 }

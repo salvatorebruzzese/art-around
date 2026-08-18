@@ -8,15 +8,14 @@
   </head>
   <body>
     <div
-      x-data="privateViewer"
+      x-data="viewer"
       class="h-screen border border-p-soft max-w-[70%] max-h-[90%]"
     >
-      <!-- x-if sul template per attendere che 'item' esista -->
       <template x-if="item">
         <div class="h-full">
           <figure>
             <img
-              x-bind:src="'/api/assets/' + item.image"
+              :src="'/api/assets/' + item.image"
               class="absolute inset-0 w-full h-full object-cover mix-blend-multiply"
             />
           </figure>

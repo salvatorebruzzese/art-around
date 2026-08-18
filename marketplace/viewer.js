@@ -1,7 +1,8 @@
 import Alpine from 'alpinejs'
 
-Alpine.data('privateViewer', () => ({
+Alpine.data('viewer', () => ({
   tour: null,
+  item: null,
   curr: 0,
 
   async init() {
@@ -9,19 +10,30 @@ Alpine.data('privateViewer', () => ({
     const response = await fetch('/api/tours/' + id)
     if (response.ok) {
       this.tour = await response.json()
+      await this.getItem()
     }
   },
 
-  // Definiamo 'item' come getter reattivo
-  get item() {
-    return this.tour?.items?.[this.curr] || null
+  async getItem() {
+    if (!this.tour?.items?.[this.curr]) return
+    const response = await fetch('/api/items/' + this.tour.items[this.curr])
+    if (response.ok) {
+      this.item = await response.json()
+    }
   },
 
-  prev() {
-    if (this.curr > 0) this.curr--
+  async prev() {
+    if (this.curr > 0) {
+      this.curr--
+      await this.getItem()
+    }
   },
-  next() {
-    if (this.tour?.items && this.curr < this.tour.items.length - 1) this.curr++
+
+  async next() {
+    if (this.tour?.items && this.curr < this.tour.items.length - 1) {
+      this.curr++
+      await this.getItem()
+    }
   },
 }))
 
