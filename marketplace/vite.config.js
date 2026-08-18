@@ -11,6 +11,7 @@ export default defineConfig({
         marketplace: 'marketplace.html',
         editor: 'editor.html',
         profile: 'profile.html',
+        viewer: 'viewer.html',
       },
     },
   },

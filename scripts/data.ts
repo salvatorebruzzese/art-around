@@ -92,7 +92,6 @@ export function generateItemsForTour(
 ) {
   return Array.from({ length: count }).map((_, index) => {
     const template = itemTemplates[index % itemTemplates.length]
-    const assignedAsset = assetIds[index % assetIds.length]
     const expKeys = Object.keys(sampleExplanations)
     const selectedExplanations =
       sampleExplanations[expKeys[index % expKeys.length]]
@@ -104,7 +103,6 @@ export function generateItemsForTour(
       tour: tourId,
       license: 'CC-BY-4.0',
       tags: template.tags,
-      images: [assignedAsset],
       explanations: selectedExplanations,
     }
   })

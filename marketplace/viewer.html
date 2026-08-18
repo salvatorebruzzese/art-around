@@ -7,6 +7,52 @@
     <script src="viewer.js" type="module"></script>
   </head>
   <body>
-    <div x-data="{ tour: null }" x-init="tour = $store.viewer.getTour()"></div>
+    <div
+      x-data="privateViewer"
+      class="h-screen border border-p-soft max-w-[70%] max-h-[90%]"
+    >
+      <!-- x-if sul template per attendere che 'item' esista -->
+      <template x-if="item">
+        <div class="h-full">
+          <figure>
+            <img
+              x-bind:src="'/api/assets/' + item.image"
+              class="absolute inset-0 w-full h-full object-cover mix-blend-multiply"
+            />
+          </figure>
+
+          <div
+            class="flex flex-col justify-start md:justify-center gap-4 h-full overflow-y-auto"
+          >
+            <h1 class="text-lg text-p-dark" x-text="item.name"></h1>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div class="flex flex-col">
+                <h2 class="text-xs font-semibold text-p-medium uppercase">
+                  Museo
+                </h2>
+                <p class="text-p-dark" x-text="item.museum"></p>
+              </div>
+              <div class="flex flex-col">
+                <h2 class="text-xs font-semibold text-p-medium uppercase">
+                  Data
+                </h2>
+                <p class="text-p-dark" x-text="item.date"></p>
+              </div>
+            </div>
+
+            <div class="flex flex-col">
+              <h2 class="text-xs font-semibold text-p-medium uppercase">
+                Descrizione
+              </h2>
+              <p
+                class="text-p-dark font-sans mt-1"
+                x-text="item.description"
+              ></p>
+            </div>
+          </div>
+        </div>
+      </template>
+    </div>
   </body>
 </html>

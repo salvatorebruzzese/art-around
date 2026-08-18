@@ -14,7 +14,6 @@ interface _Tour {
   author: Types.ObjectId
   museum: Types.ObjectId
   thumbnail?: Types.ObjectId
-  images?: Types.ObjectId[]
   items: Types.ObjectId[]
   description?: string
   reviews?: IReview[]
@@ -39,7 +38,6 @@ export const tourSchema = new Schema<ITour>(
     author: { type: Schema.Types.ObjectId, ref: 'User' },
     museum: { type: Schema.Types.ObjectId, ref: 'Museum' },
     thumbnail: { type: Schema.Types.ObjectId, ref: 'Asset' },
-    images: [{ type: Schema.Types.ObjectId, ref: 'Asset' }],
     items: [{ type: Schema.Types.ObjectId, ref: 'Item' }],
     description: { type: String },
     reviews: [reviewSchema],
@@ -82,7 +80,6 @@ const TourInputSchemaZod = z.object({
   museum: objectIdZod,
   items: z.array(objectIdZod),
   thumbnail: objectIdZod.optional(),
-  images: z.array(objectIdZod).optional(),
   description: z.string().optional(),
 })
 
@@ -93,7 +90,6 @@ const TourQuerySchemaZod = z.object({
   museum: objectIdZod.optional(),
   items: z.array(objectIdZod).optional(),
   thumbnail: objectIdZod.optional(),
-  images: z.array(objectIdZod).optional(),
   description: z.string().optional(),
   // REVIEW: check whether this is the correct way to validate reviews
   reviews: z.array(ReviewQuerySchemaZod).optional(),
@@ -118,7 +114,6 @@ export const safeTourFields: (keyof _Tour)[] = [
   'museum',
   'description',
   'thumbnail',
-  'images',
   'reviews',
   // fill as needed
 ]

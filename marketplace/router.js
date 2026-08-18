@@ -18,7 +18,7 @@ router.get('/', (req, res) => {
 })
 
 router.get('/:id', async (req, res) => {
-  res.sendFile(join(rootDir, './viewer.html'))
+  res.sendFile(join(rootDir, 'marketplace/viewer.html'))
 })
 
 export default router

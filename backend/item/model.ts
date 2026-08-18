@@ -45,7 +45,7 @@ interface _Item {
   explanations: IDescription[]
   license: string
   tags?: string[]
-  images?: Types.ObjectId[]
+  image?: Types.ObjectId
   position?: IGeoPosition
 }
 
@@ -66,7 +66,7 @@ export const itemSchema = new Schema<IItem>(
     license: String,
     tour: { type: Schema.ObjectId, ref: 'Tour', required: true },
     tags: [{ type: String }],
-    images: [{ type: Schema.ObjectId, ref: 'Asset' }],
+    image: { type: Schema.ObjectId, ref: 'Asset' },
   },
   { discriminatorKey: 'itemType', collection: 'items', timestamps: true },
 )
@@ -112,7 +112,7 @@ const ItemInputSchemaZod = z.object({
   explanations: z.array(DescriptionSchemaZod),
   license: z.string(),
   tags: z.array(z.string()).optional(),
-  images: z.array(objectIdZod).optional(),
+  image: z.array(objectIdZod).optional(),
 })
 
 const ItemQuerySchemaZod = z.object({
@@ -123,7 +123,7 @@ const ItemQuerySchemaZod = z.object({
   explanations: z.array(DescriptionSchemaZod).optional(),
   license: z.string().optional(),
   tags: z.array(z.string()).optional(),
-  images: z.array(objectIdZod).optional(),
+  image: z.array(objectIdZod).optional(),
 })
 
 const ItemPatchSchemaZod = ItemInputSchemaZod.partial()
