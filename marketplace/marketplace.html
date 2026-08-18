@@ -69,7 +69,7 @@
           <!-- Switch Toggle (Visibile solo se un museo è selezionato, e si è loggati) -->
           <div
             id="toggle-switch"
-            x-show="$store.marketplace.user"
+            x-transition
             class="flex items-center border border-p-soft rounded-full h-12 p-1 bg-white shadow-sm w-64"
           >
             <button
@@ -92,7 +92,8 @@
           <!-- purchased tours -->
           <div
             id="toggle-purchased"
-            x-show="$store.marketplace.user"
+            x-show="$store.marketplace.user && $store.marketplace.view == 'tour'"
+            x-transition
             class="flex items-center border border-p-soft rounded-full h-12 p-1 bg-white shadow-sm w-64"
           >
             <button
@@ -210,12 +211,18 @@
                       ></h2>
                     </div>
                     <div class="flex gap-4">
-                      <!-- Use inline onclick calling window.selectItem -->
-                      <button class="shared-button-full">
-                        <!-- onclick="selectItem('${item._id}')" -->
+                      <a
+                        class="shared-button-full-primary"
+                        :href="'./' + item.tour + '?item=' + item._id"
+                      >
                         Apri
-                      </button>
-                      <button class="shared-button-full">Modifica</button>
+                      </a>
+                      <a
+                        class="shared-button-full-secondary"
+                        :href="'/editor/' + item.tour + '?item=' + item._id"
+                      >
+                        Modifica
+                      </a>
                     </div>
                   </div>
                 </div>
@@ -315,7 +322,6 @@
                     class="shared-button-full-secondary"
                     :href="'./' + tour._id"
                   >
-                    <!-- onclick="selectTour('${tour._id}')" -->
                     Apri
                   </a>
                   <button class="shared-button-full-primary">Acquista</button>
