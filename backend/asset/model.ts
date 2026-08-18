@@ -1,7 +1,6 @@
 import mongoose, { Schema, Document, Types } from 'mongoose'
 import z from 'zod'
 import { makeZodValidator, objectIdZod } from '../shared/validation.js'
-import { Projection } from '../shared/utils.js'
 
 export interface IAsset extends Document {
   author: Types.ObjectId
@@ -24,12 +23,12 @@ export const assetSchema = new Schema<IAsset>(
 
 export const Asset = mongoose.model<IAsset>('Asset', assetSchema)
 
-export const safeAssetFields: Projection<IAsset> = {
-  author: 1,
-  tour: 1,
-  datatype: 1,
-  data: 1,
-}
+export const safeAssetFields: (keyof IAsset)[] = [
+  'author',
+  'tour',
+  'datatype',
+  'data',
+]
 
 // -----------
 // ASSET VALIDATOR

@@ -10,6 +10,7 @@ import { User } from '../backend/user/model.js'
 import { Asset } from '../backend/asset/model.js'
 import { Item } from '../backend/item/model.js'
 import { generateItemsForTour } from './data.js'
+import { Role } from '../backend/accessControl.js'
 
 async function fetchRandomImageBuffer() {
   const url = 'https://picsum.photos/600/600'
@@ -44,11 +45,13 @@ async function seed() {
       username: 'testuser',
       email: 'me@example.com',
       password: hashedPassword,
-      role: 'User',
+      role: Role['User'],
       authoredTours: [],
       purchasedTours: [],
       billingData: { cards: [], addresses: [] },
     })
+
+    console.debug(user)
 
     // Creazione pool di Asset condivisi
     const assetPromises = Array.from({ length: 5 }).map(async () =>

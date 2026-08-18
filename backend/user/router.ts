@@ -6,7 +6,7 @@ import {
   privateUserFields,
 } from './model.js'
 import UserService from './service.js'
-import mongoose from 'mongoose'
+import mongoose, { Types } from 'mongoose'
 import { ensureAuth } from '../accessControl.js'
 import { handleLeft } from '../shared/router.js'
 import { project } from '../shared/utils.js'
@@ -62,9 +62,11 @@ router.get('/:id', ensureAuth, async (req: Request, res: Response) => {
   const currentUserId = req.user!._id
   if (!mongoose.Types.ObjectId.isValid(userID))
     return res.status(400).json({ message: 'Malformed user ID' })
-  const id = mongoose.Types.ObjectId.createFromHexString(userID)
 
-  const result = await UserService.getUser(id, currentUserId)
+  const result = await UserService.getUser(
+    new Types.ObjectId(userID),
+    currentUserId,
+  )
   result.caseOf({
     Right: (user) => res.json(user),
     Left: handleLeft(res),

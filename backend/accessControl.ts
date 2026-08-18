@@ -5,7 +5,12 @@ import { Model, Types, Document } from 'mongoose'
 
 // A user and an editor are not that different, as editors are
 // users who either created a tour or bought one and have the right to fork it
-export type Role = 'Guest' | 'User' | 'Teacher' | 'Admin'
+export enum Role {
+  Guest = 'Guest',
+  User = 'User',
+  Teacher = 'Teacher',
+  Admin = 'Admin',
+}
 
 const _resources = [
   'item',
@@ -40,6 +45,7 @@ const User: Permission[] = [
   'view:metatour',
   'view:tour',
   'view:item',
+  'view:user',
   'delete:item',
   'purchase:tour',
   'create:tour',
@@ -59,10 +65,10 @@ const Teacher: Permission[] = [
 const Admin: Permission[] = [...Teacher, 'edit:all']
 
 export const ACMatrix: Record<Role, Permission[]> = {
-  Guest,
-  User,
-  Teacher,
-  Admin,
+  [Role['Guest']]: Guest,
+  [Role['User']]: User,
+  [Role['Teacher']]: Teacher,
+  [Role['Admin']]: Admin,
 }
 
 export function checkRole(role: Role, permission: Permission): boolean {

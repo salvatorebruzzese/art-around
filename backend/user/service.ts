@@ -10,7 +10,7 @@ import {
 } from './model.js'
 import { Either, Left, Right } from 'purify-ts/Either'
 import { Types } from 'mongoose'
-import { _getById, checkRole } from '../accessControl.js'
+import { _getById, checkRole, Role } from '../accessControl.js'
 import {
   accessDenied,
   AccessDenied,
@@ -47,7 +47,7 @@ async function signup(
     const newUser = await User.create({
       ...input,
       password: hashedPassword,
-      role: input.username == 'Admin' ? 'Admin' : 'User', // TODO: role attribution
+      role: input.username == 'Admin' ? Role['Admin'] : Role['User'], // TODO: role attribution
     })
     return Right(newUser)
   } catch (e) {
@@ -64,15 +64,18 @@ async function getUser(
   if (userResult.isLeft()) return userResult
   const currentUser = userResult.unsafeCoerce()
 
-  if (!checkRole(currentUser.role, 'view:user')) return Left(accessDenied())
+  if (!checkRole(currentUser.role, 'view:user')) {
+    return Left(accessDenied())
+  }
 
   const targetResult = await _getById(id, User)
   if (targetResult.isLeft()) return targetResult
-
   const targetUser = targetResult.unsafeCoerce()
+
+  console.log(targetUser, '\n---\n', project(privateUserFields, targetUser))
   return Right(
     project(
-      id == currentUserId || currentUser.role == 'Admin'
+      id == currentUserId || currentUser.role == Role['Admin']
         ? privateUserFields
         : publicUserFields,
       targetUser,
@@ -123,7 +126,7 @@ async function patchUser(
   if (userResult.isLeft()) return Left(accessDenied())
   const currentUser = userResult.unsafeCoerce()
   if (!checkRole(currentUser.role, 'edit:user')) return Left(accessDenied())
-  if (currentUserId != id && currentUser.role != 'Admin')
+  if (currentUserId != id && currentUser.role != Role['Admin'])
     return Left(accessDenied())
 
   // Hash password if being changed
@@ -159,7 +162,7 @@ async function deleteUser(
 
   if (
     (!checkRole(currentUser.role, 'delete:user') || id != targetUser.id) &&
-    currentUser.role != 'Admin'
+    currentUser.role != Role['Admin']
   )
     return Left(accessDenied())
 

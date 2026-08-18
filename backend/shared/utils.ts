@@ -5,28 +5,17 @@ export function assertNever(x: never): never {
 
 // TODO: add explanation of project function
 
-export type Projection<T> = Partial<Record<keyof T, boolean | 1 | 0>>
-
-export function project<T>(projection: Projection<T>, obj: T): Partial<T> {
-  const result: Partial<T> = {}
-  for (const key in projection) {
-    if (projection[key] && Object.prototype.hasOwnProperty.call(obj, key)) {
-      result[key] = obj[key]
-    }
+export function project<T, K extends keyof T>(
+  keys: K[],
+  obj: T & object,
+): Pick<T, K> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const ret: any = {}
+  keys.forEach((key) => {
+    if (key in obj) ret[key] = obj[key]
+  })
+  if (!('_id' in keys) && '_id' in obj) {
+    ret['_id'] = obj['_id']
   }
-
-  if (
-    Object.prototype.hasOwnProperty.call(obj, '_id') &&
-    !('_id' in projection)
-  ) {
-    // _id not specified, so include it
-    result['_id' as keyof T] = obj['_id' as keyof T]
-  }
-
-  // If _id is explicitly 0/false, remove it
-  if ('_id' in projection && !projection['_id']) {
-    delete result['_id' as keyof T]
-  }
-
-  return result
+  return ret
 }

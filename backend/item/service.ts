@@ -8,7 +8,7 @@ import {
 } from './model.js'
 import { Either, Left, Right } from 'purify-ts/Either'
 import { Types } from 'mongoose'
-import { _getById, checkRole } from '../accessControl.js'
+import { _getById, checkRole, Role } from '../accessControl.js'
 import {
   accessDenied,
   AccessDenied,
@@ -44,7 +44,7 @@ async function getItem(
   if (
     user.authoredTours.includes(tourId) ||
     user.purchasedTours.includes(tourId) ||
-    user.role === 'Admin' ||
+    user.role === Role['Admin'] ||
     item.itemAuthor.equals(userID)
   )
     return Right(project(safeItemFields, item))
@@ -89,7 +89,7 @@ async function createItem(
     return Left(validationError('itemAuthor', 'Item author not found.'))
 
   // Ownership & authoring rules
-  if (user.role !== 'Admin') {
+  if (user.role !== Role['Admin']) {
     if (!new Types.ObjectId(input.itemAuthor).equals(userId))
       return Left(
         validationError('itemAuthor', 'Logged user is not the author.'),
@@ -129,7 +129,7 @@ async function patchItem(
   const item = itemResult.unsafeCoerce()
 
   // Only admin or author can edit
-  if (user.role !== 'Admin') {
+  if (user.role !== Role['Admin']) {
     if (!item.itemAuthor.equals(userId)) {
       return Left(accessDenied())
     }
@@ -178,7 +178,7 @@ async function deleteItem(
 
   if (!checkRole(user.role, 'delete:item')) return Left(accessDenied())
 
-  if (user.role !== 'Admin') {
+  if (user.role !== Role['Admin']) {
     // Only author can delete
     if (!item.itemAuthor || !item.itemAuthor.equals(userId))
       return Left(accessDenied())

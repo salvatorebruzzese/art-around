@@ -8,7 +8,7 @@ import {
 } from './model.js'
 import { Either, Left, Right } from 'purify-ts/Either'
 import { Types } from 'mongoose'
-import { _getById, checkRole } from '../accessControl.js'
+import { _getById, checkRole, Role } from '../accessControl.js'
 import {
   accessDenied,
   AccessDenied,
@@ -66,7 +66,7 @@ async function createAsset(
   if (!checkRole(user.role, 'create:asset')) return Left(accessDenied())
   const tourId = new Types.ObjectId(input.tour)
 
-  if (user.role != 'Admin') {
+  if (user.role != Role['Admin']) {
     if (!new Types.ObjectId(input.author).equals(userId))
       return Left(validationError('author', 'Logged user is not the author.'))
     if (!user.authoredTours.includes(tourId))
@@ -96,7 +96,7 @@ async function patchAsset(
   const user = userResult.unsafeCoerce()
 
   if (!checkRole(user.role, 'edit:asset')) return Left(accessDenied())
-  if (user.role != 'Admin') {
+  if (user.role != Role['Admin']) {
     // Only allow editing if user is author
     const assetResult = await _getById(id, Asset)
     if (assetResult.isLeft()) return assetResult
@@ -130,7 +130,7 @@ async function deleteAsset(
   const asset = assetResult.unsafeCoerce()
 
   if (!checkRole(user.role, 'delete:asset')) return Left(accessDenied())
-  if (user.role != 'Admin')
+  if (user.role != Role['Admin'])
     if (!asset.author.equals(userId)) return Left(accessDenied())
 
   try {

@@ -12,6 +12,7 @@ Alpine.store('marketplace', {
   allTours: [],
   allItems: [], // Dichiarato per evitare ReferenceError
   view: 'tour', // | 'item'
+  profile: null,
   user: null,
 
   get filteredTours() {
@@ -26,23 +27,22 @@ Alpine.store('marketplace', {
 
   // TODO: refactor into user-logged component
   get filteredItems() {
-    const fmus = this.filters.museum
-    const fpur = this.filters.purchased
-    const user = this.user
-    return this.allTours
-      .filter((i) => (fmus ? i.museum === fmus : true))
-      .filter((i) => (user && fpur ? user.purchasedTours.includes(i) : true))
-      .filter((i) => i.name.startsWith(this.filters.search))
+    // const fmus = this.filters.museum
+    // const fpur = this.filters.purchased
+    // const user = this.user
+    console.log('purchasedTours: ', this.user)
+    return null
+    // .filter((i) => (fmus ? i.museum === fmus : true))
+    // .filter((i) => (user && fpur ? user.purchasedTours.includes(i) : true))
+    // .filter((i) => i.name.startsWith(this.filters.search))
   },
 
   get filtered() {
-    return this.selectedView === 'tour'
-      ? this.filteredTours
-      : this.filteredItems
+    return this.view === 'tour' ? this.filteredTours : this.filteredItems
   },
 
   async init() {
-    const [museums, tours, items, user] = await Promise.all([
+    const [museums, tours, items, profile] = await Promise.all([
       fetch('/api/museums/').then((r) => r.json()),
       fetch('/api/tours/').then((r) => r.json()),
       fetch('/api/items/').then((r) => r.json()),
@@ -51,10 +51,16 @@ Alpine.store('marketplace', {
         .catch(() => null),
     ])
 
+    if (profile) {
+      this.user = await fetch(`/api/users/${profile._id}`)
+        .then((r) => r.json())
+        .catch((e) => console.log(e)) // TODO: better err handl.
+    }
+
     this.museums = museums
     this.allTours = tours
     this.allItems = items
-    this.user = user
+    this.profile = profile
   },
 })
 

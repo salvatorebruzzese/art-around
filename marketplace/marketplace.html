@@ -72,16 +72,16 @@
             class="flex items-center border border-p-soft rounded-full h-12 p-1 bg-white shadow-sm w-64"
           >
             <button
-              @click="$store.marketplace.selectedView = 'tour'"
-              :class="$store.marketplace.selectedView === 'tour'
+              @click="$store.marketplace.view = 'tour'"
+              :class="$store.marketplace.view === 'tour'
                 ? 'flex-1 h-full rounded-full bg-p-medium text-white font-semibold text-sm transition-all duration-150 active:scale-95 shadow-sm cursor-pointer'
                 : 'flex-1 h-full rounded-full bg-transparent text-p-medium hover:bg-p-soft/20 font-semibold text-sm transition-all duration-150 active:scale-95 cursor-pointer'"
             >
               TOURS
             </button>
             <button
-              @click="$store.marketplace.selectedView = 'ITEM'"
-              :class="$store.marketplace.selectedView === 'ITEM'
+              @click="$store.marketplace.view = 'item'"
+              :class="$store.marketplace.view === 'item'
                 ? 'flex-1 h-full rounded-full bg-p-medium text-white font-semibold text-sm transition-all duration-150 active:scale-95 shadow-sm cursor-pointer'
                 : 'flex-1 h-full rounded-full bg-transparent text-p-medium hover:bg-p-soft/20 font-semibold text-sm transition-all duration-150 active:scale-95 cursor-pointer'"
             >
@@ -97,87 +97,183 @@
       </header>
 
       <!-- GRIGLIA DI RENDER CARDS -->
-      <div
-        id="thing-container"
-        class="grid grid-cols-[repeat(auto-fit,minmax(280px,0.5fr))] justify-center gap-8"
-      >
-        <template
-          x-for="tour in $store.marketplace.filteredTours"
-          :key="tour._id"
+      <div id="cards-container">
+        <!-- Item card -->
+        <div
+          x-show="$store.marketplace.view == 'item'"
+          class="grid grid-cols-[repeat(auto-fit,minmax(280px,0.5fr))] justify-center gap-8"
         >
-          <div :class="$store.marketplace.cardDecorator">
-            <div
-              class="h-full flex-1 relative overflow-hidden bg-gradient-to-br from-p-light to-p-soft/20"
-            >
-              <img
-                x-bind:src="'/api/assets/'+tour.thumbnail"
-                alt="Thumbnail not found"
-                class="absolute inset-0 w-full h-full object-cover mix-blend-multiply"
-              />
+          <template
+            x-for="item in $store.marketplace.filteredItems"
+            :key="item._id"
+          >
+            <div :class="$store.marketplace.cardDecorator">
+              <div
+                class="h-full flex-1 relative overflow-hidden bg-gradient-to-br from-p-light to-p-soft/20"
+              >
+                <img
+                  x-bind:src="'/api/assets/'+item.thumbnail"
+                  alt="Thumbnail not found"
+                  class="absolute inset-0 w-full h-full object-cover mix-blend-multiply"
+                />
 
-              <!-- Dropdown Menu Tre Punti -->
-              <div class="absolute top-3 right-3 z-10">
-                <div x-data="{open:false}" class="dropdown dropdown-end">
-                  <button
-                    @click="open = !open"
-                    class="btn btn-sm btn-circle bg-white/80 hover:bg-white text-p-dark border-none shadow-md backdrop-blur-sm focus:outline-none list-none"
-                  >
-                    <svg
-                      class="w-5 h-5"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
+                <!-- Dropdown Menu Tre Punti -->
+                <!-- TODO: refactor into template -->
+                <div class="absolute top-3 right-3 z-10">
+                  <div x-data="{open:false}" class="dropdown dropdown-end">
+                    <button
+                      @click="open = !open"
+                      class="btn btn-sm btn-circle bg-white/80 hover:bg-white text-p-dark border-none shadow-md backdrop-blur-sm focus:outline-none list-none"
                     >
-                      <path
-                        d="M10 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4z"
-                      />
-                    </svg>
-                  </button>
-                  <div x-show="open" @click.outside="open = false">
-                    <ul class="nav-dropdown-menu p-2">
-                      <li>
-                        <a class="shared-button-flex-secondary shadow-none"
-                          >Condividi</a
-                        >
-                      </li>
-                      <li>
-                        <a class="shared-button-flex-warning shadow-none"
-                          >Elimina</a
-                        >
-                      </li>
-                    </ul>
+                      <svg
+                        class="w-5 h-5"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          d="M10 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4z"
+                        />
+                      </svg>
+                    </button>
+                    <div
+                      x-show="open"
+                      x-transition
+                      @click.outside="open = false"
+                    >
+                      <ul class="nav-dropdown-menu p-2">
+                        <li>
+                          <a class="shared-button-flex-secondary shadow-none"
+                            >Condividi</a
+                          >
+                        </li>
+                        <li>
+                          <a class="shared-button-flex-warning shadow-none"
+                            >Elimina</a
+                          >
+                        </li>
+                      </ul>
+                    </div>
                   </div>
                 </div>
               </div>
+              <div
+                class="h-36 bg-p-soft/20 flex flex-col justify-center gap-4 px-6 border-t text-p-dark border-p-soft/50"
+              >
+                <div class="flex flex-col font-sans">
+                  <h1
+                    class="text-2xl text-p-medium truncate"
+                    x-text="item.name"
+                  ></h1>
+                  <h2
+                    x-init="init"
+                    x-data="{
+                            tourName: '',
+                            async init() {this.tourName = (await fetch('/api/tours/'+item.tour).then(r => r.json())).name},
+                          }"
+                    class="text-md text-p-medium/50 truncate"
+                    x-text="tourName"
+                  ></h2>
+                </div>
+                <div class="flex gap-4">
+                  <!-- Use inline onclick calling window.selectItem -->
+                  <button class="shared-button-full">
+                    <!-- onclick="selectItem('${item._id}')" -->
+                    Apri
+                  </button>
+                  <button class="shared-button-full">Modifica</button>
+                </div>
+              </div>
             </div>
-            <div
-              class="h-36 bg-p-soft/20 flex flex-col justify-center gap-4 px-6 border-t text-p-dark border-p-soft/50"
-            >
-              <div class="flex flex-col font-sans">
-                <h1
-                  class="text-2xl text-p-medium truncate"
-                  x-text="tour.name"
-                ></h1>
-                <h2
-                  x-init="init"
-                  x-data="{
+          </template>
+        </div>
+        <!-- Tour card -->
+        <div
+          x-show="$store.marketplace.view == 'tour'"
+          class="grid grid-cols-[repeat(auto-fit,minmax(280px,0.5fr))] justify-center gap-8"
+        >
+          <template
+            x-show="$store.marketplace.view == 'tour'"
+            x-for="tour in $store.marketplace.filteredTours"
+            :key="tour._id"
+          >
+            <div :class="$store.marketplace.cardDecorator">
+              <div
+                class="h-full flex-1 relative overflow-hidden bg-gradient-to-br from-p-light to-p-soft/20"
+              >
+                <img
+                  x-bind:src="'/api/assets/'+tour.thumbnail"
+                  alt="Thumbnail not found"
+                  class="absolute inset-0 w-full h-full object-cover mix-blend-multiply"
+                />
+
+                <!-- Dropdown Menu Tre Punti -->
+                <div class="absolute top-3 right-3 z-10">
+                  <div x-data="{open:false}" class="dropdown dropdown-end">
+                    <button
+                      @click="open = !open"
+                      class="btn btn-sm btn-circle bg-white/80 hover:bg-white text-p-dark border-none shadow-md backdrop-blur-sm focus:outline-none list-none"
+                    >
+                      <svg
+                        class="w-5 h-5"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          d="M10 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4z"
+                        />
+                      </svg>
+                    </button>
+                    <div
+                      x-show="open"
+                      x-transition
+                      @click.outside="open = false"
+                    >
+                      <ul class="nav-dropdown-menu p-2">
+                        <li>
+                          <a class="shared-button-flex-secondary shadow-none"
+                            >Condividi</a
+                          >
+                        </li>
+                        <li>
+                          <a class="shared-button-flex-warning shadow-none"
+                            >Elimina</a
+                          >
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="h-36 bg-p-soft/20 flex flex-col justify-center gap-4 px-6 border-t text-p-dark border-p-soft/50"
+              >
+                <div class="flex flex-col font-sans">
+                  <h1
+                    class="text-2xl text-p-medium truncate"
+                    x-text="tour.name"
+                  ></h1>
+                  <h2
+                    x-init="init"
+                    x-data="{
                             museumName: '',
                             async init() {this.museumName = (await fetch('/api/museums/'+tour.museum).then(r => r.json())).name},
                           }"
-                  class="text-md text-p-medium/50 truncate"
-                  x-text="museumName"
-                ></h2>
-              </div>
-              <div class="flex gap-4">
-                <!-- Use inline onclick calling window.selectTour -->
-                <button class="shared-button-full">
-                  <!-- onclick="selectTour('${tour._id}')" -->
-                  Apri
-                </button>
-                <button class="shared-button-full">Modifica</button>
+                    class="text-md text-p-medium/50 truncate"
+                    x-text="museumName"
+                  ></h2>
+                </div>
+                <div class="flex gap-4">
+                  <!-- Use inline onclick calling window.selectTour -->
+                  <button class="shared-button-full">
+                    <!-- onclick="selectTour('${tour._id}')" -->
+                    Apri
+                  </button>
+                  <button class="shared-button-full">Modifica</button>
+                </div>
               </div>
             </div>
-          </div>
-        </template>
+          </template>
+        </div>
       </div>
     </main>
   </body>

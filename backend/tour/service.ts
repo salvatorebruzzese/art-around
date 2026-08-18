@@ -8,7 +8,7 @@ import {
 } from './model.js'
 import { Either, Left, Right } from 'purify-ts/Either'
 import { Types } from 'mongoose'
-import { _getById, checkRole } from '../accessControl.js'
+import { _getById, checkRole, Role } from '../accessControl.js'
 import {
   accessDenied,
   AccessDenied,
@@ -33,7 +33,7 @@ async function getTour(
     !(/*(*/ checkRole(user.role, 'view:tour')) /* ||
       // !user.purchasedTours.includes(id) ||
       // !user.authoredTours.includes(id)) */ &&
-    user.role != 'Admin'
+    user.role != Role['Admin']
   )
     return Left(accessDenied())
 
@@ -92,7 +92,7 @@ async function patchTour(
   try {
     const tour = await Tour.findByIdAndUpdate(id, input)
     if (tour) {
-      if (tour.author != userId && user.role != 'Admin')
+      if (tour.author != userId && user.role != Role['Admin'])
         return Left(accessDenied())
       return Right(project(safeTourFields, tour))
     } else return Left(notFound())
@@ -119,7 +119,7 @@ async function deleteTour(
 
   if (
     (!checkRole(user.role, 'delete:tour') || !tour.author.equals(userId)) &&
-    user.role != 'Admin'
+    user.role != Role['Admin']
   )
     return Left(accessDenied())
 
