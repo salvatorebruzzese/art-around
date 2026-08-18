@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Marketplace</title>
     <link href="../styles.css" rel="stylesheet" type="text/css" />
-    <script type="module" src="./card.js" defer></script>
     <script type="module" src="./quick-nav.js" defer></script>
     <script type="module" src="./marketplace.js" defer></script>
   </head>
@@ -109,7 +108,7 @@
           >
             <div :class="$store.marketplace.cardDecorator">
               <div
-                class="h-full flex-1 relative overflow-hidden bg-gradient-to-br from-p-light to-p-soft/20"
+                class="h-full flex-1 relative bg-gradient-to-br from-p-light to-p-soft/20"
               >
                 <img
                   x-bind:src="'/api/assets/'+item.thumbnail"
@@ -198,7 +197,7 @@
           >
             <div :class="$store.marketplace.cardDecorator">
               <div
-                class="h-full flex-1 relative overflow-hidden bg-gradient-to-br from-p-light to-p-soft/20"
+                class="h-full flex-1 relative bg-gradient-to-br from-p-light to-p-soft/20"
               >
                 <img
                   x-bind:src="'/api/assets/'+tour.thumbnail"
@@ -229,6 +228,16 @@
                       @click.outside="open = false"
                     >
                       <ul class="nav-dropdown-menu p-2">
+                        <li>
+                          <a class="shared-button-flex-secondary shadow-none"
+                            >Modifica</a
+                          >
+                        </li>
+                        <li>
+                          <a class="shared-button-flex-secondary shadow-none"
+                            >Clona</a
+                          >
+                        </li>
                         <li>
                           <a class="shared-button-flex-secondary shadow-none"
                             >Condividi</a
@@ -264,11 +273,11 @@
                 </div>
                 <div class="flex gap-4">
                   <!-- Use inline onclick calling window.selectTour -->
-                  <button class="shared-button-full">
+                  <button class="shared-button-full-secondary">
                     <!-- onclick="selectTour('${tour._id}')" -->
                     Apri
                   </button>
-                  <button class="shared-button-full">Modifica</button>
+                  <button class="shared-button-full-primary">Acquista</button>
                 </div>
               </div>
             </div>
