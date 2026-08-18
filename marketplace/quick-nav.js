@@ -35,7 +35,10 @@ class QuickNav extends HTMLElement {
 
         <!-- Dropdown Utente -->
         <div x-data="{open: false}" class="avatar dropdown dropdown-end z-20">
-        <button @click="open = !open" class="nav-avatar-trigger list-none cursor-pointer"></button>
+    <button @click="open = !open" class="nav-avatar-trigger list-none cursor-pointer">
+    <!-- Temporary guest 'profile picuture' -->
+    <img x-bind:src="$store.marketplace.user?.profilePicture ? '/api/assets/'+$store.marketplace.user.profilePicture : 'https://dummyimage.com/200x200/bbb/fff&text=U'">
+    </button>
         <div x-show="open" @click.outside="open = false">
           <ul  class="nav-dropdown-menu mt-16">
             <template x-if="$store?.marketplace?.user">

@@ -53,6 +53,7 @@ Alpine.store('marketplace', {
       this.user = await fetch(`/api/users/${profile._id}`)
         .then((r) => r.json())
         .catch((e) => console.log(e)) // TODO: better err handl.
+      console.log(this.user)
     }
 
     this.museums = museums

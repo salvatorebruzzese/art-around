@@ -12,8 +12,8 @@ import { Item } from '../backend/item/model.js'
 import { generateItemsForTour } from './data.js'
 import { Role } from '../backend/accessControl.js'
 
-async function fetchRandomImageBuffer() {
-  const url = 'https://picsum.photos/600/600'
+async function fetchRandomImageBuffer(w = 600, h = 600) {
+  const url = `https://picsum.photos/${w}/${h}`
   const response = await fetch(url)
   const buffer = await response.arrayBuffer()
   return Buffer.from(buffer)
@@ -41,7 +41,7 @@ async function seed() {
 
     // Creazione Utente
     const hashedPassword = await bcrypt.hash('password123', 10)
-    const user = await User.create({
+    let user = await User.create({
       username: 'testuser',
       email: 'me@example.com',
       password: hashedPassword,
@@ -50,6 +50,22 @@ async function seed() {
       purchasedTours: [],
       billingData: { cards: [], addresses: [] },
     })
+
+    const profilePicture = await Asset.create({
+      author: user._id,
+      data: await fetchRandomImageBuffer(200, 200),
+      datatype: 'image/jpeg',
+      public: true,
+    })
+
+    const update = await User.findByIdAndUpdate(
+      user._id,
+      {
+        profilePicture: profilePicture._id,
+      },
+      { new: true },
+    )
+    user = update ? update : user
 
     // Creazione Utente Admin
     const adminPassword = await bcrypt.hash('admin123', 10)
