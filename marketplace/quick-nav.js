@@ -46,7 +46,7 @@ class QuickNav extends HTMLElement {
                 <li>
                   <button
                     class="shared-button-flex-warning shadow-none mt-2"
-                    @click="$store?.accessComponent ? $store.accessComponent.logout() : window.location.href='../home'"
+                    @click="$store.shared.logout()"
                   >
                     Esci
                   </button>

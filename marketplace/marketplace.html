@@ -7,6 +7,7 @@
     <link href="../styles.css" rel="stylesheet" type="text/css" />
     <script type="module" src="./quick-nav.js" defer></script>
     <script type="module" src="./marketplace.js" defer></script>
+    <script type="module" src="./shared.js" defer></script>
   </head>
   <body
     class="flex justify-center h-screen bg-p-light text-p-dark font-serif selection:bg-p-soft overflow-y-auto"
@@ -48,7 +49,7 @@
 
           <!-- Dropdown Musei -->
           <div
-            :class="{ 'aura aura-dual aura-md text-p-soft rounded-full': !$store.marketplace.selectedMuseum }"
+            :class="{ 'aura aura-dual aura-md text-p-soft rounded-full': !$store.marketplace.filters.museum }"
           >
             <select
               x-model="$store.marketplace.filters.museum"
@@ -67,7 +68,7 @@
           <!-- Switch Toggle (Visibile solo se un museo è selezionato, e si è loggati) -->
           <div
             id="toggle-switch"
-            x-show="$store.marketplace.filters.museum && $store.marketplace.user"
+            x-show="$store.marketplace.user"
             class="flex items-center border border-p-soft rounded-full h-12 p-1 bg-white shadow-sm w-64"
           >
             <button
@@ -87,6 +88,30 @@
               ITEM
             </button>
           </div>
+        </div>
+
+        <!-- purchased tours -->
+        <div
+          id="toggle-purchased"
+          x-show="$store.marketplace.user"
+          class="flex items-center border border-p-soft rounded-full h-12 p-1 bg-white shadow-sm w-64"
+        >
+          <button
+            @click="$store.marketplace.filters.purchased = false"
+            :class="!$store.marketplace.filters.purchased
+                ? 'flex-1 h-full rounded-full bg-p-medium text-white font-semibold text-sm transition-all duration-150 active:scale-95 shadow-sm cursor-pointer'
+                : 'flex-1 h-full rounded-full bg-transparent text-p-medium hover:bg-p-soft/20 font-semibold text-sm transition-all duration-150 active:scale-95 cursor-pointer'"
+          >
+            ALL
+          </button>
+          <button
+            @click="$store.marketplace.filters.purchased = true"
+            :class="$store.marketplace.filters.purchased
+                ? 'flex-1 h-full rounded-full bg-p-medium text-white font-semibold text-sm transition-all duration-150 active:scale-95 shadow-sm cursor-pointer'
+                : 'flex-1 h-full rounded-full bg-transparent text-p-medium hover:bg-p-soft/20 font-semibold text-sm transition-all duration-150 active:scale-95 cursor-pointer'"
+          >
+            PURCHASED
+          </button>
         </div>
 
         <!-- SVG Navigation & User Dropdown -->
