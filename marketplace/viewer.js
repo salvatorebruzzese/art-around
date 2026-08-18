@@ -1,4 +1,5 @@
 import Alpine from 'alpinejs'
+import './userManager'
 
 Alpine.data('viewer', () => ({
   /* TODO: handle non-logged case / unauthorized case */
@@ -29,6 +30,17 @@ Alpine.data('viewer', () => ({
     const response = await fetch('/api/items/' + this.tour.items[this.curr])
     if (response.ok) {
       this.item = await response.json()
+    } else {
+      // first: await user
+      if (!Alpine.store('userManager').user)
+        await Alpine.store('userManager').init()
+      // second: application logic
+      if (!Alpine.store('userManager').user) {
+        window.location.href = '../login/'
+      } else {
+        alert('You did not buy this visit')
+        window.location.href = '../marketplace/'
+      }
     }
   },
 

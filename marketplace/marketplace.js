@@ -1,5 +1,6 @@
 import Alpine from 'alpinejs'
 import fuzzysearch from 'fuzzysearch'
+import './userManager'
 
 document.addEventListener('alpine:init', () => {
   Alpine.data('marketplace', () => ({
@@ -14,7 +15,6 @@ document.addEventListener('alpine:init', () => {
     allTours: [],
     allItems: [], // Dichiarato per evitare ReferenceError
     view: 'tour', // | 'item'
-    profile: null,
 
     get filteredTours() {
       const fmus = this.filters.museum

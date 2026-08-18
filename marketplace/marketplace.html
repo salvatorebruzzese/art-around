@@ -8,7 +8,6 @@
     <script type="module" src="./quick-nav.js" defer></script>
     <script type="module" src="./marketplace.js" defer></script>
     <script type="module" src="./shared.js" defer></script>
-    <script type="module" src="./userManager.js" defer></script>
   </head>
   <body
     class="flex justify-center h-screen bg-p-light text-p-dark font-serif selection:bg-p-soft overflow-y-auto"
@@ -318,13 +317,30 @@
                 </div>
                 <div class="flex gap-4">
                   <!-- Use inline onclick calling window.selectTour -->
+                  <!-- Vero apri -->
                   <a
+                    x-show="$store.userManager.user.purchasedTours.includes(tour._id)
+                           || $store.userManager.user.authoredTours.includes(tour._id)"
                     class="shared-button-full-secondary"
                     :href="'./' + tour._id"
                   >
                     Apri
                   </a>
-                  <button class="shared-button-full-primary">Acquista</button>
+                  <!-- Preview apri TODO: implementare preview e/o ripensare ui -->
+                  <a
+                    x-show="!$store.userManager.user.purchasedTours.includes(tour._id)
+                           && !$store.userManager.user.authoredTours.includes(tour._id)"
+                    class="shared-button-full-secondary"
+                  >
+                    Apri
+                  </a>
+                  <button
+                    class="shared-button-full-primary"
+                    x-show="!$store.userManager.user.purchasedTours.includes(tour._id)
+                           && !$store.userManager.user.authoredTours.includes(tour._id)"
+                  >
+                    Acquista
+                  </button>
                 </div>
               </div>
             </div>
