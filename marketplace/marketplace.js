@@ -1,6 +1,7 @@
 import Alpine from 'alpinejs'
 import fuzzysearch from 'fuzzysearch'
 import './userManager'
+import './quick-nav.js'
 
 document.addEventListener('alpine:init', () => {
   Alpine.data('marketplace', () => ({
@@ -15,11 +16,12 @@ document.addEventListener('alpine:init', () => {
     allTours: [],
     allItems: [], // Dichiarato per evitare ReferenceError
     view: 'tour', // | 'item'
+    user: null,
 
     get filteredTours() {
       const fmus = this.filters.museum
       const fpur = this.filters.purchased
-      const user = Alpine.store('userManager').user
+      const user = this.user
       return this.allTours
         .filter((t) => (fmus ? t.museum === fmus : true))
         .filter((t) =>
@@ -33,7 +35,7 @@ document.addEventListener('alpine:init', () => {
 
     get filteredItems() {
       const fmus = this.filters.museum
-      const user = Alpine.store('userManager').user
+      const user = this.user
       return this.allItems
         .filter(
           (i) =>
@@ -58,6 +60,7 @@ document.addEventListener('alpine:init', () => {
       this.museums = museums
       this.allTours = tours
       this.allItems = items
+      this.user = await Alpine.store('userManager').getUser() // NOTE: a refresh i needed to change user
     },
   }))
 })

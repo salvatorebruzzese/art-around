@@ -1,3 +1,5 @@
+import Alpine from 'alpinejs'
+
 class QuickNav extends HTMLElement {
   connectedCallback() {
     this.innerHTML = `
@@ -34,14 +36,14 @@ class QuickNav extends HTMLElement {
         </div>
 
         <!-- Dropdown Utente -->
-        <div x-data="{open: false}" class="avatar dropdown dropdown-end z-20">
+    <div x-data="dropdown" class="avatar dropdown dropdown-end z-20">
     <button @click="open = !open" class="nav-avatar-trigger list-none cursor-pointer">
-    <!-- Temporary guest 'profile picuture' -->
-    <img x-bind:src="$store.userManager.user?.profilePicture ? '/api/assets/'+$store.userManager.user.profilePicture : 'https://dummyimage.com/200x200/bbb/fff&text=U'">
+        <!-- Temporary guest 'profile picuture' -->
+        <img x-bind:src="user?.profilePicture ? '/api/assets/'+user.profilePicture : 'https://dummyimage.com/200x200/bbb/fff&text=U'">
     </button>
         <div x-show="open" @click.outside="open = false">
           <ul  class="nav-dropdown-menu mt-16">
-            <template x-if="$store?.userManager?.user">
+            <template x-if="user">
               <div>
                 <li>
                   <a class="shared-button-flex-secondary shadow-none" href="../profile">Profilo</a>
@@ -56,7 +58,7 @@ class QuickNav extends HTMLElement {
                 </li>
               </div>
             </template>
-            <template x-if="!$store.userManager.user">
+            <template x-if="!user">
               <li>
                 <a class="shared-button-flex-secondary shadow-none" href="../login">Accedi</a>
               </li>
@@ -73,3 +75,13 @@ class QuickNav extends HTMLElement {
 }
 
 customElements.define('quick-nav', QuickNav)
+
+document.addEventListener('alpine:init', () => {
+  Alpine.data('dropdown', () => ({
+    open: false,
+    user: null,
+    async init() {
+      this.user = await Alpine.store('userManager').getUser()
+    },
+  }))
+})

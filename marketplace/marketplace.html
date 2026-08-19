@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Marketplace</title>
     <link href="../styles.css" rel="stylesheet" type="text/css" />
-    <script type="module" src="./quick-nav.js" defer></script>
     <script type="module" src="./marketplace.js" defer></script>
     <script type="module" src="./shared.js" defer></script>
   </head>
@@ -101,7 +100,7 @@
             <div
               x-data
               id="toggle-purchased"
-              x-show="$store.userManager.user && view == 'tour'"
+              x-show="user && view == 'tour'"
               x-transition
               class="flex items-center border border-p-soft rounded-full h-12 p-1 bg-white shadow-sm w-64"
             >
@@ -259,9 +258,9 @@
                   <!-- The dropdown should only render if the user is logged in or owns the tour -->
                   <div
                     x-data="{open:false}"
-                    x-show="$store.userManager.user 
-                           &&( $store.userManager.user.purchasedTours.includes(tour._id)
-                           || $store.userManager.user.authoredTours.includes(tour._id))"
+                    x-show="user
+                           &&( user.purchasedTours.includes(tour._id)
+                           || user.authoredTours.includes(tour._id))"
                     class="dropdown dropdown-end"
                   >
                     <button
@@ -332,9 +331,9 @@
                    could open the preview in any case. Isn't one "Apri" enough? -->
                   <!-- Vero apri -->
                   <a
-                    x-show="$store.userManager.user
-                           &&($store.userManager.user.purchasedTours.includes(tour._id)
-                           || $store.userManager.user.authoredTours.includes(tour._id))"
+                    x-show="user
+                           &&(user.purchasedTours.includes(tour._id)
+                           || user.authoredTours.includes(tour._id))"
                     class="shared-button-full-secondary"
                     :href="'./' + tour._id"
                   >
@@ -342,16 +341,16 @@
                   </a>
                   <!-- Preview apri TODO: implementare preview e/o ripensare ui -->
                   <a
-                    x-show="!$store.userManager.user?.purchasedTours.includes(tour._id)
-                           && !$store.userManager.user?.authoredTours.includes(tour._id)"
+                    x-show="!user?.purchasedTours.includes(tour._id)
+                           && !user?.authoredTours.includes(tour._id)"
                     class="shared-button-full-secondary"
                   >
                     Apri
                   </a>
                   <button
                     class="shared-button-full-primary"
-                    x-show="!$store.userManager.user?.purchasedTours.includes(tour._id)
-                           && !$store.userManager.user?.authoredTours.includes(tour._id)"
+                    x-show="!user?.purchasedTours.includes(tour._id)
+                           && !user?.authoredTours.includes(tour._id)"
                   >
                     Acquista
                   </button>

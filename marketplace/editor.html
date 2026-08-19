@@ -6,25 +6,19 @@
     <title>Editor</title>
 
     <link href="../styles.css" rel="stylesheet" type="text/css" />
-    <script type="module" src="./quick-nav.js" defer></script>
+    <script type="module" src="./editor.js" defer></script>
     <script type="module" src="./shared.js" defer></script>
-    <script
-      defer
-      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
-    ></script>
   </head>
   <body
-    class="p-6 md:p-10 min-h-screen font-sans text-p-dark"
     x-data="editorState()"
+    class="p-6 md:p-10 min-h-screen font-sans text-p-dark"
   >
     <!-- Header Navigation -->
-
     <header
       class="flex flex-wrap justify-end items-center gap-6 mb-10 w-full max-w-7xl mx-auto"
     >
       <quick-nav></quick-nav>
     </header>
-
     <!-- Main Content -->
     <main
       class="grid lg:grid-cols-2 gap-10 items-start w-full max-w-7xl mx-auto"
