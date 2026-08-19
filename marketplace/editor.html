@@ -19,112 +19,150 @@
     >
       <quick-nav></quick-nav>
     </header>
-    <!-- Main Content -->
-    <main
-      class="grid lg:grid-cols-2 gap-10 items-start w-full max-w-7xl mx-auto"
-    >
-      <!-- Media Preview -->
-      <figure
-        class="w-full aspect-video lg:aspect-square bg-white rounded-3xl overflow-hidden shadow-sm border border-p-soft"
+    <!-- Content with reorderable list sidebar -->
+    <div class="flex w-full max-w-7xl mx-auto gap-10">
+      <!-- Reorderable List Sidebar -->
+      <aside
+        x-data="reorderList()"
+        class="shrink-0 w-64 flex flex-col items-start pt-2"
       >
-        <img
-          x-bind:src="nav.item?.image ? '/api/assets/'+nav.item.image : 'https://dummyimage.com/800x800/efefef/a3a3a3.jpg&text=Not+Found'"
-          alt="Thumbnail"
-          class="object-cover w-full h-full"
-        />
-      </figure>
-
-      <!-- Data Form -->
-      <form
-        @submit.prevent="submitForm"
-        class="flex flex-col text-p-medium gap-5 bg-white p-8 rounded-3xl shadow-sm border border-p-soft"
-      >
-        <div class="border-b border-p-soft pb-4 mb-2">
-          <h1 class="text-2xl text-p-medium font-bold">Modifica Item</h1>
-        </div>
-
-        <div class="flex flex-col gap-1 w-full">
-          <label class="text-sm font-medium">Nome dell'item</label>
-          <input
-            type="text"
-            x-model="formData.name"
-            required
-            class="w-full px-4 py-2 rounded-xl border border-p-soft bg-white text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium transition-shadow"
-          />
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="flex flex-col gap-1 w-full">
-            <label class="text-sm font-medium">Tipo di item (deprecato)</label>
-            <select
-              class="w-full px-4 py-2 rounded-xl border border-p-soft bg-white text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium"
+        <div id="draggable-list" class="w-full" x-ref="list">
+          <template x-for="(item, idx) in someItems" :key="item._id">
+            <div
+              class="draggable-item flex items-center justify-between rounded-lg bg-white shadow mb-3 px-4 py-3 cursor-grab transition-all select-none"
+              :class="{
+                'ring-2 ring-red-400 opacity-80': dragging && draggingIdx === idx,
+                'bg-gray-100': overIdx === idx && dragging && draggingIdx !== idx
+              }"
+              draggable="true"
+              @dragstart="onDragStart(idx)"
+              @dragend="onDragEnd"
+              @dragover.prevent="onDragOver(idx, $event)"
+              @dragleave="onDragLeave(idx)"
+              @drop="onDrop(idx, $event)"
             >
-              <option value="artist">Artista</option>
-              <option value="style">Stile</option>
-              <option value="technique">Tecnica</option>
-              <option value="artwork">Opera</option>
-              <option value="other">Altro</option>
-            </select>
+              <span class="material-icons-round text-gray-400 mr-3 select-none"
+                >drag_indicator</span
+              >
+              <span
+                class="flex-1 text-base font-medium text-gray-800 text-center"
+                x-text="item.label"
+              ></span>
+            </div>
+          </template>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main
+        class="flex-1 grid lg:grid-cols-2 gap-10 items-start w-full max-w-7xl mx-auto"
+      >
+        <!-- Main content goes here -->
+        <!-- Media Preview -->
+        <figure
+          class="w-full aspect-video lg:aspect-square bg-white rounded-3xl overflow-hidden shadow-sm border border-p-soft"
+        >
+          <img
+            x-bind:src="nav.item?.image ? '/api/assets/'+nav.item.image : 'https://dummyimage.com/800x800/efefef/a3a3a3.jpg&text=Not+Found'"
+            alt="Thumbnail"
+            class="object-cover w-full h-full"
+          />
+        </figure>
+
+        <!-- Data Form -->
+        <form
+          @submit.prevent="submitForm"
+          class="flex flex-col text-p-medium gap-5 bg-white p-8 rounded-3xl shadow-sm border border-p-soft"
+        >
+          <div class="border-b border-p-soft pb-4 mb-2">
+            <h1 class="text-2xl text-p-medium font-bold">Modifica Item</h1>
           </div>
 
           <div class="flex flex-col gap-1 w-full">
-            <label class="text-sm font-medium">Tour</label>
+            <label class="text-sm font-medium">Nome dell'item</label>
             <input
               type="text"
-              x-model="formData.tour"
+              x-model="formData.name"
               required
+              class="w-full px-4 py-2 rounded-xl border border-p-soft bg-white text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium transition-shadow"
+            />
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="flex flex-col gap-1 w-full">
+              <label class="text-sm font-medium"
+                >Tipo di item (deprecato)</label
+              >
+              <select
+                class="w-full px-4 py-2 rounded-xl border border-p-soft bg-white text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium"
+              >
+                <option value="artist">Artista</option>
+                <option value="style">Stile</option>
+                <option value="technique">Tecnica</option>
+                <option value="artwork">Opera</option>
+                <option value="other">Altro</option>
+              </select>
+            </div>
+
+            <div class="flex flex-col gap-1 w-full">
+              <label class="text-sm font-medium">Tour</label>
+              <input
+                type="text"
+                x-model="formData.tour"
+                required
+                class="w-full px-4 py-2 rounded-xl border border-p-soft bg-white text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium"
+              />
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-1 w-full">
+            <label class="text-sm font-medium">Licenza d'uso</label>
+            <input
+              type="text"
+              x-model="formData.license"
               class="w-full px-4 py-2 rounded-xl border border-p-soft bg-white text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium"
             />
           </div>
-        </div>
 
-        <div class="flex flex-col gap-1 w-full">
-          <label class="text-sm font-medium">Licenza d'uso</label>
-          <input
-            type="text"
-            x-model="formData.license"
-            class="w-full px-4 py-2 rounded-xl border border-p-soft bg-white text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium"
-          />
-        </div>
-
-        <!-- Mongoose Sub-schema Mapping -->
-        <fieldset
-          class="border border-p-soft p-5 rounded-2xl bg-p-soft/20 mt-2"
-        >
-          <legend class="font-semibold bg-p-light rounded-lg">
-            Spiegazione
-          </legend>
-          <div class="flex flex-col gap-4 mt-2">
-            <div class="flex flex-col gap-1 w-full md:w-1/2">
-              <label class="text-sm font-medium">Livello</label>
-              <select
-                x-model="formData.explanations[0].level"
-                required
-                class="w-full px-4 py-2 rounded-xl border border-p-soft bg-white text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium"
-              >
-                <option value="simple">Semplice</option>
-                <option value="normal">Normale</option>
-                <option value="advanced">Avanzato</option>
-              </select>
+          <!-- Mongoose Sub-schema Mapping -->
+          <fieldset
+            class="border border-p-soft p-5 rounded-2xl bg-p-soft/20 mt-2"
+          >
+            <legend class="font-semibold bg-p-light rounded-lg">
+              Spiegazione
+            </legend>
+            <div class="flex flex-col gap-4 mt-2">
+              <div class="flex flex-col gap-1 w-full md:w-1/2">
+                <label class="text-sm font-medium">Livello</label>
+                <select
+                  x-model="formData.explanations[0].level"
+                  required
+                  class="w-full px-4 py-2 rounded-xl border border-p-soft bg-white text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium"
+                >
+                  <option value="simple">Semplice</option>
+                  <option value="normal">Normale</option>
+                  <option value="advanced">Avanzato</option>
+                </select>
+              </div>
+              <div class="flex flex-col gap-1 w-full">
+                <label class="text-sm font-medium">Testo</label>
+                <textarea
+                  x-model="formData.explanations[0].text"
+                  required
+                  rows="4"
+                  class="w-full px-4 py-2 rounded-xl border border-p-soft bg-white text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium resize-none"
+                ></textarea>
+              </div>
             </div>
-            <div class="flex flex-col gap-1 w-full">
-              <label class="text-sm font-medium">Testo</label>
-              <textarea
-                x-model="formData.explanations[0].text"
-                required
-                rows="4"
-                class="w-full px-4 py-2 rounded-xl border border-p-soft bg-white text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium resize-none"
-              ></textarea>
-            </div>
-          </div>
-        </fieldset>
+          </fieldset>
 
-        <button
-          type="submit"
-          class="shared-button-full-primary"
-          x-text="formData._id ? 'Salva Modifiche':'Crea'"
-        ></button>
-      </form>
-    </main>
+          <button
+            type="submit"
+            class="shared-button-full-primary"
+            x-text="formData._id ? 'Salva Modifiche':'Crea'"
+          ></button>
+        </form>
+      </main>
+    </div>
   </body>
 </html>

@@ -21,10 +21,10 @@ document.addEventListener('alpine:init', () => {
       const url = new URL(window.location.href)
       const tourId = url.pathname.split('/').filter(Boolean).at(2)
       const itemId = url.searchParams.get('item')
-      this.nav = new ItemNavigator()
+      this.nav = new ItemNavigator(tourId, itemId)
       this.nav
-        .init(tourId, itemId)
-        .then((i) => console.log('item: ', i.item))
+        .init()
+        .then((i) => console.log('nav init: ', i))
         .then(() => this.populateFormData())
     },
     populateFormData() {
@@ -80,6 +80,59 @@ document.addEventListener('alpine:init', () => {
           this.isSubmitting = false
           alert('Errore di rete: ' + error.message)
         })
+    },
+  }))
+
+  Alpine.data('reorderList', () => ({
+    items: null,
+    dragging: false,
+    draggingIdx: null,
+    overIdx: null,
+    async init() {
+      /* TODO handle items */
+    },
+    get someItems() {
+      return this.items ? this.items : [{ _id: 'id', label: 'loading' }]
+    },
+    onDragStart(idx) {
+      this.dragging = true
+      this.draggingIdx = idx
+      this.overIdx = null
+    },
+    onDragEnd() {
+      this.dragging = false
+      this.draggingIdx = null
+      this.overIdx = null
+    },
+    onDragOver(idx, _event) {
+      if (this.dragging && this.draggingIdx !== idx) {
+        this.overIdx = idx
+      }
+    },
+    onDragLeave(idx) {
+      if (this.overIdx === idx) {
+        this.overIdx = null
+      }
+    },
+    onDrop(idx, event) {
+      if (
+        this.dragging &&
+        this.draggingIdx !== null &&
+        this.draggingIdx !== idx
+      ) {
+        const moved = this.items.splice(this.draggingIdx, 1)[0]
+        let insertIdx = idx
+        // Place after if cursor is below halfway point
+        const targetRect = event.target.getBoundingClientRect()
+        if (event.clientY > targetRect.top + targetRect.height / 2) {
+          insertIdx++
+        }
+        if (insertIdx > this.items.length) insertIdx = this.items.length
+        this.items.splice(insertIdx > idx ? insertIdx - 1 : insertIdx, 0, moved)
+        this.draggingIdx = null
+        this.overIdx = null
+        this.dragging = false
+      }
     },
   }))
 })
