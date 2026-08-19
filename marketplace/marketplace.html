@@ -332,22 +332,23 @@
                            &&(user.purchasedTours.includes(tour._id)
                            || user.authoredTours.includes(tour._id))"
                     class="shared-button-full-secondary"
-                    :href="'./' + tour._id"
+                    :href="'/marketplace/' + tour._id"
                   >
                     Apri
                   </a>
                   <!-- Preview apri TODO: implementare preview e/o ripensare ui -->
-                  <a
-                    x-show="!user?.purchasedTours.includes(tour._id)
-                           && !user?.authoredTours.includes(tour._id)"
+                  <button
+                    x-show="!user?.purchasedTours.includes(tour._id) && !user?.authoredTours.includes(tour._id)"
                     class="shared-button-full-secondary"
+                    @click="window.history.pushState({}, '', '/marketplace/preview/' + tour._id); showPreview = true;"
                   >
-                    Apri
-                  </a>
+                    Anteprima
+                  </button>
                   <button
                     class="shared-button-full-primary"
-                    x-show="!user?.purchasedTours.includes(tour._id)
+                    x-show="user && !user?.purchasedTours.includes(tour._id)
                            && !user?.authoredTours.includes(tour._id)"
+                    :href="'/checkout/' + tour._id"
                   >
                     Acquista
                   </button>
@@ -355,6 +356,45 @@
               </div>
             </div>
           </template>
+        </div>
+      </div>
+
+      <!-- Wrapper Modale Centrato con Overlay / Fade -->
+      <div
+        x-show="showPreview"
+        x-transition.opacity.duration.300ms
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-p-dark/50 backdrop-blur-sm overflow-y-auto"
+        x-init="if (window.location.pathname.startsWith('/marketplace/preview/')) { showPreview = true;}"
+        @popstate.window="showPreview = window.location.pathname.startsWith('/marketplace/preview/');"
+      >
+        <!-- Contenitore Interno della Modale -->
+
+        <div
+          @click.outside="window.history.pushState({}, '', '/marketplace/'); showPreview = false;"
+          class="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl border border-p-soft p-6 my-auto"
+        >
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Image Container -->
+            <figure
+              class="w-full aspect-square rounded-2xl overflow-hidden justify-self-center self-center"
+            >
+              <img
+                :src="'/api/assets/' + item.image"
+                :alt="item.name"
+                class="object-cover w-full h-full"
+              />
+            </figure>
+          </div>
+
+          <!-- Bottone Chiudi integrato -->
+          <div class="flex justify-end mt-6">
+            <button
+              class="shared-button-fit-secondary px-6"
+              @click="window.history.pushState({}, '', '/marketplace/'); showPreview = false;"
+            >
+              Torna indietro
+            </button>
+          </div>
         </div>
       </div>
     </main>

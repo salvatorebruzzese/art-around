@@ -20,6 +20,7 @@
   align-items: center;
   justify-content: center;
   height: 2.5rem;
+  border-radius: var(--radius-sm, 0.125rem);
   background-color: var(--color-p-light);
   color: var(--color-p-medium);
   font-family: var(--font-sans);
@@ -42,7 +43,7 @@
 
 /* Variant utilities extending shared-button */
 @utility shared-button-full-primary {
-  @apply shared-button w-full rounded-sm;
+  @apply shared-button w-full;
   background-color: var(--color-p-medium);
   color: var(--color-p-light);
 
@@ -53,11 +54,11 @@
 }
 
 @utility shared-button-full-secondary {
-  @apply shared-button w-full rounded-sm;
+  @apply shared-button w-full;
 }
 
 @utility shared-button-flex-primary {
-  @apply shared-button flex-1 rounded-sm;
+  @apply shared-button flex-1;
   background-color: var(--color-p-medium);
   color: var(--color-p-light);
   &:hover {
@@ -67,11 +68,30 @@
 }
 
 @utility shared-button-flex-secondary {
-  @apply shared-button flex-1 rounded-sm;
+  @apply shared-button flex-1;
 }
 
 @utility shared-button-flex-warning {
-  @apply shared-button flex-1 rounded-sm;
+  @apply shared-button flex-1;
+  color: var(--color-p-warning);
+
+  &:hover {
+    background-color: var(--color-p-warning);
+    color: var(--color-p-light);
+  }
+
+  &:active {
+    background-color: var(--color-p-warning-dark);
+    color: var(--color-p-light);
+  }
+}
+
+@utility shared-button-fit-secondary {
+  @apply shared-button flex-none w-fit;
+}
+
+@utility shared-button-fit-warning {
+  @apply shared-button flex-none w-fit;
   color: var(--color-p-warning);
 
   &:hover {

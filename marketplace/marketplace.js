@@ -17,6 +17,7 @@ document.addEventListener('alpine:init', () => {
     allItems: [], // Dichiarato per evitare ReferenceError
     view: 'tour', // | 'item'
     user: null,
+    showPreview: false,
 
     get filteredTours() {
       const fmus = this.filters.museum

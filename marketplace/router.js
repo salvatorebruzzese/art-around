@@ -17,6 +17,10 @@ router.get('/', (req, res) => {
   }
 })
 
+router.get('/preview/:id', (req, res) => {
+  res.sendFile(join(rootDir, 'marketplace/marketplace.html'))
+})
+
 router.get('/editor/:id', (req, res) => {
   res.sendFile(join(rootDir, 'marketplace/editor.html'))
 })
