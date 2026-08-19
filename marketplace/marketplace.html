@@ -18,7 +18,7 @@
     >
       <!-- HEADER CON FILTRI E ICONE SVG -->
       <header
-        class="flex flex-col justify-end items-center mb-10 gap-6 font-sans"
+        class="flex flex-col justify-center items-center mb-10 gap-6 font-sans"
       >
         <!-- SVG Navigation & User Dropdown -->
         <div class="flex flex-row justify-center items-center gap-3">
@@ -27,7 +27,7 @@
 
         <!-- Controls: Search, Select Museo e Toggle -->
         <div
-          class="flex flex-wrap gap-6 justify-center sm:justify-end items-center flex-1 min-w-[300px]"
+          class="flex flex-wrap gap-6 justify-center items-center flex-1 min-w-[300px]"
         >
           <!-- Search Bar -->
           <div class="relative flex-1 max-w-lg min-w-[250px]">
@@ -74,54 +74,56 @@
           </div>
 
           <!-- Switch Toggle (Visibile solo se un museo è selezionato, e si è loggati) -->
-          <div
-            id="toggle-switch"
-            x-transition
-            class="flex items-center border border-p-soft rounded-full h-12 p-1 bg-white shadow-sm w-64"
-          >
-            <button
+          <div class="flex flex-col gap-4 sm:flex-row">
+            <div
+              id="toggle-switch"
+              x-transition
+              class="flex items-center border border-p-soft rounded-full h-12 p-1 bg-white shadow-sm w-64"
+            >
+              <button
+                x-data
+                @click="view = 'tour'"
+                :class="view === 'tour'
+                ? 'flex-1 h-full rounded-full bg-p-medium text-white font-semibold text-sm transition-all duration-150 active:scale-95 shadow-sm cursor-pointer'
+                : 'flex-1 h-full rounded-full bg-transparent text-p-medium hover:bg-p-soft/20 font-semibold text-sm transition-all duration-150 active:scale-95 cursor-pointer'"
+              >
+                TOURS
+              </button>
+              <button
+                x-data
+                @click="view = 'item'"
+                :class="view === 'item'
+                ? 'flex-1 h-full rounded-full bg-p-medium text-white font-semibold text-sm transition-all duration-150 active:scale-95 shadow-sm cursor-pointer'
+                : 'flex-1 h-full rounded-full bg-transparent text-p-medium hover:bg-p-soft/20 font-semibold text-sm transition-all duration-150 active:scale-95 cursor-pointer'"
+              >
+                ITEM
+              </button>
+            </div>
+            <!-- purchased tours -->
+            <div
               x-data
-              @click="view = 'tour'"
-              :class="view === 'tour'
+              id="toggle-purchased"
+              x-show="$store.userManager.user && view == 'tour'"
+              x-transition
+              class="flex items-center border border-p-soft rounded-full h-12 p-1 bg-white shadow-sm w-64"
+            >
+              <button
+                @click="filters.purchased = false"
+                :class="!filters.purchased
                 ? 'flex-1 h-full rounded-full bg-p-medium text-white font-semibold text-sm transition-all duration-150 active:scale-95 shadow-sm cursor-pointer'
                 : 'flex-1 h-full rounded-full bg-transparent text-p-medium hover:bg-p-soft/20 font-semibold text-sm transition-all duration-150 active:scale-95 cursor-pointer'"
-            >
-              TOURS
-            </button>
-            <button
-              x-data
-              @click="view = 'item'"
-              :class="view === 'item'
+              >
+                ALL
+              </button>
+              <button
+                @click="filters.purchased = true"
+                :class="filters.purchased
                 ? 'flex-1 h-full rounded-full bg-p-medium text-white font-semibold text-sm transition-all duration-150 active:scale-95 shadow-sm cursor-pointer'
                 : 'flex-1 h-full rounded-full bg-transparent text-p-medium hover:bg-p-soft/20 font-semibold text-sm transition-all duration-150 active:scale-95 cursor-pointer'"
-            >
-              ITEM
-            </button>
-          </div>
-          <!-- purchased tours -->
-          <div
-            x-data
-            id="toggle-purchased"
-            x-show="$store.userManager.user && view == 'tour'"
-            x-transition
-            class="flex items-center border border-p-soft rounded-full h-12 p-1 bg-white shadow-sm w-64"
-          >
-            <button
-              @click="filters.purchased = false"
-              :class="!filters.purchased
-                ? 'flex-1 h-full rounded-full bg-p-medium text-white font-semibold text-sm transition-all duration-150 active:scale-95 shadow-sm cursor-pointer'
-                : 'flex-1 h-full rounded-full bg-transparent text-p-medium hover:bg-p-soft/20 font-semibold text-sm transition-all duration-150 active:scale-95 cursor-pointer'"
-            >
-              ALL
-            </button>
-            <button
-              @click="filters.purchased = true"
-              :class="filters.purchased
-                ? 'flex-1 h-full rounded-full bg-p-medium text-white font-semibold text-sm transition-all duration-150 active:scale-95 shadow-sm cursor-pointer'
-                : 'flex-1 h-full rounded-full bg-transparent text-p-medium hover:bg-p-soft/20 font-semibold text-sm transition-all duration-150 active:scale-95 cursor-pointer'"
-            >
-              PURCHASED
-            </button>
+              >
+                PURCHASED
+              </button>
+            </div>
           </div>
         </div>
       </header>
