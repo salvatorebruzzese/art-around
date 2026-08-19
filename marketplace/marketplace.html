@@ -258,7 +258,14 @@
 
                 <!-- Dropdown Menu Tre Punti -->
                 <div class="absolute top-3 right-3 z-10">
-                  <div x-data="{open:false}" class="dropdown dropdown-end">
+                  <!-- The dropdown should only render if the user is logged in or owns the tour -->
+                  <div
+                    x-data="{open:false}"
+                    x-show="$store.userManager.user 
+                           &&( $store.userManager.user.purchasedTours.includes(tour._id)
+                           || $store.userManager.user.authoredTours.includes(tour._id))"
+                    class="dropdown dropdown-end"
+                  >
                     <button
                       @click="open = !open"
                       class="btn btn-sm btn-circle bg-white/80 hover:bg-white text-p-dark border-none shadow-md backdrop-blur-sm focus:outline-none list-none"
@@ -323,7 +330,8 @@
                   ></h2>
                 </div>
                 <div class="flex gap-4">
-                  <!-- Use inline onclick calling window.selectTour -->
+                  <!-- REVIEW: I understand the reasoning but I though that the user
+                   could open the preview in any case. Isn't one "Apri" enough? -->
                   <!-- Vero apri -->
                   <a
                     x-show="$store.userManager.user.purchasedTours.includes(tour._id)
