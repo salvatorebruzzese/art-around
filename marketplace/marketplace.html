@@ -59,9 +59,7 @@
           </div>
 
           <!-- Dropdown Musei -->
-          <div
-            :class="{ 'aura aura-dual aura-md text-p-soft rounded-full': !filters.museum }"
-          >
+          <div :class="{ 'text-p-soft rounded-full': !filters.museum }">
             <select
               x-model="filters.museum"
               class="select select-bordered rounded-full w-56 border-p-soft bg-white text-p-dark focus:border-p-medium focus:ring-2 focus:ring-p-soft focus:outline-none font-medium shadow-sm cursor-pointer transition-all"
