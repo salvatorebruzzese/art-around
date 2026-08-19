@@ -22,92 +22,74 @@
     <!-- Content with reorderable list sidebar -->
     <div class="flex w-full max-w-7xl mx-auto gap-10">
       <!-- Reorderable List Sidebar -->
-      <aside class="min-h-50 shrink-0 w-64 flex flex-col items-start pt-2">
-        <div class="flex w-full gap-2 mb-4">
-          <button
-            class="shared-button-full-primary w-full"
-            @click="if(ghostIdx>itd/2) ghostIdx--"
-          >
-            UP
-          </button>
-          <button class="shared-button w-14" @click="ghostIdx = currentItemIdx">
-            RE
-          </button>
-        </div>
-        <div id="draggable-list" class="w-full" x-ref="list">
-          <template x-for="(item, idx) in items" :key="item._id">
-            <div
-              class="draggable-item flex items-center justify-between rounded-lg bg-white shadow mb-3 px-4 py-3 cursor-grab transition-all select-none"
-              :class="{
-                'ring-2 ring-red-400 opacity-80': dragging && draggingIdx === idx,
-                'bg-gray-100': overIdx === idx && dragging && draggingIdx !== idx
-              }"
-              draggable="true"
-              @dragstart="onDragStart(idx)"
-              @dragend="onDragEnd"
-              @dragover.prevent="onDragOver(idx, $event)"
-              @dragleave="onDragLeave(idx)"
-              @drop="onDrop(idx, $event)"
-              x-show="doView(item._id)"
-            >
-              <label class="flex items-center cursor-pointer">
-                <input
-                  type="radio"
-                  class="form-radio text-blue-600 mr-3"
-                  name="itemRadio"
-                  x-model="currentItemId"
-                  :value="item._id"
-                  @input="loadItem(item._id)"
-                />
-                <span
-                  class="flex-1 text-base font-medium text-gray-800 text-center"
-                  x-text="item.name"
-                ></span>
-              </label>
-            </div>
-          </template>
-          <button
-            class="shared-button-full-primary"
-            @click="
-                   if(ghostIdx<items.length - 3) {ghostIdx++}"
-          >
-            DOWN
-          </button>
-        </div>
+      <div class="min-h-50 shrink-0 w-64 flex flex-col items-start pt-2">
+        <template x-for="board in boards()" :key="board.name">
+          <aside class="min-h-50 shrink-0 w-64 flex flex-col items-start pt-2">
+            <template x-if="board.controls">
+              <div class="flex w-full gap-2 mb-4">
+                <button
+                  class="shared-button-full-primary w-full"
+                  @click="upItems()"
+                >
+                  UP
+                </button>
+                <button class="shared-button w-14" @click="resetItems()">
+                  RE
+                </button>
+              </div>
+            </template>
 
-        <!-- stash -->
-        <aside
-          class="flex flex-col min-h-50 w-full items-center justify-between rounded-lg bg-gray-300 w-full mt-4 mb-4 border-2 border-dashed border-gray-400 rounded flex items-center justify-center text-gray-500"
-          @drop="onDropStore($event)"
-          @dragover.prevent=""
-        >
-          <p x-transition x-show="stash.length==0">Drop here...</p>
-          <template x-for="(item, idx) in stash" :key="item._id">
-            <div
-              class="draggable-item flex items-center justify-between rounded-lg bg-white shadow mb-1 mt-1 px-4 py-3 cursor-grab transition-all select-none"
-              :class="{
-                'ring-2 ring-red-400 opacity-80': dragging && draggingIdx === idx,
-                'bg-gray-100': overIdx === idx && dragging && draggingIdx !== idx
-              }"
-            >
-              <label class="flex items-center cursor-pointer">
-                <input
-                  type="radio"
-                  class="form-radio text-blue-600 mr-3"
-                  name="itemRadio"
-                  x-model="currentItemId"
-                  :value="item._id"
-                  @input="loadItem(item._id)"
-                />
-                <span
-                  class="flex-1 text-base font-medium text-gray-800 text-center"
-                  x-text="item.name"
-                ></span>
-              </label>
+            <div class="w-full" x-ref="'list-'+board.name">
+              <template x-for="(item, idx) in board.arr" :key="item._id">
+                <div
+                  class="draggable-item flex items-center justify-between rounded-lg bg-white shadow mb-3 px-4 py-3 cursor-grab transition-all select-none"
+                  :class="{
+            'ring-2 ring-red-400 opacity-80': isDragging(board.name, idx),
+            'bg-gray-100': isOver(board.name, idx)
+          }"
+                  draggable="true"
+                  @dragstart="onDragStart(board.name, idx)"
+                  @dragend="onDragEnd"
+                  @dragover.prevent="onDragOver(board.name, idx, $event)"
+                  @dragleave="onDragLeave(board.name, idx)"
+                  @drop="onDrop(board.name, idx, $event)"
+                  x-show="board.name === 'items' ? doView(item._id) : true"
+                >
+                  <label class="flex items-center cursor-pointer">
+                    <input
+                      type="radio"
+                      class="form-radio text-blue-600 mr-3"
+                      name="itemRadio"
+                      x-model="currentItemId"
+                      :value="item._id"
+                      @input="loadItem(item._id)"
+                    />
+                    <span
+                      class="flex-1 text-base font-medium text-gray-800 text-center"
+                      x-text="item.name"
+                    ></span>
+                  </label>
+                </div>
+              </template>
+              <template x-if="board.controls">
+                <button class="shared-button-full-primary" @click="downItems()">
+                  DOWN
+                </button>
+              </template>
+              <div
+                x-show="board.arr.length === 0"
+                x-transition:enter
+                x-transition:leave.opacity
+                class="flex flex-col min-h-50 w-full items-center justify-center rounded-lg bg-gray-300 border-2 border-dashed border-gray-400 text-gray-500 cursor-pointer"
+                @drop="onDropEmpty(board.name, $event)"
+                @dragover.prevent=""
+              >
+                <p>Drop here...</p>
+              </div>
             </div>
-          </template>
-        </aside>
-      </aside>
+          </aside>
+        </template>
+      </div>
 
       <!-- Main Content -->
       <main

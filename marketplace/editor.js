@@ -7,12 +7,20 @@ document.addEventListener('alpine:init', () => {
     // NAVIGATION
     tour: null,
     items: [],
+    stash: [],
     currentItem: null,
     currentItemIdx: -1,
     ghostIdx: 2,
     currentItemId: null,
     anchorItemId: null,
     itd: 4, // items to display
+
+    // Drag and drop state
+    dragging: false,
+    draggingIdx: null,
+    draggingBoard: null, // "items" or "stash"
+    overIdx: null,
+    overBoard: null, // target board during dragover
 
     // FORM
     submitting: false, // TODO: suspend input and show loading icon
@@ -55,24 +63,6 @@ document.addEventListener('alpine:init', () => {
         (entry) => entry._id === itemId,
       )
       this.currentItem = await this.loadItem(itemId)
-    },
-
-    async loadItem(id) {
-      // this.anchorItemId = this.currentItemId
-      this.currentItemId = null
-      this.currentItem = null
-      let idx = this.items.findIndex((i) => i._id === id)
-      this.currentItemIdx = idx != -1 ? idx : this.currentItemIdx
-      return await fetch('/api/items/' + id)
-        .then((r) => {
-          if (r.ok) return r.json()
-          else throw new Error('Failed loading item')
-        })
-        .then((item) => {
-          this.currentItemId = id
-          this.currentItem = item
-          this.populateFormData()
-        })
     },
 
     // lazy load item
@@ -141,6 +131,25 @@ document.addEventListener('alpine:init', () => {
         })
     },
 
+    // Boards configuration
+    boards() {
+      return [
+        {
+          name: 'items',
+          title: 'Items',
+          arr: this.items,
+          controls: true,
+        },
+        {
+          name: 'stash',
+          title: 'Stash',
+          arr: this.stash,
+          controls: false,
+        },
+      ]
+    },
+
+    // Determine if given id should display in items list pager window
     doView(id) {
       let idx = this.items.findIndex((i) => i._id === id)
       const ghostIdx = this.ghostIdx
@@ -159,80 +168,139 @@ document.addEventListener('alpine:init', () => {
       )
     },
 
-    dragging: false,
-    draggingIdx: null,
-    overIdx: null,
+    // List controls (UP/DOWN/RESET) only on "items"
+    upItems() {
+      if (this.ghostIdx > this.itd / 2) this.ghostIdx--
+    },
+    downItems() {
+      if (this.ghostIdx < this.items.length - 3) this.ghostIdx++
+    },
+    resetItems() {
+      this.ghostIdx = this.currentItemIdx
+    },
 
-    onDragStart(idx) {
+    // Radio/load logic unified
+    async loadItem(id) {
+      this.currentItemId = null
+      this.currentItem = null
+      let idx = this.items.findIndex((i) => i._id === id)
+      if (idx !== -1) {
+        this.currentItemIdx = idx
+      }
+      return await fetch('/api/items/' + id)
+        .then((r) => {
+          if (r.ok) return r.json()
+          else throw new Error('Failed loading item')
+        })
+        .then((item) => {
+          this.currentItemId = id
+          this.currentItem = item
+          this.populateFormData()
+        })
+    },
+
+    // Generalized Drag/Drop Handlers
+
+    onDragStart(board, idx) {
       this.dragging = true
       this.draggingIdx = idx
+      this.draggingBoard = board
       this.overIdx = null
+      this.overBoard = null
     },
+
     onDragEnd() {
       this.dragging = false
       this.draggingIdx = null
+      this.draggingBoard = null
       this.overIdx = null
+      this.overBoard = null
     },
-    onDragOver(idx, _event) {
-      if (this.dragging && this.draggingIdx !== idx) {
+
+    onDragOver(board, idx, _event) {
+      if (
+        this.dragging &&
+        (this.draggingBoard !== board || this.draggingIdx !== idx)
+      ) {
         this.overIdx = idx
+        this.overBoard = board
       }
     },
-    onDragLeave(idx) {
-      if (this.overIdx === idx) {
+
+    onDragLeave(board, idx) {
+      if (this.overBoard === board && this.overIdx === idx) {
         this.overIdx = null
+        this.overBoard = null
       }
     },
-    onDrop(idx, event) {
+
+    // board is "items" or "stash". idx is drop index, event is drag/drop event
+    onDrop(board, idx, event) {
       if (
-        this.dragging &&
-        this.draggingIdx !== null &&
-        this.draggingIdx !== idx
-      ) {
-        console.log('drgIdx@drop: ', this.draggingIdx)
-        const moved = this.items.splice(this.draggingIdx, 1)[0]
-        let insertIdx = idx
-        // Place after if cursor is below halfway point
-        const targetRect = event.target.getBoundingClientRect()
-        if (event.clientY > targetRect.top + targetRect.height / 2) {
-          insertIdx++
-        }
-        if (insertIdx > this.items.length) insertIdx = this.items.length
-        this.items.splice(insertIdx > idx ? insertIdx - 1 : insertIdx, 0, moved)
-        this.draggingIdx = null
-        this.overIdx = null
-        this.dragging = false
+        !this.dragging ||
+        this.draggingIdx === null ||
+        this.draggingBoard === null
+      )
+        return
+      if (this.draggingBoard === board && this.draggingIdx === idx) return
+      // Defensive: get source/target arrays
+      const sources = { items: this.items, stash: this.stash }
+      let sourceArr = sources[this.draggingBoard]
+      let targetArr = sources[board]
+
+      // Pop source
+      const moved = sourceArr.splice(this.draggingIdx, 1)[0]
+      let insertIdx = idx
+      // Place after if cursor is below halfway point
+      const targetRect = event.target.getBoundingClientRect()
+      if (event.clientY > targetRect.top + targetRect.height / 2) {
+        insertIdx++
       }
+      if (insertIdx > targetArr.length) insertIdx = targetArr.length
+      targetArr.splice(insertIdx > idx ? insertIdx - 1 : insertIdx, 0, moved)
+      // Reset drag state
+      this.dragging = false
+      this.draggingIdx = null
+      this.draggingBoard = null
+      this.overIdx = null
+      this.overBoard = null
     },
-    stash: [],
-    onDropStore(event, idx = -1) {
+
+    // Drop into empty board
+    onDropEmpty(board, _event) {
       if (
+        !this.dragging ||
+        this.draggingIdx === null ||
+        this.draggingBoard === null
+      )
+        return
+      const sources = { items: this.items, stash: this.stash }
+      let sourceArr = sources[this.draggingBoard]
+      let targetArr = sources[board]
+      const moved = sourceArr.splice(this.draggingIdx, 1)[0]
+      targetArr.push(moved)
+      this.dragging = false
+      this.draggingIdx = null
+      this.draggingBoard = null
+      this.overIdx = null
+      this.overBoard = null
+    },
+
+    // Utility for repeat rendering
+    isDragging(board, idx) {
+      return (
         this.dragging &&
-        this.draggingIdx !== null &&
-        this.draggingIdx !== idx
-      ) {
-        console.log('onDropStore: ', idx, event)
-        const moved = this.items.splice(this.draggingIdx, 1)[0]
-        let insertIdx = idx
-        // Place after if cursor is below halfway point
-        const targetRect = event.target.getBoundingClientRect()
-        if (
-          event.clientY > targetRect.top + targetRect.height / 2 &&
-          insertIdx != -1
-        ) {
-          insertIdx++
-        }
-        if (insertIdx > this.stash.length || insertIdx == -1)
-          insertIdx = this.stash.length
-        this.stash.splice(
-          insertIdx > idx && idx != -1 ? insertIdx - 1 : insertIdx,
-          0,
-          moved,
-        )
-        this.draggingIdx = null
-        this.overIdx = null
-        this.dragging = false
-      }
+        this.draggingBoard === board &&
+        this.draggingIdx === idx
+      )
+    },
+    isOver(board, idx) {
+      return (
+        this.overBoard === board &&
+        this.overIdx === idx &&
+        this.dragging &&
+        !(this.draggingBoard === board && this.draggingIdx === idx)
+      )
     },
   }))
 })
