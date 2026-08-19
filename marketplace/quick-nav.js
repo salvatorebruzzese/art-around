@@ -59,7 +59,7 @@ class QuickNav extends HTMLElement {
     </a>
 
     <!-- Dropdown Utente -->
-    <div x-data="dropdown" class="avatar dropdown dropdown-end z-20">
+    <div x-data="dropdown" class="avatar dropdown dropdown-center z-20">
       <button
         @click="open = !open"
         class="nav-avatar-trigger list-none cursor-pointer"

@@ -176,7 +176,7 @@
                           x-transition
                           @click.outside="open = false"
                         >
-                          <ul class="nav-dropdown-menu p-2">
+                          <ul class="nav-dropdown-menu dropdown-end p-2">
                             <li>
                               <a
                                 class="shared-button-flex-secondary shadow-none"
@@ -282,7 +282,7 @@
                       x-transition
                       @click.outside="open = false"
                     >
-                      <ul class="nav-dropdown-menu p-2">
+                      <ul class="nav-dropdown-menu dropdown-end p-4">
                         <li>
                           <a class="shared-button-flex-secondary shadow-none"
                             >Modifica</a
@@ -327,9 +327,6 @@
                   ></h2>
                 </div>
                 <div class="flex gap-4">
-                  <!-- REVIEW: I understand the reasoning but I though that the user
-                   could open the preview in any case. Isn't one "Apri" enough? -->
-                  <!-- Vero apri -->
                   <a
                     x-show="user
                            &&(user.purchasedTours.includes(tour._id)
