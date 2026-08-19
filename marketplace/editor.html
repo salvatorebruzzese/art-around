@@ -11,7 +11,7 @@
   </head>
   <body
     x-data="editorState()"
-    class="p-6 md:p-10 min-h-screen font-sans text-p-dark"
+    class="p-6 md:p-10 min-h-screen font-sans text-p-dark bg-white"
   >
     <!-- Header Navigation -->
     <header
@@ -22,10 +22,8 @@
     <!-- Content with reorderable list sidebar -->
     <div class="flex w-full max-w-7xl mx-auto gap-10">
       <!-- Reorderable List Sidebar -->
-      <aside
-        x-data="reorderList()"
-        class="shrink-0 w-64 flex flex-col items-start pt-2"
-      >
+      <aside class="shrink-0 w-64 flex flex-col items-start pt-2">
+        <button class="shared-button-full-primary mb-4">UP</button>
         <div id="draggable-list" class="w-full" x-ref="list">
           <template x-for="(item, idx) in someItems" :key="item._id">
             <div
@@ -40,16 +38,25 @@
               @dragover.prevent="onDragOver(idx, $event)"
               @dragleave="onDragLeave(idx)"
               @drop="onDrop(idx, $event)"
+              x-show="doView(item._id)"
             >
-              <span class="material-icons-round text-gray-400 mr-3 select-none"
-                >drag_indicator</span
-              >
-              <span
-                class="flex-1 text-base font-medium text-gray-800 text-center"
-                x-text="item.label"
-              ></span>
+              <label class="flex items-center cursor-pointer">
+                <input
+                  type="radio"
+                  class="form-radio text-blue-600 mr-3"
+                  name="itemRadio"
+                  x-model="currentItemId"
+                  :value="item._id"
+                  @input="loadItem(item._id)"
+                />
+                <span
+                  class="flex-1 text-base font-medium text-gray-800 text-center"
+                  x-text="item.name"
+                ></span>
+              </label>
             </div>
           </template>
+          <button class="shared-button-full-primary">DOWN</button>
         </div>
       </aside>
 
@@ -63,7 +70,7 @@
           class="w-full aspect-video lg:aspect-square bg-white rounded-3xl overflow-hidden shadow-sm border border-p-soft"
         >
           <img
-            x-bind:src="nav.item?.image ? '/api/assets/'+nav.item.image : 'https://dummyimage.com/800x800/efefef/a3a3a3.jpg&text=Not+Found'"
+            x-bind:src="currentItem?.image ? '/api/assets/'+currentItem.image : 'https://dummyimage.com/800x800/efefef/a3a3a3.jpg&text=Not+Found'"
             alt="Thumbnail"
             class="object-cover w-full h-full"
           />

@@ -1,11 +1,18 @@
 import Alpine from 'alpinejs'
 import './userManager.js'
 import './quick-nav.js'
-import { ItemNavigator } from './itemNavigator.js'
 
 document.addEventListener('alpine:init', () => {
   Alpine.data('editorState', () => ({
-    nav: null,
+    // NAVIGATION
+    tour: null,
+    items: [],
+    currentItem: null,
+    currentItemIdx: -1,
+    currentItemId: null,
+    anchorItemId: null,
+
+    // FORM
     submitting: false, // TODO: suspend input and show loading icon
     formData: {
       _id: null,
@@ -14,6 +21,7 @@ document.addEventListener('alpine:init', () => {
       license: '',
       explanations: [{ level: '', text: '', duration: 0 }],
     },
+
     async init() {
       Alpine.store('userManager')
         .getUser()
@@ -21,12 +29,60 @@ document.addEventListener('alpine:init', () => {
       const url = new URL(window.location.href)
       const tourId = url.pathname.split('/').filter(Boolean).at(2)
       const itemId = url.searchParams.get('item')
-      this.nav = new ItemNavigator(tourId, itemId)
-      this.nav
-        .init()
-        .then((i) => console.log('nav init: ', i))
-        .then(() => this.populateFormData())
+      await fetch('/api/tours/' + tourId)
+        .then((r) => {
+          if (r.ok) {
+            return r.json()
+          } else throw new Error('Tour not found')
+        })
+        .then((tour) => {
+          this.tour = tour
+          return tour
+        })
+        .then((tour) =>
+          fetch(`/api/items?${new URLSearchParams({ tour: tour._id })}`),
+        )
+        .then((res) => res.json())
+        .then((items) => {
+          console.log('List loaded items: ', items)
+          this.items = items
+        })
+        .catch((e) => console.log('Error ', e))
+      // HACK: pretend items as itemNav
+      this.currentItemIdx = this.items.findIndex(
+        (entry) => entry._id === itemId,
+      )
+      this.currentItem = await this.loadItem(itemId)
     },
+
+    async loadItem(id) {
+      // this.anchorItemId = this.currentItemId
+      this.currentItemId = null
+      this.currentItem = null
+      let idx = this.items.findIndex((i) => i._id === id)
+      this.currentItemIdx = idx != -1 ? idx : this.currentItemIdx
+      return await fetch('/api/items/' + id)
+        .then((r) => {
+          if (r.ok) return r.json()
+          else throw new Error('Failed loading item')
+        })
+        .then((item) => {
+          this.currentItemId = id
+          this.currentItem = item
+        })
+    },
+
+    // lazy load item
+    // TODO: check if this is used
+    async getItem() {
+      if (this.currentItem) return this.currentItem
+      if (this.currentItemId) {
+        return this.loadItem(this.currentItemId)
+      }
+      //  else if (this.currentItemId) {
+      // }
+    },
+
     populateFormData() {
       this.formData = {
         _id: this.nav?.item?._id || null,
@@ -81,16 +137,16 @@ document.addEventListener('alpine:init', () => {
           alert('Errore di rete: ' + error.message)
         })
     },
-  }))
 
-  Alpine.data('reorderList', () => ({
-    items: null,
+    doView(id) {
+      let idx = this.items.findIndex((i) => i._id === id)
+      return Math.abs(idx - this.currentItemIdx) <= 2 // HACK: hardcoded
+    },
+
     dragging: false,
     draggingIdx: null,
     overIdx: null,
-    async init() {
-      /* TODO handle items */
-    },
+
     get someItems() {
       return this.items ? this.items : [{ _id: 'id', label: 'loading' }]
     },
