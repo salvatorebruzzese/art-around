@@ -332,8 +332,9 @@
                    could open the preview in any case. Isn't one "Apri" enough? -->
                   <!-- Vero apri -->
                   <a
-                    x-show="$store.userManager.user.purchasedTours.includes(tour._id)
-                           || $store.userManager.user.authoredTours.includes(tour._id)"
+                    x-show="$store.userManager.user
+                           &&($store.userManager.user.purchasedTours.includes(tour._id)
+                           || $store.userManager.user.authoredTours.includes(tour._id))"
                     class="shared-button-full-secondary"
                     :href="'./' + tour._id"
                   >
@@ -341,16 +342,16 @@
                   </a>
                   <!-- Preview apri TODO: implementare preview e/o ripensare ui -->
                   <a
-                    x-show="!$store.userManager.user.purchasedTours.includes(tour._id)
-                           && !$store.userManager.user.authoredTours.includes(tour._id)"
+                    x-show="!$store.userManager.user?.purchasedTours.includes(tour._id)
+                           && !$store.userManager.user?.authoredTours.includes(tour._id)"
                     class="shared-button-full-secondary"
                   >
                     Apri
                   </a>
                   <button
                     class="shared-button-full-primary"
-                    x-show="!$store.userManager.user.purchasedTours.includes(tour._id)
-                           && !$store.userManager.user.authoredTours.includes(tour._id)"
+                    x-show="!$store.userManager.user?.purchasedTours.includes(tour._id)
+                           && !$store.userManager.user?.authoredTours.includes(tour._id)"
                   >
                     Acquista
                   </button>
