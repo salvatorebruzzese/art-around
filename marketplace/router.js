@@ -14,6 +14,8 @@ router.get('/', (req, res) => {
     res.sendFile(join(rootDir, 'marketplace/editor.html'))
   } else if (req.baseUrl === '/profile') {
     res.sendFile(join(rootDir, 'marketplace/profile.html'))
+  } else if (req.baseUrl === '/checkout') {
+    res.sendFile(join(rootDir, 'marketplace/checkout.html'))
   }
 })
 

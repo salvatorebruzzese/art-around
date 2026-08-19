@@ -12,6 +12,7 @@ export default defineConfig({
         editor: 'editor.html',
         profile: 'profile.html',
         viewer: 'viewer.html',
+        checkout: 'checkout.html',
       },
     },
   },
