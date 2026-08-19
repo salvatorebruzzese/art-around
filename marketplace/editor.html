@@ -23,7 +23,17 @@
     <div class="flex w-full max-w-7xl mx-auto gap-10">
       <!-- Reorderable List Sidebar -->
       <aside class="shrink-0 w-64 flex flex-col items-start pt-2">
-        <button class="shared-button-full-primary mb-4">UP</button>
+        <div class="flex w-full gap-2 mb-4">
+          <button
+            class="shared-button-full-primary w-full"
+            @click="if(ghostIdx>itd/2) ghostIdx--"
+          >
+            UP
+          </button>
+          <button class="shared-button w-14" @click="ghostIdx = currentItemIdx">
+            RE
+          </button>
+        </div>
         <div id="draggable-list" class="w-full" x-ref="list">
           <template x-for="(item, idx) in someItems" :key="item._id">
             <div
@@ -56,7 +66,13 @@
               </label>
             </div>
           </template>
-          <button class="shared-button-full-primary">DOWN</button>
+          <button
+            class="shared-button-full-primary"
+            @click="
+                   if(ghostIdx<items.length - 3) {ghostIdx++}"
+          >
+            DOWN
+          </button>
         </div>
       </aside>
 

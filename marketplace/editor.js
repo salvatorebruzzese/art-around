@@ -9,8 +9,10 @@ document.addEventListener('alpine:init', () => {
     items: [],
     currentItem: null,
     currentItemIdx: -1,
+    ghostIdx: 2,
     currentItemId: null,
     anchorItemId: null,
+    itd: 4, // items to display
 
     // FORM
     submitting: false, // TODO: suspend input and show loading icon
@@ -69,6 +71,7 @@ document.addEventListener('alpine:init', () => {
         .then((item) => {
           this.currentItemId = id
           this.currentItem = item
+          this.populateFormData()
         })
     },
 
@@ -85,17 +88,17 @@ document.addEventListener('alpine:init', () => {
 
     populateFormData() {
       this.formData = {
-        _id: this.nav?.item?._id || null,
-        name: this.nav?.item?.name || '',
-        tour: this.nav?.item?.tour || '',
-        license: this.nav?.item?.license || '',
+        _id: this.currentItem?._id || null,
+        name: this.currentItem?.name || '',
+        tour: this.currentItem?.tour || '',
+        license: this.currentItem?.license || '',
         explanations:
-          Array.isArray(this.nav?.item?.explanations) &&
-          this.nav.item.explanations.length > 0
+          Array.isArray(this.currentItem?.explanations) &&
+          this.currentItem.explanations.length > 0
             ? [
                 {
-                  level: this.nav.item.explanations[0]?.level || '',
-                  text: this.nav.item.explanations[0]?.text || '',
+                  level: this.currentItem?.explanations[0]?.level || '',
+                  text: this.currentItem?.explanations[0]?.text || '',
                   duration: 0, // HACK:TODO: implement
                 },
               ]
@@ -140,7 +143,20 @@ document.addEventListener('alpine:init', () => {
 
     doView(id) {
       let idx = this.items.findIndex((i) => i._id === id)
-      return Math.abs(idx - this.currentItemIdx) <= 2 // HACK: hardcoded
+      const ghostIdx = this.ghostIdx
+      const itd = this.itd
+      const cap = this.items.length - 1
+      if (ghostIdx <= 1) {
+        return idx >= 0 && idx <= itd - 1
+      }
+      if (ghostIdx >= cap - 2) {
+        return idx >= cap - 3 && idx <= cap
+      }
+      return (
+        Math.abs(idx - ghostIdx) <= 2 &&
+        idx >= ghostIdx - 2 &&
+        idx <= ghostIdx + 1
+      )
     },
 
     dragging: false,
