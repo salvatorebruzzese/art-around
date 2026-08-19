@@ -118,7 +118,17 @@
           class="w-full aspect-video lg:aspect-square bg-white rounded-3xl overflow-hidden shadow-sm border border-p-soft"
         >
           <img
-            x-bind:src="currentItem?.image ? '/api/assets/'+currentItem.image : 'https://dummyimage.com/800x800/efefef/a3a3a3.jpg&text=Not+Found'"
+            x-data="{cache: null}"
+            x-bind:src="
+                    if(currentItem?.image != cache || !cache){ // needs to cache
+                        if(currentItem?.image){ // can save
+                            cache = '/api/assets/'+currentItem.image
+                        }else if (!cache){
+                            cache = 'https://dummyimage.com/800x800/efefef/a3a3a3.jpg&text=Loading'
+                        } // else keep old
+                    }
+                    return cache
+                    "
             alt="Thumbnail"
             class="object-cover w-full h-full"
           />
