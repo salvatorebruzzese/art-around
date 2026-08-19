@@ -8,7 +8,7 @@ class QuickNav extends HTMLElement {
     <!-- Home -->
     <a
       class="nav-icon-link group !p-0 !border-none shadow-sm rounded-xl hover:!bg-transparent"
-      href="../home/"
+      href="/home/"
     >
       <svg
         width="48"
@@ -76,7 +76,7 @@ class QuickNav extends HTMLElement {
               <li>
                 <a
                   class="shared-button-flex-secondary shadow-none"
-                  href="../profile"
+                  href="/profile"
                   >Profilo</a
                 >
               </li>
@@ -94,7 +94,7 @@ class QuickNav extends HTMLElement {
             <li>
               <a
                 class="shared-button-flex-secondary shadow-none"
-                href="../login"
+                href="/login"
                 >Accedi</a
               >
             </li>
@@ -132,7 +132,7 @@ class QuickNav extends HTMLElement {
     <!-- Navigator -->
     <a
       class="nav-icon-link group !p-0 !border-none shadow-sm rounded-xl hover:!bg-transparent"
-      href="../navigator/"
+      href="/navigator/"
     >
       <svg
         width="48"
