@@ -163,9 +163,6 @@ document.addEventListener('alpine:init', () => {
     draggingIdx: null,
     overIdx: null,
 
-    get someItems() {
-      return this.items ? this.items : [{ _id: 'id', label: 'loading' }]
-    },
     onDragStart(idx) {
       this.dragging = true
       this.draggingIdx = idx
@@ -192,6 +189,7 @@ document.addEventListener('alpine:init', () => {
         this.draggingIdx !== null &&
         this.draggingIdx !== idx
       ) {
+        console.log('drgIdx@drop: ', this.draggingIdx)
         const moved = this.items.splice(this.draggingIdx, 1)[0]
         let insertIdx = idx
         // Place after if cursor is below halfway point
@@ -201,6 +199,36 @@ document.addEventListener('alpine:init', () => {
         }
         if (insertIdx > this.items.length) insertIdx = this.items.length
         this.items.splice(insertIdx > idx ? insertIdx - 1 : insertIdx, 0, moved)
+        this.draggingIdx = null
+        this.overIdx = null
+        this.dragging = false
+      }
+    },
+    stash: [],
+    onDropStore(event, idx = -1) {
+      if (
+        this.dragging &&
+        this.draggingIdx !== null &&
+        this.draggingIdx !== idx
+      ) {
+        console.log('onDropStore: ', idx, event)
+        const moved = this.items.splice(this.draggingIdx, 1)[0]
+        let insertIdx = idx
+        // Place after if cursor is below halfway point
+        const targetRect = event.target.getBoundingClientRect()
+        if (
+          event.clientY > targetRect.top + targetRect.height / 2 &&
+          insertIdx != -1
+        ) {
+          insertIdx++
+        }
+        if (insertIdx > this.stash.length || insertIdx == -1)
+          insertIdx = this.stash.length
+        this.stash.splice(
+          insertIdx > idx && idx != -1 ? insertIdx - 1 : insertIdx,
+          0,
+          moved,
+        )
         this.draggingIdx = null
         this.overIdx = null
         this.dragging = false
