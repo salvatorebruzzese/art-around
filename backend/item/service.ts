@@ -130,17 +130,19 @@ async function patchItem(
   if (userResult.isLeft()) return Left(accessDenied())
   const user = userResult.unsafeCoerce()
 
-  if (!checkRole(user.role, 'edit:item')) return Left(accessDenied())
+  if (!checkRole(user.role, 'edit:item'))
+    return Left(accessDenied(`Your role, ${user.role}, cannot edit items.`))
 
   // Must load the item to check authorship and ownership
   const itemResult = await _getById(id, Item)
   if (itemResult.isLeft()) return itemResult
   const item = itemResult.unsafeCoerce()
 
+  console.log('qui')
   // Only admin or author can edit
   if (user.role !== Role['Admin']) {
     if (!item.itemAuthor.equals(userId)) {
-      return Left(accessDenied())
+      return Left(accessDenied('Not the author.'))
     }
     // If patch includes 'tour', check user authorship of updated tour
     if ('tour' in input && input.tour) {

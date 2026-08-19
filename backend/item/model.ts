@@ -39,7 +39,6 @@ export enum ItemType {
 
 interface _Item {
   name: string
-  itemType: ItemType
   itemAuthor: Types.ObjectId
   tour: Types.ObjectId
   explanations: IDescription[]
@@ -68,13 +67,12 @@ export const itemSchema = new Schema<IItem>(
     tags: [{ type: String }],
     image: { type: Schema.ObjectId, ref: 'Asset' },
   },
-  { discriminatorKey: 'itemType', collection: 'items', timestamps: true },
+  { collection: 'items', timestamps: true },
 )
 
 // NOTE: _id will always be returned (even if not specified)
 export const safeItemFields: (keyof _Item)[] = [
   'name',
-  'itemType',
   'itemAuthor',
   'tour',
   'explanations',
@@ -86,7 +84,6 @@ export const safeItemFields: (keyof _Item)[] = [
 
 export const metaItemFields: (keyof _Item)[] = [
   'name',
-  'itemType',
   'itemAuthor',
   'tour',
   'license',
@@ -116,7 +113,6 @@ export const Description = { validate: makeZodValidator(DescriptionSchemaZod) }
 
 const ItemInputSchemaZod = z.object({
   name: z.string(),
-  itemType: z.enum(ItemType),
   itemAuthor: objectIdZod,
   tour: objectIdZod,
   explanations: z.array(DescriptionSchemaZod),
@@ -127,7 +123,6 @@ const ItemInputSchemaZod = z.object({
 
 const ItemQuerySchemaZod = z.object({
   name: z.string().optional(),
-  itemType: z.enum(ItemType).optional(),
   itemAuthor: objectIdZod.optional(),
   tour: objectIdZod.optional(),
   explanations: z.array(DescriptionSchemaZod).optional(),

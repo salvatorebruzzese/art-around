@@ -10,13 +10,15 @@ router.use('/assets', express.static(join(rootDir, 'marketplace/assets')))
 router.get('/', (req, res) => {
   if (req.baseUrl === '/marketplace') {
     res.sendFile(join(rootDir, 'marketplace/marketplace.html'))
-  } else if (req.baseUrl === '/editor') {
-    res.sendFile(join(rootDir, 'marketplace/editor.html'))
   } else if (req.baseUrl === '/profile') {
     res.sendFile(join(rootDir, 'marketplace/profile.html'))
   } else if (req.baseUrl === '/checkout') {
     res.sendFile(join(rootDir, 'marketplace/checkout.html'))
   }
+})
+
+router.get('/editor/:id', (req, res) => {
+  res.sendFile(join(rootDir, 'marketplace/editor.html'))
 })
 
 router.get('/:id', async (req, res) => {

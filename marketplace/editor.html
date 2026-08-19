@@ -28,7 +28,7 @@
         class="w-full aspect-video lg:aspect-square bg-white rounded-3xl overflow-hidden shadow-sm border border-p-soft"
       >
         <img
-          src="https://dummyimage.com/800x800/efefef/a3a3a3.jpg&text=Image+Preview"
+          x-bind:src="nav.item?.image ? '/api/assets/'+nav.item.image : 'https://dummyimage.com/800x800/efefef/a3a3a3.jpg&text=Not+Found'"
           alt="Thumbnail"
           class="object-cover w-full h-full"
         />
@@ -55,10 +55,8 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="flex flex-col gap-1 w-full">
-            <label class="text-sm font-medium">Tipo di item</label>
+            <label class="text-sm font-medium">Tipo di item (deprecato)</label>
             <select
-              x-model="formData.itemType"
-              required
               class="w-full px-4 py-2 rounded-xl border border-p-soft bg-white text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium"
             >
               <option value="artist">Artista</option>
@@ -121,9 +119,11 @@
           </div>
         </fieldset>
 
-        <button type="submit" class="shared-button-full-primary">
-          Salva Modifiche
-        </button>
+        <button
+          type="submit"
+          class="shared-button-full-primary"
+          x-text="formData._id ? 'Salva Modifiche':'Crea'"
+        ></button>
       </form>
     </main>
   </body>
