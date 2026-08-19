@@ -39,7 +39,7 @@ async function seed() {
     ])
     console.log('Cleared existing data.')
 
-    // Creazione Utente
+    // Creazione Utente principale
     const hashedPassword = await bcrypt.hash('password123', 10)
     let user = await User.create({
       username: 'testuser',
@@ -79,8 +79,37 @@ async function seed() {
       billingData: { cards: [], addresses: [] },
     })
 
+    // Creazione Secondo Utente
+    const secondPassword = await bcrypt.hash('user987', 10)
+    let secondUser = await User.create({
+      username: 'anotheruser',
+      email: 'anotheruser@example.com',
+      password: secondPassword,
+      role: Role['User'],
+      authoredTours: [],
+      purchasedTours: [],
+      billingData: { cards: [], addresses: [] },
+    })
+
+    const secondProfilePicture = await Asset.create({
+      author: secondUser._id,
+      data: await fetchRandomImageBuffer(200, 200),
+      datatype: 'image/jpeg',
+      public: true,
+    })
+
+    const updatedSecondUser = await User.findByIdAndUpdate(
+      secondUser._id,
+      {
+        profilePicture: secondProfilePicture._id,
+      },
+      { new: true },
+    )
+    secondUser = updatedSecondUser ? updatedSecondUser : secondUser
+
     console.debug('Created user:', user)
     console.debug('Created admin:', admin)
+    console.debug('Created another user:', secondUser)
 
     // Creazione pool di Asset condivisi
     const assetPromises = Array.from({ length: 5 }).map(async () =>
@@ -93,6 +122,18 @@ async function seed() {
     )
     const assets = await Promise.all(assetPromises)
     const assetIds = assets.map((a) => a._id as mongoose.Types.ObjectId)
+
+    // Creazione asset per altro user
+    const asset2Promises = Array.from({ length: 3 }).map(async () =>
+      Asset.create({
+        author: secondUser._id,
+        data: await fetchRandomImageBuffer(),
+        datatype: 'image/jpeg',
+        public: true,
+      }),
+    )
+    const assets2 = await Promise.all(asset2Promises)
+    const asset2Ids = assets2.map((a) => a._id as mongoose.Types.ObjectId)
 
     const museumsData = [
       {
@@ -146,7 +187,58 @@ async function seed() {
 
       await Museum.findByIdAndUpdate(museum._id, { $push: { tours: tour._id } })
       console.log(
-        `Seeded ${museum.name} with Tour and ${createdItems.length} items.`,
+        `Seeded ${museum.name} with Tour and ${createdItems.length} items. (user1)`,
+      )
+    }
+
+    // Creazione Museo e Tour per altro user
+    const museumsData2 = [
+      {
+        name: 'Museo Egizio',
+        address: 'Via Accademia delle Scienze, 6, 10123 Torino TO, Italy',
+        description: 'Famous museum dedicated to Egyptian antiquities.',
+      },
+      {
+        name: 'Museo di Capodimonte',
+        address: 'Via Miano, 2, 80131 Napoli NA, Italy',
+        description: 'Art museum in Naples with a vast collection.',
+      },
+    ]
+
+    for (const data of museumsData2) {
+      const museum = await Museum.create({ ...data, tours: [] })
+      const tour = await Tour.create({
+        name: `Best of ${museum.name}`,
+        author: secondUser._id,
+        thumbnail: asset2Ids[0],
+        museum: museum._id,
+        price: 8,
+        items: [],
+        description: `Discover ${museum.name}`,
+      })
+
+      await User.findByIdAndUpdate(secondUser._id, {
+        $push: { authoredTours: tour._id },
+      })
+
+      // Generazione di 7 item per ognuno di questi tour
+      const itemsData = generateItemsForTour(
+        museum.name,
+        secondUser._id as mongoose.Types.ObjectId,
+        tour._id as mongoose.Types.ObjectId,
+        asset2Ids,
+        7,
+      )
+      const createdItems = await Item.insertMany(itemsData)
+
+      // Update references in tour and museum
+      const itemIds = createdItems.map((i) => i._id)
+      tour.items = itemIds as mongoose.Types.ObjectId[]
+      await tour.save()
+
+      await Museum.findByIdAndUpdate(museum._id, { $push: { tours: tour._id } })
+      console.log(
+        `Seeded ${museum.name} with Tour and ${createdItems.length} items. (anotheruser)`,
       )
     }
 
