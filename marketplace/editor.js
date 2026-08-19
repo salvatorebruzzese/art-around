@@ -39,6 +39,7 @@ document.addEventListener('alpine:init', () => {
       const url = new URL(window.location.href)
       const tourId = url.pathname.split('/').filter(Boolean).at(2)
       const itemId = url.searchParams.get('item')
+
       await fetch('/api/tours/' + tourId)
         .then((r) => {
           if (r.ok) {
@@ -62,7 +63,7 @@ document.addEventListener('alpine:init', () => {
       this.currentItemIdx = this.items.findIndex(
         (entry) => entry._id === itemId,
       )
-      this.currentItem = await this.loadItem(itemId)
+      await this.loadItem(itemId)
     },
 
     // lazy load item

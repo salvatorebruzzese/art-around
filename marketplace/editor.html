@@ -23,8 +23,25 @@
     <div class="flex w-full max-w-7xl mx-auto gap-10">
       <!-- Reorderable List Sidebar -->
       <div class="min-h-50 shrink-0 w-64 flex flex-col items-start pt-2">
+        <div class="flex gap-2 w-full">
+          <button class="shared-button w-full" @click="saveItems()">
+            Save Order
+          </button>
+
+          <button class="shared-button-full-primary w-14" @click="addItem()">
+            +
+          </button>
+        </div>
         <template x-for="board in boards()" :key="board.name">
-          <aside class="min-h-50 shrink-0 w-64 flex flex-col items-start pt-2">
+          <aside
+            class="min-h-50 shrink-0 w-64 flex flex-col items-start pt-2"
+            @wheel.prevent="((e)=>{
+                    if(board.controls){
+                        if(e.deltaY > 0) { downItems(); }
+                        else if(e.deltaY < 0) { upItems(); }
+                    }
+                   })($event)"
+          >
             <template x-if="board.controls">
               <div class="flex w-full gap-2 mb-4">
                 <button
@@ -44,9 +61,9 @@
                 <div
                   class="draggable-item flex items-center justify-between rounded-lg bg-white shadow mb-3 px-4 py-3 cursor-grab transition-all select-none"
                   :class="{
-            'ring-2 ring-red-400 opacity-80': isDragging(board.name, idx),
-            'bg-gray-100': isOver(board.name, idx)
-          }"
+              'ring-2 ring-red-400 opacity-80': isDragging(board.name, idx),
+              'bg-gray-100': isOver(board.name, idx)
+            }"
                   draggable="true"
                   @dragstart="onDragStart(board.name, idx)"
                   @dragend="onDragEnd"
