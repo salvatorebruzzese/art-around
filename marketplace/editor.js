@@ -7,6 +7,7 @@ document.addEventListener('alpine:init', () => {
     // NAVIGATION
     tour: null,
     items: [],
+    itemsCache: [],
     stash: [],
     currentItem: null,
     currentItemIdx: -1,
@@ -55,7 +56,6 @@ document.addEventListener('alpine:init', () => {
         )
         .then((res) => res.json())
         .then((items) => {
-          console.log('List loaded items: ', items)
           this.items = items
         })
         .catch((e) => console.log('Error ', e))
@@ -101,11 +101,14 @@ document.addEventListener('alpine:init', () => {
                 },
               ],
       }
-      console.log('Data loaded: ', this.formData)
     },
     submitForm() {
-      console.log('Subimitting: ', this.formData)
       this.isSubmitting = true
+      // invalidate cache
+      if (this.formData._id) {
+        let idx = this.itemsCache.findIndex((i) => i._id === this.formData._id)
+        this.itemsCache.splice(idx, idx == -1 ? 0 : 1)
+      }
       fetch('/api/items/' + this.formData._id, {
         method: this.formData._id ? 'PATCH' : 'POST',
         headers: {
@@ -188,16 +191,24 @@ document.addEventListener('alpine:init', () => {
       if (idx !== -1) {
         this.currentItemIdx = idx
       }
-      return await fetch('/api/items/' + id)
-        .then((r) => {
-          if (r.ok) return r.json()
-          else throw new Error('Failed loading item')
-        })
-        .then((item) => {
-          this.currentItemId = id
-          this.currentItem = item
-          this.populateFormData()
-        })
+      let cacheIdx = this.itemsCache.findIndex((i) => i._id === id)
+      if (cacheIdx === -1) {
+        await fetch('/api/items/' + id)
+          .then((r) => {
+            if (r.ok) return r.json()
+            else throw new Error('Failed loading item')
+          })
+          .then((item) => {
+            this.currentItemId = id
+            this.currentItem = item
+            this.populateFormData()
+            this.itemsCache.push(item)
+          })
+      } else {
+        this.currentItemId = id
+        this.currentItem = this.itemsCache.at(cacheIdx)
+        this.populateFormData()
+      }
     },
 
     // Generalized Drag/Drop Handlers
