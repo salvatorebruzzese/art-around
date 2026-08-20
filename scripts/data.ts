@@ -1,5 +1,5 @@
 import { Types } from 'mongoose'
-import { ItemType, IDescription } from '../backend/item/model.js'
+import { ItemType, IDescription, IItem } from '../backend/item/model.js'
 
 export const sampleExplanations: Record<string, IDescription[]> = {
   simple: [
@@ -96,18 +96,16 @@ export function generateItemsForTour(
     const selectedExplanations =
       sampleExplanations[expKeys[index % expKeys.length]]
 
-    const res = {
+    const res: Partial<IItem> = {
       name: `${template.name} - ${museumName} #${index + 1}`,
-      itemType: template.type,
       itemAuthor: userId,
       image: assetIds.length == 1 ? assetIds.at(0) : assetIds.pop(),
       tour: tourId,
       license: 'CC-BY-4.0',
+      refs: [],
       tags: template.tags,
       explanations: selectedExplanations,
-      imageUrl: `https://dummyimage.com/600x600/efefef/a3a3a3.jpg&text=Image+Preview`,
     }
-    console.log(res)
     return res
   })
 }

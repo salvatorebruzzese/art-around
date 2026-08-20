@@ -21,6 +21,7 @@ document.addEventListener('alpine:init', () => {
     boards: {},
     dragDrop: null,
     formManager: null,
+    doView: null,
 
     async init() {
       // Setup boards and managers
@@ -104,6 +105,13 @@ document.addEventListener('alpine:init', () => {
         loadItem: this.loadItem.bind(this),
         addItem: this._addItem.bind(this),
       })
+    },
+
+    getRefs() {
+      if (!this.currentItem) return
+      return this.items.filter((i) =>
+        this.currentItem.refs?.some((rid) => i._id === rid),
+      )
     },
 
     // Form and item load logic

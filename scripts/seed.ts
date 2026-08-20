@@ -1,4 +1,4 @@
-import mongoose from 'mongoose'
+import mongoose, { Types } from 'mongoose'
 import dotenv from 'dotenv'
 import path from 'path'
 import fetch from 'node-fetch'
@@ -179,8 +179,19 @@ async function seed() {
         assetIds,
         10,
       )
-      const createdItems = await Item.insertMany(itemsData)
 
+      const createdItems = await Item.insertMany(itemsData)
+      createdItems.forEach((item, idx) => {
+        if (idx > 1 && idx % 2 === 0) {
+          Item.findByIdAndUpdate(
+            item._id,
+            {
+              refs: [createdItems.at(idx - 1)!._id as Types.ObjectId],
+            },
+            { new: true },
+          ).then((res) => console.log('Added refs: ', res))
+        }
+      })
       // Aggiornamento riferimenti nel tour e nel museo
       const itemIds = createdItems.map((i) => i._id)
       tour.items = itemIds as mongoose.Types.ObjectId[]

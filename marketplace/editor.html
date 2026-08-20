@@ -66,7 +66,7 @@
                     @dragover.prevent="onDragOver(board.name, idx, $event)"
                     @dragleave="onDragLeave(board.name, idx)"
                     @drop="onDrop(board.name, idx, $event)"
-                    x-show="board.name === 'items' ? doView(item._id) : true"
+                    x-show="board.name === 'items' && doView ? doView(item._id) : true"
                   >
                     <label class="flex items-center cursor-pointer">
                       <input
@@ -137,22 +137,76 @@
       <main
         class="flex-1 grid lg:grid-cols-2 gap-10 items-start w-full max-w-7xl mx-auto"
       >
-        <figure
-          class="w-full aspect-video lg:aspect-square bg-white rounded-3xl overflow-hidden shadow-sm border border-p-soft"
-        >
-          <img
-            x-data="{cache: null}"
-            x-bind:src="
+        <div class="flex flex-col gap-6">
+          <figure
+            class="w-full aspect-video lg:aspect-square bg-white rounded-3xl overflow-hidden shadow-sm border border-p-soft"
+          >
+            <img
+              x-data="{cache: null}"
+              x-bind:src="
               if(currentItem?.image != cache || !cache){
                 if(currentItem?.image){cache = '/api/assets/'+currentItem.image}
                 else if (!cache){cache = 'https://dummyimage.com/800x800/efefef/a3a3a3.jpg&text=Loading'}
               }
               return cache
             "
-            alt="Thumbnail"
-            class="object-cover w-full h-full"
-          />
-        </figure>
+              alt="Thumbnail"
+              class="object-cover w-full h-full"
+            />
+          </figure>
+          <!-- REFS -->
+          <div
+            class="flex flex-col flex-wrap gap-2 bg-blue-300 w-full h-72 rounded-xl"
+          >
+            <template x-for="ref in getRefs">
+              <div
+                class="flex justify-between rounded-lg bg-white shadow m-3 px-4 py-3 cursor-grab transition-all select-none"
+              >
+                <label class="flex items-center cursor-pointer">
+                  <input
+                    type="radio"
+                    class="form-radio text-blue-600 mr-3"
+                    name="itemRadio"
+                    x-model="currentItemId"
+                    :value="ref._id"
+                    @input="loadItem(ref._id)"
+                  />
+                  <span
+                    class="flex-1 text-base font-medium text-gray-800 text-center"
+                    x-text="ref.name"
+                  ></span>
+                </label>
+                <div x-data="{open: false}" class="dropdown dropdown-end">
+                  <button
+                    @click="open = !open"
+                    class="btn btn-sm btn-circle bg-white/80 hover:bg-white text-p-dark border-none shadow-md backdrop-blur-sm focus:outline-none list-none"
+                  >
+                    <svg
+                      class="w-5 h-5"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        d="M10 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4z"
+                      />
+                    </svg>
+                  </button>
+                  <div x-show="open" x-transition @click.outside="open = false">
+                    <ul class="nav-dropdown-menu dropdown-end p-4">
+                      <li>
+                        <button
+                          class="shared-button-flex-secondary shadow-none"
+                        >
+                          Elimina
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
         <form
           @submit.prevent="submitForm"
           class="flex flex-col text-p-medium gap-5 bg-white p-8 rounded-3xl shadow-sm border border-p-soft"

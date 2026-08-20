@@ -46,6 +46,7 @@ interface _Item {
   tags?: string[]
   image?: Types.ObjectId
   position?: IGeoPosition
+  refs?: Types.ObjectId[]
 }
 
 export interface IItem extends Document, _Item {}
@@ -65,6 +66,7 @@ export const itemSchema = new Schema<IItem>(
     license: String,
     tour: { type: Schema.ObjectId, ref: 'Tour', required: true },
     tags: [{ type: String }],
+    refs: [{ type: Schema.ObjectId, ref: 'Item' }],
     image: { type: Schema.ObjectId, ref: 'Asset' },
   },
   { collection: 'items', timestamps: true },
@@ -75,6 +77,7 @@ export const safeItemFields: (keyof _Item)[] = [
   'name',
   'itemAuthor',
   'tour',
+  'refs',
   'explanations',
   'license',
   'tags',
@@ -118,6 +121,7 @@ const ItemInputSchemaZod = z.object({
   explanations: z.array(DescriptionSchemaZod),
   license: z.string(),
   tags: z.array(z.string()).optional(),
+  refs: objectIdZod.array().optional(),
   image: z.array(objectIdZod).optional(),
 })
 
@@ -127,6 +131,7 @@ const ItemQuerySchemaZod = z.object({
   tour: objectIdZod.optional(),
   explanations: z.array(DescriptionSchemaZod).optional(),
   license: z.string().optional(),
+  refs: objectIdZod.array().optional(),
   tags: z.array(z.string()).optional(),
   image: z.array(objectIdZod).optional(),
 })
