@@ -7,6 +7,7 @@ document.addEventListener('alpine:init', () => {
     // NAVIGATION
     tour: null,
     items: [],
+    itemNav: [],
     itemsCache: [],
     stash: [],
     currentItem: null,
@@ -49,6 +50,7 @@ document.addEventListener('alpine:init', () => {
         })
         .then((tour) => {
           this.tour = tour
+          this.itemNav = tour.itemNav
           return tour
         })
         .then((tour) =>
@@ -59,10 +61,7 @@ document.addEventListener('alpine:init', () => {
           this.items = items
         })
         .catch((e) => console.log('Error ', e))
-      // HACK: pretend items as itemNav
-      this.currentItemIdx = this.items.findIndex(
-        (entry) => entry._id === itemId,
-      )
+      this.currentItemIdx = this.itemNav.findIndex((entry) => entry === itemId)
       await this.loadItem(itemId)
     },
 
@@ -141,7 +140,9 @@ document.addEventListener('alpine:init', () => {
         {
           name: 'items',
           title: 'Items',
-          arr: this.items,
+          arr: this.items.filter((item) => {
+            return this.itemNav.includes(item._id)
+          }),
           controls: true,
         },
         {
@@ -155,10 +156,10 @@ document.addEventListener('alpine:init', () => {
 
     // Determine if given id should display in items list pager window
     doView(id) {
-      let idx = this.items.findIndex((i) => i._id === id)
+      let idx = this.itemNav.findIndex((i) => i === id)
       const ghostIdx = this.ghostIdx
       const itd = this.itd
-      const cap = this.items.length - 1
+      const cap = this.itemNav.length - 1
       if (ghostIdx <= 1) {
         return idx >= 0 && idx <= itd - 1
       }
@@ -177,7 +178,7 @@ document.addEventListener('alpine:init', () => {
       if (this.ghostIdx > this.itd / 2) this.ghostIdx--
     },
     downItems() {
-      if (this.ghostIdx < this.items.length - 3) this.ghostIdx++
+      if (this.ghostIdx < this.itemNav.length - 3) this.ghostIdx++
     },
     resetItems() {
       this.ghostIdx = this.currentItemIdx
@@ -187,7 +188,7 @@ document.addEventListener('alpine:init', () => {
     async loadItem(id) {
       this.currentItemId = null
       this.currentItem = null
-      let idx = this.items.findIndex((i) => i._id === id)
+      let idx = this.itemNav.findIndex((i) => i === id)
       if (idx !== -1) {
         this.currentItemIdx = idx
       }

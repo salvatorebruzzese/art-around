@@ -163,6 +163,7 @@ async function seed() {
         museum: museum._id,
         price: 15,
         items: [],
+        itemNav: [],
         description: `Explore the best of ${museum.name}.`,
       })
 
@@ -183,6 +184,7 @@ async function seed() {
       // Aggiornamento riferimenti nel tour e nel museo
       const itemIds = createdItems.map((i) => i._id)
       tour.items = itemIds as mongoose.Types.ObjectId[]
+      tour.itemNav = itemIds.filter((_, idx) => idx % 2 === 0)
       await tour.save()
 
       await Museum.findByIdAndUpdate(museum._id, { $push: { tours: tour._id } })

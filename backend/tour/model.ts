@@ -15,6 +15,7 @@ interface _Tour {
   museum: Types.ObjectId
   thumbnail?: Types.ObjectId
   items: Types.ObjectId[]
+  itemNav: Types.ObjectId[]
   description?: string
   reviews?: IReview[]
   price: number
@@ -39,6 +40,7 @@ export const tourSchema = new Schema<ITour>(
     museum: { type: Schema.Types.ObjectId, ref: 'Museum' },
     thumbnail: { type: Schema.Types.ObjectId, ref: 'Asset' },
     items: [{ type: Schema.Types.ObjectId, ref: 'Item' }],
+    itemNav: [{ type: Schema.Types.ObjectId, ref: 'Item' }],
     description: { type: String },
     reviews: [reviewSchema],
     price: { type: Number },
@@ -110,6 +112,7 @@ export const safeTourFields: (keyof _Tour)[] = [
   'name',
   'author',
   'items',
+  'itemNav',
   'price',
   'museum',
   'description',
