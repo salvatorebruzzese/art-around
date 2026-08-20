@@ -9,6 +9,7 @@ document.addEventListener('alpine:init', () => {
     items: [],
     itemNav: [],
     itemsCache: [],
+    toDelete: [],
     stash: [],
     currentItem: null,
     currentItemIdx: -1,
@@ -26,6 +27,13 @@ document.addEventListener('alpine:init', () => {
 
     // FORM
     submitting: false, // TODO: suspend input and show loading icon
+    emptyFormData: {
+      _id: null,
+      name: '',
+      tour: '',
+      license: '',
+      explanations: [{ level: '', text: '', duration: 0 }],
+    },
     formData: {
       _id: null,
       name: '',
@@ -51,7 +59,6 @@ document.addEventListener('alpine:init', () => {
         })
         .then((tour) => {
           this.tour = tour
-          console.log(tour)
           metaNav = tour.itemNav
           return tour
         })
@@ -136,41 +143,99 @@ document.addEventListener('alpine:init', () => {
           title: 'Items',
           arr: this.itemNav,
           controls: true,
+          dropZoneStyle:
+            'bg-green-200 border-2 border-dashed border-green-600 text-green-600 cursor-pointer',
+          dropZoneText: 'Drop here to order',
         },
         {
           name: 'stash',
           title: 'Stash',
           arr: this.stash,
           controls: false,
+          dropZoneStyle:
+            'bg-gray-300 border-2 border-dashed border-gray-400 text-gray-500 cursor-pointer',
+          dropZoneText: 'Drop here to stash',
+        },
+
+        {
+          name: 'toDelete',
+          title: 'toDelete',
+          arr: this.toDelete,
+          controls: false,
+          dropZoneStyle:
+            'bg-red-200 border-2 border-dashed border-red-700 text-red-700 cursor-pointer',
+          dropZoneText: 'Drop here to delete',
         },
       ]
     },
 
-    async saveItemNav() {
-      let patch = {
-        itemNav: this.itemNav.map((item) => item._id),
-        items: Array.from(new Set([...this.items, ...this.stash])).map(
-          (i) => i._id,
-        ),
+    deleteItem(elm) {
+      if (elm._id == this.formData._id) {
+        this.formData = { ...this.emptyFormData }
       }
+      let index = this.itemNav.findIndex((item) => item._id === elm._id)
+      if (index !== -1) {
+        const removed = this.itemNav.splice(index, 1)[0]
+        const _ = this.items.splice(index, 1)[0]
+        this.toDelete.push(removed)
+      } else {
+        index = this.stash.findIndex((item) => item._id === elm._id)
+        if (index !== -1) {
+          const removed = this.stash.splice(index, 1)[0]
+          const _ = this.items.splice(index, 1)[0]
+          this.toDelete.push(removed)
+        }
+      }
+
+      console.log(index)
+      if (index != -1) {
+        if (this.itemNav.length === 0) {
+          if (this.items.length > 0) {
+            const randomIndex = Math.floor(Math.random() * this.items.length)
+            this.loadItem(this.items[randomIndex]._id)
+          }
+        } else {
+          this.loadItem(this.itemNav[0]._id)
+        }
+      }
+      /* TODO: ask confirm? */
+    },
+
+    async saveItemNav() {
       fetch('/api/tours/' + this.tour._id, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(patch),
+        body: JSON.stringify({
+          itemNav: this.itemNav.map((item) => item._id),
+          items: Array.from(new Set([...this.items, ...this.stash])).map(
+            (i) => i._id,
+          ),
+        }),
       })
         .then(async (response) => {
-          this.isSubmitting = false
           if (response.ok) {
-            // TODO: show success or reload/navigate
-            // location.reload();
-            // or: this.$dispatch('item-updated', await response.json());
-            // https://alpinejs.dev/magics/dispatch
-            alert('Modifiche salvate con successo.')
+            const deletePromises = this.toDelete.map((item) =>
+              fetch('/api/items/' + item._id, {
+                method: 'DELETE',
+              }),
+            )
+            try {
+              await Promise.all(deletePromises)
+              alert('Modifiche salvate con successo.')
+            } catch (deleteError) {
+              alert(
+                "Errore nell'eliminazione di alcuni elementi: " +
+                  deleteError.message,
+              )
+            }
           } else {
             const err = await response.json().catch(() => ({}))
-            alert('Errore nel salvataggio: ', err.error.message)
+            alert(
+              'Errore nel salvataggio: ' +
+                (err.error && err.error.message ? err.error.message : ''),
+            )
           }
         })
         .catch((error) => {
@@ -222,18 +287,25 @@ document.addEventListener('alpine:init', () => {
         await fetch('/api/items/' + id)
           .then((r) => {
             if (r.ok) return r.json()
-            else throw new Error('Failed loading item')
+            else console.log(r)
           })
           .then((item) => {
             this.currentItemId = id
             this.currentItem = item
             this.populateFormData()
             this.itemsCache.push(item)
+            if (this.itemNav.length == 0 && this.stash.length == 0) {
+              this.stash.push(item)
+            }
           })
       } else {
+        const item = this.itemsCache.at(cacheIdx)
         this.currentItemId = id
-        this.currentItem = this.itemsCache.at(cacheIdx)
+        this.currentItem = item
         this.populateFormData()
+        if (this.itemNav.length == 0 && this.stash.length == 0) {
+          this.stash.push(item)
+        }
       }
     },
 
@@ -282,7 +354,11 @@ document.addEventListener('alpine:init', () => {
         return
       if (this.draggingBoard === board && this.draggingIdx === idx) return
       // Defensive: get source/target arrays
-      const sources = { items: this.itemNav, stash: this.stash }
+      const sources = {
+        items: this.itemNav,
+        stash: this.stash,
+        toDelete: this.toDelete,
+      }
       let sourceArr = sources[this.draggingBoard]
       let targetArr = sources[board]
 
@@ -296,7 +372,6 @@ document.addEventListener('alpine:init', () => {
       }
       if (insertIdx > targetArr.length) insertIdx = targetArr.length
       targetArr.splice(insertIdx > idx ? insertIdx - 1 : insertIdx, 0, moved)
-      console.log(sourceArr, targetArr, this.itemNav, this.stash)
       // Reset drag state
       this.dragging = false
       this.draggingIdx = null
@@ -313,7 +388,11 @@ document.addEventListener('alpine:init', () => {
         this.draggingBoard === null
       )
         return
-      const sources = { items: this.itemNav, stash: this.stash }
+      const sources = {
+        items: this.itemNav,
+        stash: this.stash,
+        toDelete: this.toDelete,
+      }
       let sourceArr = sources[this.draggingBoard]
       let targetArr = sources[board]
       const moved = sourceArr.splice(this.draggingIdx, 1)[0]

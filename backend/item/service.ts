@@ -196,7 +196,16 @@ async function deleteItem(
   }
 
   try {
+    const tourId = item.tour
     await item.deleteOne()
+    const promise = (await _getById(tourId, Tour)).chain((tour) => {
+      tour.items = tour.items.filter((item) => item._id !== id)
+      tour.itemNav = tour.itemNav.filter((item) => item._id !== id)
+      return Right(tour.save())
+    })
+    if (promise.isRight()) {
+      await promise.unsafeCoerce()
+    }
     return Right(project(safeItemFields, item))
   } catch (e) {
     return Left(dbError(undefined, () => JSON.stringify(e)))
