@@ -87,14 +87,15 @@ async function patchTour(
   if (userResult.isLeft()) return Left(accessDenied())
   const user = userResult.unsafeCoerce()
 
-  if (!checkRole(user.role, 'edit:tour')) return Left(accessDenied())
+  if (!checkRole(user.role, 'edit:tour'))
+    return Left(accessDenied("Can't edit tours."))
   // DONE: only allow if user is author; needs loading the Tour (see below)
 
   try {
-    const tour = await Tour.findByIdAndUpdate(id, input)
+    const tour = await Tour.findByIdAndUpdate(id, input, { new: true })
     if (tour) {
-      if (tour.author != userId && user.role != Role['Admin'])
-        return Left(accessDenied())
+      if (!tour.author.equals(userId) && user.role != Role['Admin'])
+        return Left(accessDenied('You are not the author.'))
       return Right(project(safeTourFields, tour))
     } else return Left(notFound())
   } catch (e) {

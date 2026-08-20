@@ -24,7 +24,7 @@
       <!-- Reorderable List Sidebar -->
       <div class="min-h-50 shrink-0 w-64 flex flex-col items-start pt-2">
         <div class="flex gap-2 w-full">
-          <button class="shared-button w-full" @click="saveItems()">
+          <button class="shared-button w-full" @click="saveItemNav()">
             Save Order
           </button>
 
@@ -88,21 +88,22 @@
                   </label>
                 </div>
               </template>
-              <template x-if="board.controls">
-                <button class="shared-button-full-primary" @click="downItems()">
-                  DOWN
-                </button>
-              </template>
               <div
                 x-show="board.arr.length === 0"
                 x-transition:enter
                 x-transition:leave.opacity
-                class="flex flex-col min-h-50 w-full items-center justify-center rounded-lg bg-gray-300 border-2 border-dashed border-gray-400 text-gray-500 cursor-pointer"
+                class="flex flex-col min-h-50 w-full mb-4 items-center justify-center rounded-lg bg-gray-300 border-2 border-dashed border-gray-400 text-gray-500 cursor-pointer"
                 @drop="onDropEmpty(board.name, $event)"
                 @dragover.prevent=""
               >
                 <p>Drop here...</p>
               </div>
+
+              <template x-if="board.controls">
+                <button class="shared-button-full-primary" @click="downItems()">
+                  DOWN
+                </button>
+              </template>
             </div>
           </aside>
         </template>

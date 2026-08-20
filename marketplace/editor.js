@@ -35,6 +35,7 @@ document.addEventListener('alpine:init', () => {
     },
 
     async init() {
+      let metaNav = []
       Alpine.store('userManager')
         .getUser()
         .then((u) => (this.user = u))
@@ -50,7 +51,8 @@ document.addEventListener('alpine:init', () => {
         })
         .then((tour) => {
           this.tour = tour
-          this.itemNav = tour.itemNav
+          console.log(tour)
+          metaNav = tour.itemNav
           return tour
         })
         .then((tour) =>
@@ -59,21 +61,13 @@ document.addEventListener('alpine:init', () => {
         .then((res) => res.json())
         .then((items) => {
           this.items = items
+          this.itemNav = metaNav
+            .map((id) => items.find((item) => item._id === id))
+            .filter(Boolean)
         })
         .catch((e) => console.log('Error ', e))
-      this.currentItemIdx = this.itemNav.findIndex((entry) => entry === itemId)
+      this.currentItemIdx = this.itemNav.findIndex((i) => i._id === itemId)
       await this.loadItem(itemId)
-    },
-
-    // lazy load item
-    // TODO: check if this is used
-    async getItem() {
-      if (this.currentItem) return this.currentItem
-      if (this.currentItemId) {
-        return this.loadItem(this.currentItemId)
-      }
-      //  else if (this.currentItemId) {
-      // }
     },
 
     populateFormData() {
@@ -140,9 +134,7 @@ document.addEventListener('alpine:init', () => {
         {
           name: 'items',
           title: 'Items',
-          arr: this.items.filter((item) => {
-            return this.itemNav.includes(item._id)
-          }),
+          arr: this.itemNav,
           controls: true,
         },
         {
@@ -154,9 +146,42 @@ document.addEventListener('alpine:init', () => {
       ]
     },
 
+    async saveItemNav() {
+      let patch = {
+        itemNav: this.itemNav.map((item) => item._id),
+        items: Array.from(new Set([...this.items, ...this.stash])).map(
+          (i) => i._id,
+        ),
+      }
+      fetch('/api/tours/' + this.tour._id, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(patch),
+      })
+        .then(async (response) => {
+          this.isSubmitting = false
+          if (response.ok) {
+            // TODO: show success or reload/navigate
+            // location.reload();
+            // or: this.$dispatch('item-updated', await response.json());
+            // https://alpinejs.dev/magics/dispatch
+            alert('Modifiche salvate con successo.')
+          } else {
+            const err = await response.json().catch(() => ({}))
+            alert('Errore nel salvataggio: ', err.error.message)
+          }
+        })
+        .catch((error) => {
+          this.isSubmitting = false
+          alert('Errore di rete: ' + error.message)
+        })
+    },
+
     // Determine if given id should display in items list pager window
     doView(id) {
-      let idx = this.itemNav.findIndex((i) => i === id)
+      let idx = this.itemNav.findIndex((i) => i._id === id)
       const ghostIdx = this.ghostIdx
       const itd = this.itd
       const cap = this.itemNav.length - 1
@@ -188,7 +213,7 @@ document.addEventListener('alpine:init', () => {
     async loadItem(id) {
       this.currentItemId = null
       this.currentItem = null
-      let idx = this.itemNav.findIndex((i) => i === id)
+      let idx = this.itemNav.findIndex((i) => i._id === id)
       if (idx !== -1) {
         this.currentItemIdx = idx
       }
@@ -257,7 +282,7 @@ document.addEventListener('alpine:init', () => {
         return
       if (this.draggingBoard === board && this.draggingIdx === idx) return
       // Defensive: get source/target arrays
-      const sources = { items: this.items, stash: this.stash }
+      const sources = { items: this.itemNav, stash: this.stash }
       let sourceArr = sources[this.draggingBoard]
       let targetArr = sources[board]
 
@@ -271,6 +296,7 @@ document.addEventListener('alpine:init', () => {
       }
       if (insertIdx > targetArr.length) insertIdx = targetArr.length
       targetArr.splice(insertIdx > idx ? insertIdx - 1 : insertIdx, 0, moved)
+      console.log(sourceArr, targetArr, this.itemNav, this.stash)
       // Reset drag state
       this.dragging = false
       this.draggingIdx = null
@@ -287,7 +313,7 @@ document.addEventListener('alpine:init', () => {
         this.draggingBoard === null
       )
         return
-      const sources = { items: this.items, stash: this.stash }
+      const sources = { items: this.itemNav, stash: this.stash }
       let sourceArr = sources[this.draggingBoard]
       let targetArr = sources[board]
       const moved = sourceArr.splice(this.draggingIdx, 1)[0]

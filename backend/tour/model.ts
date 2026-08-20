@@ -81,6 +81,7 @@ const TourInputSchemaZod = z.object({
   price: z.number(),
   museum: objectIdZod,
   items: z.array(objectIdZod),
+  itemNav: z.array(objectIdZod),
   thumbnail: objectIdZod.optional(),
   description: z.string().optional(),
 })
