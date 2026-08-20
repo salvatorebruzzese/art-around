@@ -3,8 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Editor</title>
-
+    <title>Editor (New Modular Refactor)</title>
     <link href="../styles.css" rel="stylesheet" type="text/css" />
     <script type="module" src="./editor.js" defer></script>
     <script type="module" src="./shared.js" defer></script>
@@ -13,13 +12,11 @@
     x-data="editorState()"
     class="p-6 md:p-10 min-h-screen font-sans text-p-dark bg-white"
   >
-    <!-- Header Navigation -->
     <header
       class="flex flex-wrap justify-center items-center gap-6 mb-10 w-full max-w-7xl mx-auto"
     >
       <quick-nav></quick-nav>
     </header>
-    <!-- Content with reorderable list sidebar -->
     <div class="flex w-full max-w-7xl mx-auto gap-4">
       <!-- Reorderable List Sidebar -->
       <div class="min-h-50 shrink-0 w-72 flex flex-col items-start pt-2">
@@ -27,20 +24,14 @@
           <button class="shared-button w-full" @click="saveItemNav()">
             Save Order
           </button>
-
           <button class="shared-button-full-primary w-14" @click="addItem()">
             +
           </button>
         </div>
-        <template x-for="board in boards()" :key="board.name">
+        <template x-for="board in Object.values(boards)" :key="board.name">
           <aside
             class="gap-2 min-h-50 shrink-0 w-full flex flex-col items-start pt-2"
-            @wheel.prevent="((e)=>{
-                    if(board.controls){
-                        if(e.deltaY > 0) { downItems(); }
-                        else if(e.deltaY < 0) { upItems(); }
-                    }
-                   })($event)"
+            @wheel.prevent="((e)=>{if(board.controls){if(e.deltaY>0){downItems();}else if(e.deltaY<0){upItems();}}})($event)"
           >
             <template x-if="board.controls">
               <div class="flex w-full gap-2">
@@ -66,8 +57,8 @@
                   <div
                     class="draggable-item flex items-center justify-between rounded-lg bg-white shadow mb-3 px-4 py-3 cursor-grab transition-all select-none"
                     :class="{
-              'ring-2 ring-red-400 opacity-80': isDragging(board.name, idx),
-              'bg-gray-100': isOver(board.name, idx)
+              'ring-2 ring-red-400 opacity-80': dragDrop.isDragging(board.name, idx),
+              'bg-gray-100': dragDrop.isOver(board.name, idx)
             }"
                     draggable="true"
                     @dragstart="onDragStart(board.name, idx)"
@@ -142,34 +133,26 @@
           </aside>
         </template>
       </div>
-
       <!-- Main Content -->
       <main
         class="flex-1 grid lg:grid-cols-2 gap-10 items-start w-full max-w-7xl mx-auto"
       >
-        <!-- Main content goes here -->
-        <!-- Media Preview -->
         <figure
           class="w-full aspect-video lg:aspect-square bg-white rounded-3xl overflow-hidden shadow-sm border border-p-soft"
         >
           <img
             x-data="{cache: null}"
             x-bind:src="
-                    if(currentItem?.image != cache || !cache){ // needs to cache
-                        if(currentItem?.image){ // can save
-                            cache = '/api/assets/'+currentItem.image
-                        }else if (!cache){
-                            cache = 'https://dummyimage.com/800x800/efefef/a3a3a3.jpg&text=Loading'
-                        } // else keep old
-                    }
-                    return cache
-                    "
+              if(currentItem?.image != cache || !cache){
+                if(currentItem?.image){cache = '/api/assets/'+currentItem.image}
+                else if (!cache){cache = 'https://dummyimage.com/800x800/efefef/a3a3a3.jpg&text=Loading'}
+              }
+              return cache
+            "
             alt="Thumbnail"
             class="object-cover w-full h-full"
           />
         </figure>
-
-        <!-- Data Form -->
         <form
           @submit.prevent="submitForm"
           class="flex flex-col text-p-medium gap-5 bg-white p-8 rounded-3xl shadow-sm border border-p-soft"
@@ -177,17 +160,15 @@
           <div class="border-b border-p-soft pb-4 mb-2">
             <h1 class="text-2xl text-p-medium font-bold">Modifica Item</h1>
           </div>
-
           <div class="flex flex-col gap-1 w-full">
             <label class="text-sm font-medium">Nome dell'item</label>
             <input
               type="text"
-              x-model="formData.name"
+              x-model="formManager.formData.name"
               required
               class="w-full px-4 py-2 rounded-xl border border-p-soft bg-white text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium transition-shadow"
             />
           </div>
-
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="flex flex-col gap-1 w-full">
               <label class="text-sm font-medium"
@@ -203,28 +184,24 @@
                 <option value="other">Altro</option>
               </select>
             </div>
-
             <div class="flex flex-col gap-1 w-full">
               <label class="text-sm font-medium">Tour</label>
               <input
                 type="text"
-                x-model="formData.tour"
+                x-model="formManager.formData.tour"
                 required
                 class="w-full px-4 py-2 rounded-xl border border-p-soft bg-white text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium"
               />
             </div>
           </div>
-
           <div class="flex flex-col gap-1 w-full">
             <label class="text-sm font-medium">Licenza d'uso</label>
             <input
               type="text"
-              x-model="formData.license"
+              x-model="formManager.formData.license"
               class="w-full px-4 py-2 rounded-xl border border-p-soft bg-white text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium"
             />
           </div>
-
-          <!-- Mongoose Sub-schema Mapping -->
           <fieldset
             class="border border-p-soft p-5 rounded-2xl bg-p-soft/20 mt-2"
           >
@@ -235,7 +212,7 @@
               <div class="flex flex-col gap-1 w-full md:w-1/2">
                 <label class="text-sm font-medium">Livello</label>
                 <select
-                  x-model="formData.explanations[0].level"
+                  x-model="formManager.formData.explanations[0].level"
                   required
                   class="w-full px-4 py-2 rounded-xl border border-p-soft bg-white text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium"
                 >
@@ -247,7 +224,7 @@
               <div class="flex flex-col gap-1 w-full">
                 <label class="text-sm font-medium">Testo</label>
                 <textarea
-                  x-model="formData.explanations[0].text"
+                  x-model="formManager.formData.explanations[0].text"
                   required
                   rows="4"
                   class="w-full px-4 py-2 rounded-xl border border-p-soft bg-white text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium resize-none"
@@ -255,11 +232,10 @@
               </div>
             </div>
           </fieldset>
-
           <button
             type="submit"
             class="shared-button-full-primary"
-            x-text="formData._id ? 'Salva Modifiche':'Crea'"
+            x-text="formManager.formData._id ? 'Salva Modifiche':'Crea'"
           ></button>
         </form>
       </main>

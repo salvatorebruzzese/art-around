@@ -1,424 +1,248 @@
 import Alpine from 'alpinejs'
 import './userManager.js'
 import './quick-nav.js'
+import { getTour, saveTour } from './api/tours.js'
+import { getItemsByTour, getItem, deleteItem } from './api/items.js'
+import { createItemNav } from './itemNav.js'
+import { createDragDropManager } from './dragDropManager.js'
+import { useBoard } from './boards.js'
+import { createItemFormManager } from './itemFormManager.js'
 
 document.addEventListener('alpine:init', () => {
   Alpine.data('editorState', () => ({
-    // NAVIGATION
+    // Central state
     tour: null,
     items: [],
-    itemNav: [],
     itemsCache: [],
-    toDelete: [],
-    stash: [],
+    itemNav: null, // instance
     currentItem: null,
     currentItemIdx: -1,
-    ghostIdx: 2,
     currentItemId: null,
-    anchorItemId: null,
-    itd: 4, // items to display
-
-    // Drag and drop state
-    dragging: false,
-    draggingIdx: null,
-    draggingBoard: null, // "items" or "stash"
-    overIdx: null,
-    overBoard: null, // target board during dragover
-
-    // FORM
-    submitting: false, // TODO: suspend input and show loading icon
-    emptyFormData: {
-      _id: null,
-      name: '',
-      tour: '',
-      license: '',
-      explanations: [{ level: '', text: '', duration: 0 }],
-    },
-    formData: {
-      _id: null,
-      name: '',
-      tour: '',
-      license: '',
-      explanations: [{ level: '', text: '', duration: 0 }],
-    },
+    boards: {},
+    dragDrop: null,
+    formManager: null,
 
     async init() {
-      let metaNav = []
-      Alpine.store('userManager')
-        .getUser()
-        .then((u) => (this.user = u))
-      const url = new URL(window.location.href)
-      const tourId = url.pathname.split('/').filter(Boolean).at(2)
-      const itemId = url.searchParams.get('item')
-
-      await fetch('/api/tours/' + tourId)
-        .then((r) => {
-          if (r.ok) {
-            return r.json()
-          } else throw new Error('Tour not found')
-        })
-        .then((tour) => {
-          this.tour = tour
-          metaNav = tour.itemNav
-          return tour
-        })
-        .then((tour) =>
-          fetch(`/api/items?${new URLSearchParams({ tour: tour._id })}`),
-        )
-        .then((res) => res.json())
-        .then((items) => {
-          this.items = items
-          this.itemNav = metaNav
-            .map((id) => items.find((item) => item._id === id))
-            .filter(Boolean)
-        })
-        .catch((e) => console.log('Error ', e))
-      this.currentItemIdx = this.itemNav.findIndex((i) => i._id === itemId)
-      await this.loadItem(itemId)
-    },
-
-    populateFormData() {
-      this.formData = {
-        _id: this.currentItem?._id || null,
-        name: this.currentItem?.name || '',
-        tour: this.currentItem?.tour || '',
-        license: this.currentItem?.license || '',
-        explanations:
-          Array.isArray(this.currentItem?.explanations) &&
-          this.currentItem.explanations.length > 0
-            ? [
-                {
-                  level: this.currentItem?.explanations[0]?.level || '',
-                  text: this.currentItem?.explanations[0]?.text || '',
-                  duration: 0, // HACK:TODO: implement
-                },
-              ]
-            : [
-                {
-                  level: '',
-                  text: '',
-                  duration: 0, // HACK:TODO: implement
-                },
-              ],
-      }
-    },
-    submitForm() {
-      this.isSubmitting = true
-      // invalidate cache
-      if (this.formData._id) {
-        let idx = this.itemsCache.findIndex((i) => i._id === this.formData._id)
-        this.itemsCache.splice(idx, idx == -1 ? 0 : 1)
-      }
-      fetch('/api/items/' + this.formData._id, {
-        method: this.formData._id ? 'PATCH' : 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(this.formData),
-      })
-        .then(async (response) => {
-          this.isSubmitting = false
-          if (response.ok) {
-            // TODO: show success or reload/navigate
-            // location.reload();
-            // or: this.$dispatch('item-updated', await response.json());
-            // https://alpinejs.dev/magics/dispatch
-            alert('Modifiche salvate con successo.')
-          } else {
-            const err = await response.json().catch(() => ({}))
-            alert('Errore nel salvataggio: ', err.error.message)
-          }
-        })
-        .catch((error) => {
-          this.isSubmitting = false
-          alert('Errore di rete: ' + error.message)
-        })
-    },
-
-    // Boards configuration
-    boards() {
-      return [
-        {
-          name: 'items',
-          title: 'Items',
-          arr: this.itemNav,
+      // Setup boards and managers
+      this.boards = {
+        items: useBoard('items', [], {
           controls: true,
           dropZoneStyle:
             'bg-green-200 border-2 border-dashed border-green-600 text-green-600 cursor-pointer',
           dropZoneText: 'Drop here to order',
-        },
-        {
-          name: 'stash',
-          title: 'Stash',
-          arr: this.stash,
-          controls: false,
+        }),
+        stash: useBoard('stash', [], {
           dropZoneStyle:
             'bg-gray-300 border-2 border-dashed border-gray-400 text-gray-500 cursor-pointer',
           dropZoneText: 'Drop here to stash',
-        },
-
-        {
-          name: 'toDelete',
-          title: 'toDelete',
-          arr: this.toDelete,
-          controls: false,
+        }),
+        toDelete: useBoard('toDelete', [], {
           dropZoneStyle:
             'bg-red-200 border-2 border-dashed border-red-700 text-red-700 cursor-pointer',
           dropZoneText: 'Drop here to delete',
-        },
-      ]
-    },
-
-    deleteItem(elm) {
-      if (elm._id == this.formData._id) {
-        this.formData = { ...this.emptyFormData }
-      }
-      let index = this.itemNav.findIndex((item) => item._id === elm._id)
-      if (index !== -1) {
-        const removed = this.itemNav.splice(index, 1)[0]
-        const _ = this.items.splice(index, 1)[0]
-        this.toDelete.push(removed)
-      } else {
-        index = this.stash.findIndex((item) => item._id === elm._id)
-        if (index !== -1) {
-          const removed = this.stash.splice(index, 1)[0]
-          const _ = this.items.splice(index, 1)[0]
-          this.toDelete.push(removed)
-        }
-      }
-
-      console.log(index)
-      if (index != -1) {
-        if (this.itemNav.length === 0) {
-          if (this.items.length > 0) {
-            const randomIndex = Math.floor(Math.random() * this.items.length)
-            this.loadItem(this.items[randomIndex]._id)
-          }
-        } else {
-          this.loadItem(this.itemNav[0]._id)
-        }
-      }
-      /* TODO: ask confirm? */
-    },
-
-    async saveItemNav() {
-      fetch('/api/tours/' + this.tour._id, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          itemNav: this.itemNav.map((item) => item._id),
-          items: Array.from(new Set([...this.items, ...this.stash])).map(
-            (i) => i._id,
-          ),
         }),
+      }
+      this.dragDrop = createDragDropManager()
+      this.formManager = createItemFormManager()
+
+      // Auth/user state (assuming your user module already inits correctly)
+      Alpine.store('userManager')
+        .getUser()
+        .then((u) => (this.user = u))
+
+      // Load tour + items
+      const url = new URL(window.location.href)
+      const tourId = url.pathname.split('/').filter(Boolean).at(2)
+      const itemId = url.searchParams.get('item')
+      const tour = await getTour(tourId)
+      this.tour = tour
+
+      // Items from API
+      const items = await getItemsByTour(tour._id)
+      this.items = items
+
+      // Set up itemNav and boards
+      this.itemNav = createItemNav(
+        tour.itemNav
+          .map((id) => items.find((i) => i._id === id))
+          .filter(Boolean),
+        items,
+      )
+      this.boards.items.arr = this.itemNav.itemNav
+      // Stash=all not in nav, ToDelete=empty
+      this.boards.stash.arr = items.filter(
+        (item) =>
+          !this.itemNav.itemNav.some((navItem) => navItem._id === item._id),
+      )
+      this.boards.toDelete.clear()
+
+      // Current item index and form setup
+      this.currentItemIdx = this.itemNav.itemNav.findIndex(
+        (i) => i._id === itemId,
+      )
+      if (this.currentItemIdx < 0 && this.itemNav.itemNav.length)
+        this.currentItemIdx = 0
+      await this.loadItem(this.itemNav.itemNav[this.currentItemIdx]?._id)
+
+      // Wire up event methods (satisfy Alpine use)
+      Object.assign(this, {
+        onDragStart: this._onDragStart.bind(this),
+        onDragEnd: this._onDragEnd.bind(this),
+        onDragOver: this._onDragOver.bind(this),
+        onDragLeave: this._onDragLeave.bind(this),
+        onDrop: this._onDrop.bind(this),
+        onDropEmpty: this._onDropEmpty.bind(this),
+        isDragging: this._isDragging.bind(this),
+        isOver: this._isOver.bind(this),
+        submitForm: this._submitForm.bind(this),
+        upItems: () => this.itemNav.up(),
+        downItems: () => this.itemNav.down(),
+        resetItems: () => this.itemNav.reset(this.currentItemIdx),
+        doView: (id) => this.itemNav.doView(id),
+        saveItemNav: this._saveItemNav.bind(this),
+        deleteItem: this._deleteItem.bind(this),
+        loadItem: this.loadItem.bind(this),
+        addItem: this._addItem.bind(this),
       })
-        .then(async (response) => {
-          if (response.ok) {
-            const deletePromises = this.toDelete.map((item) =>
-              fetch('/api/items/' + item._id, {
-                method: 'DELETE',
-              }),
-            )
-            try {
-              await Promise.all(deletePromises)
-              alert('Modifiche salvate con successo.')
-            } catch (deleteError) {
-              alert(
-                "Errore nell'eliminazione di alcuni elementi: " +
-                  deleteError.message,
-              )
-            }
-          } else {
-            const err = await response.json().catch(() => ({}))
-            alert(
-              'Errore nel salvataggio: ' +
-                (err.error && err.error.message ? err.error.message : ''),
-            )
-          }
-        })
-        .catch((error) => {
-          this.isSubmitting = false
-          alert('Errore di rete: ' + error.message)
-        })
     },
 
-    // Determine if given id should display in items list pager window
-    doView(id) {
-      let idx = this.itemNav.findIndex((i) => i._id === id)
-      const ghostIdx = this.ghostIdx
-      const itd = this.itd
-      const cap = this.itemNav.length - 1
-      if (ghostIdx <= 1) {
-        return idx >= 0 && idx <= itd - 1
+    // Form and item load logic
+    async loadItem(itemId) {
+      if (!itemId) return
+      let idx = this.itemNav.itemNav.findIndex((i) => i._id === itemId)
+      if (idx !== -1) this.currentItemIdx = idx
+      let cacheIdx = this.itemsCache.findIndex((i) => i._id === itemId)
+      let item = this.itemsCache[cacheIdx]
+      if (!item) {
+        item = await getItem(itemId)
+        this.itemsCache.push(item)
       }
-      if (ghostIdx >= cap - 2) {
-        return idx >= cap - 3 && idx <= cap
+      this.currentItem = item
+      this.currentItemId = itemId
+      this.formManager.populateFormData(item)
+      if (!this.itemNav.itemNav.length && !this.boards.stash.arr.length) {
+        this.boards.stash.add(item)
       }
-      return (
-        Math.abs(idx - ghostIdx) <= 2 &&
-        idx >= ghostIdx - 2 &&
-        idx <= ghostIdx + 1
+    },
+
+    async _submitForm() {
+      await this.formManager.submitForm(this.itemsCache)
+    },
+
+    // Add item (simplified: creates blank/new form, does NOT POST until submit)
+    _addItem() {
+      this.currentItem = null
+      this.currentItemId = null
+      this.formManager.formData = structuredClone(
+        this.formManager.emptyFormData,
       )
     },
 
-    // List controls (UP/DOWN/RESET) only on "items"
-    upItems() {
-      if (this.ghostIdx > this.itd / 2) this.ghostIdx--
-    },
-    downItems() {
-      if (this.ghostIdx < this.itemNav.length - 3) this.ghostIdx++
-    },
-    resetItems() {
-      this.ghostIdx = this.currentItemIdx
-    },
-
-    // Radio/load logic unified
-    async loadItem(id) {
-      this.currentItemId = null
-      this.currentItem = null
-      let idx = this.itemNav.findIndex((i) => i._id === id)
-      if (idx !== -1) {
-        this.currentItemIdx = idx
-      }
-      let cacheIdx = this.itemsCache.findIndex((i) => i._id === id)
-      if (cacheIdx === -1) {
-        await fetch('/api/items/' + id)
-          .then((r) => {
-            if (r.ok) return r.json()
-            else console.log(r)
-          })
-          .then((item) => {
-            this.currentItemId = id
-            this.currentItem = item
-            this.populateFormData()
-            this.itemsCache.push(item)
-            if (this.itemNav.length == 0 && this.stash.length == 0) {
-              this.stash.push(item)
-            }
-          })
-      } else {
-        const item = this.itemsCache.at(cacheIdx)
-        this.currentItemId = id
-        this.currentItem = item
-        this.populateFormData()
-        if (this.itemNav.length == 0 && this.stash.length == 0) {
-          this.stash.push(item)
+    // Delete: move from any board to ToDelete
+    _deleteItem(item) {
+      for (const boardName of ['items', 'stash']) {
+        let board = this.boards[boardName]
+        if (board.arr.find((i) => i._id === item._id)) {
+          board.remove(item)
+          this.boards.toDelete.add(item)
+          break
         }
       }
-    },
-
-    // Generalized Drag/Drop Handlers
-
-    onDragStart(board, idx) {
-      this.dragging = true
-      this.draggingIdx = idx
-      this.draggingBoard = board
-      this.overIdx = null
-      this.overBoard = null
-    },
-
-    onDragEnd() {
-      this.dragging = false
-      this.draggingIdx = null
-      this.draggingBoard = null
-      this.overIdx = null
-      this.overBoard = null
-    },
-
-    onDragOver(board, idx, _event) {
-      if (
-        this.dragging &&
-        (this.draggingBoard !== board || this.draggingIdx !== idx)
-      ) {
-        this.overIdx = idx
-        this.overBoard = board
+      // Reset form if needed
+      if (item._id === this.formManager.formData._id) {
+        this.formManager.formData = structuredClone(
+          this.formManager.emptyFormData,
+        )
+      }
+      // Load fallback item if available
+      if (this.boards.items.length === 0 && this.items.length > 0) {
+        let fallback = this.items.find(
+          (i) => !this.boards.toDelete.arr.find((j) => j._id === i._id),
+        )
+        if (fallback) this.loadItem(fallback._id)
+      } else if (this.boards.items.arr[0]) {
+        this.loadItem(this.boards.items.arr[0]._id)
       }
     },
 
-    onDragLeave(board, idx) {
-      if (this.overBoard === board && this.overIdx === idx) {
-        this.overIdx = null
-        this.overBoard = null
+    async _saveItemNav() {
+      try {
+        await saveTour({
+          _id: this.tour._id,
+          itemNav: this.boards.items.arr.map((item) => item._id),
+          items: Array.from(
+            new Set([...this.items, ...this.boards.stash.arr]),
+          ).map((i) => i._id),
+        })
+        for (const item of this.boards.toDelete.arr) {
+          await deleteItem(item._id)
+        }
+        this.boards.toDelete.clear()
+        alert('Modifiche salvate con successo.')
+      } catch (e) {
+        alert('Errore: ' + (e.message || 'unknown'))
       }
     },
 
-    // board is "items" or "stash". idx is drop index, event is drag/drop event
-    onDrop(board, idx, event) {
+    // === DRAG & DROP DELEGATION ===
+    _onDragStart(board, idx) {
+      this.dragDrop.onDragStart(board, idx)
+    },
+    _onDragEnd() {
+      this.dragDrop.onDragEnd()
+    },
+    _onDragOver(board, idx, _event) {
+      this.dragDrop.onDragOver(board, idx)
+    },
+    _onDragLeave(board, idx) {
+      this.dragDrop.onDragLeave(board, idx)
+    },
+
+    _onDrop(board, idx, event) {
       if (
-        !this.dragging ||
-        this.draggingIdx === null ||
-        this.draggingBoard === null
+        !this.dragDrop.dragging ||
+        this.dragDrop.draggingIdx === null ||
+        this.dragDrop.draggingBoard === null
       )
         return
-      if (this.draggingBoard === board && this.draggingIdx === idx) return
-      // Defensive: get source/target arrays
-      const sources = {
-        items: this.itemNav,
-        stash: this.stash,
-        toDelete: this.toDelete,
-      }
-      let sourceArr = sources[this.draggingBoard]
-      let targetArr = sources[board]
+      if (
+        this.dragDrop.draggingBoard === board &&
+        this.dragDrop.draggingIdx === idx
+      )
+        return
 
-      // Pop source
-      const moved = sourceArr.splice(this.draggingIdx, 1)[0]
+      // Defensive: get source/target boards
+      const src = this.boards[this.dragDrop.draggingBoard]
+      const tgt = this.boards[board]
+      // Remove from source
+      const moved = src.arr.splice(this.dragDrop.draggingIdx, 1)[0]
       let insertIdx = idx
-      // Place after if cursor is below halfway point
-      const targetRect = event.target.getBoundingClientRect()
-      if (event.clientY > targetRect.top + targetRect.height / 2) {
-        insertIdx++
-      }
-      if (insertIdx > targetArr.length) insertIdx = targetArr.length
-      targetArr.splice(insertIdx > idx ? insertIdx - 1 : insertIdx, 0, moved)
-      // Reset drag state
-      this.dragging = false
-      this.draggingIdx = null
-      this.draggingBoard = null
-      this.overIdx = null
-      this.overBoard = null
+      const rect = event.target.getBoundingClientRect()
+      if (event.clientY > rect.top + rect.height / 2) insertIdx++
+      if (insertIdx > tgt.arr.length) insertIdx = tgt.arr.length
+      tgt.arr.splice(insertIdx > idx ? insertIdx - 1 : insertIdx, 0, moved)
+      this.dragDrop.onDragEnd()
     },
 
-    // Drop into empty board
-    onDropEmpty(board, _event) {
+    _onDropEmpty(board, _event) {
       if (
-        !this.dragging ||
-        this.draggingIdx === null ||
-        this.draggingBoard === null
+        !this.dragDrop.dragging ||
+        this.dragDrop.draggingIdx === null ||
+        this.dragDrop.draggingBoard === null
       )
         return
-      const sources = {
-        items: this.itemNav,
-        stash: this.stash,
-        toDelete: this.toDelete,
-      }
-      let sourceArr = sources[this.draggingBoard]
-      let targetArr = sources[board]
-      const moved = sourceArr.splice(this.draggingIdx, 1)[0]
-      targetArr.push(moved)
-      this.dragging = false
-      this.draggingIdx = null
-      this.draggingBoard = null
-      this.overIdx = null
-      this.overBoard = null
+      const src = this.boards[this.dragDrop.draggingBoard]
+      const tgt = this.boards[board]
+      const moved = src.arr.splice(this.dragDrop.draggingIdx, 1)[0]
+      tgt.arr.push(moved)
+      this.dragDrop.onDragEnd()
     },
 
-    // Utility for repeat rendering
-    isDragging(board, idx) {
-      return (
-        this.dragging &&
-        this.draggingBoard === board &&
-        this.draggingIdx === idx
-      )
+    _isDragging(board, idx) {
+      return this.dragDrop.isDragging(board, idx)
     },
-    isOver(board, idx) {
-      return (
-        this.overBoard === board &&
-        this.overIdx === idx &&
-        this.dragging &&
-        !(this.draggingBoard === board && this.draggingIdx === idx)
-      )
+    _isOver(board, idx) {
+      return this.dragDrop.isOver(board, idx)
     },
   }))
 })
