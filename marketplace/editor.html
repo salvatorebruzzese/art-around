@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Editor (New Modular Refactor)</title>
+    <title>Editor</title>
     <link href="../styles.css" rel="stylesheet" type="text/css" />
     <script type="module" src="./editor.js" defer></script>
     <script type="module" src="./shared.js" defer></script>
@@ -31,43 +31,43 @@
         <template x-for="board in Object.values(boards)" :key="board.name">
           <aside
             class="gap-2 min-h-50 shrink-0 w-full flex flex-col items-start pt-2"
-            @wheel.prevent="((e)=>{if(board.controls){if(e.deltaY>0){downItems();}else if(e.deltaY<0){upItems();}}})($event)"
           >
-            <template x-if="board.controls">
+            <!-- @wheel.prevent="((e)=>{if(board.controls){if(e.deltaY>0){downItems();}else if(e.deltaY<0){upItems();}}})($event)" -->
+            <template x-if="board.doControls">
               <div class="flex w-full gap-2">
-                <button
-                  class="shared-button-full-primary w-full"
-                  @click="upItems()"
-                >
+                <button class="shared-button-full-primary w-full">
+                  <!-- @click="upItems()" -->
                   UP
                 </button>
-                <button class="shared-button w-14" @click="resetItems()">
+                <button class="shared-button w-14">
+                  <!-- @click="resetItems()" -->
                   RE
                 </button>
               </div>
             </template>
             <div
-              class="flex flex-col min-h-50 w-full p-3 items-center justify-center rounded-lg"
-              :class="board.dropZoneStyle"
-              @drop="onDropEmpty(board.name, $event)"
+              class="bg-red-100 flex flex-col min-h-50 w-full p-3 items-center justify-center rounded-lg"
+              @drop="board.onDropEmpty($event)"
               @dragover.prevent=""
             >
-              <div class="w-full" x-ref="'list-'+board.name">
+              <!-- :class="board.dropZoneStyle" -->
+              <div class="w-full">
+                <!-- x-ref="'list-'+board.name" -->
                 <template x-for="(item, idx) in board.arr" :key="item._id">
                   <div
-                    class="draggable-item flex items-center justify-between rounded-lg bg-white shadow mb-3 px-4 py-3 cursor-grab transition-all select-none"
-                    :class="{
-              'ring-2 ring-red-400 opacity-80': dragDrop.isDragging(board.name, idx),
-              'bg-gray-100': dragDrop.isOver(board.name, idx)
-            }"
+                    class="bg-white flex justify-between rounded-lg bg-white shadow mb-3 px-4 py-3 cursor-grab transition-all select-none"
                     draggable="true"
-                    @dragstart="onDragStart(board.name, idx)"
-                    @dragend="onDragEnd"
-                    @dragover.prevent="onDragOver(board.name, idx, $event)"
-                    @dragleave="onDragLeave(board.name, idx)"
-                    @drop="onDrop(board.name, idx, $event)"
-                    x-show="board.name === 'items' && doView ? doView(item._id) : true"
+                    @dragstart="board.onDragStart(idx)"
+                    @drop="board.onDrop(idx, $event)"
                   >
+                    <!-- :class="{
+                                  'ring-2 ring-red-400 opacity-80': dragDrop.isDragging(board.name, idx),
+                                  'bg-gray-100': dragDrop.isOver(board.name, idx)
+                                }" -->
+                    <!-- @dragover.prevent="onDragOver(board.name, idx, $event)" -->
+                    <!-- @dragleave="onDragLeave(board.name, idx)" -->
+                    <!-- @dragend="board.onDragEnd()" -->
+                    <!-- x-show="board.name === 'items' && doView ? doView(item._id) : true" -->
                     <label class="flex items-center cursor-pointer">
                       <input
                         type="radio"
@@ -117,16 +117,17 @@
                   </div>
                 </template>
                 <p
-                  x-show="board.arr.length === 0"
                   x-transition:enter
                   x-transition:leave.opacity
-                  x-text="board.dropZoneText"
                   class="text-center"
                 ></p>
+                <!-- x-show="board.arr.length === 0" -->
+                <!-- x-text="board.dropZoneText" -->
               </div>
             </div>
-            <template x-if="board.controls">
-              <button class="shared-button-full-primary" @click="downItems()">
+            <template x-if="board.doControls">
+              <button class="shared-button-full-primary">
+                <!-- @click="downItems()" -->
                 DOWN
               </button>
             </template>
@@ -137,76 +138,22 @@
       <main
         class="flex-1 grid lg:grid-cols-2 gap-10 items-start w-full max-w-7xl mx-auto"
       >
-        <div class="flex flex-col gap-6">
-          <figure
-            class="w-full aspect-video lg:aspect-square bg-white rounded-3xl overflow-hidden shadow-sm border border-p-soft"
-          >
-            <img
-              x-data="{cache: null}"
-              x-bind:src="
+        <figure
+          class="w-full aspect-video lg:aspect-square bg-white rounded-3xl overflow-hidden shadow-sm border border-p-soft"
+        >
+          <img
+            x-data="{cache: null}"
+            x-bind:src="
               if(currentItem?.image != cache || !cache){
                 if(currentItem?.image){cache = '/api/assets/'+currentItem.image}
                 else if (!cache){cache = 'https://dummyimage.com/800x800/efefef/a3a3a3.jpg&text=Loading'}
               }
               return cache
             "
-              alt="Thumbnail"
-              class="object-cover w-full h-full"
-            />
-          </figure>
-          <!-- REFS -->
-          <div
-            class="flex flex-col flex-wrap gap-2 bg-blue-300 w-full h-72 rounded-xl"
-          >
-            <template x-for="ref in getRefs">
-              <div
-                class="flex justify-between rounded-lg bg-white shadow m-3 px-4 py-3 cursor-grab transition-all select-none"
-              >
-                <label class="flex items-center cursor-pointer">
-                  <input
-                    type="radio"
-                    class="form-radio text-blue-600 mr-3"
-                    name="itemRadio"
-                    x-model="currentItemId"
-                    :value="ref._id"
-                    @input="loadItem(ref._id)"
-                  />
-                  <span
-                    class="flex-1 text-base font-medium text-gray-800 text-center"
-                    x-text="ref.name"
-                  ></span>
-                </label>
-                <div x-data="{open: false}" class="dropdown dropdown-end">
-                  <button
-                    @click="open = !open"
-                    class="btn btn-sm btn-circle bg-white/80 hover:bg-white text-p-dark border-none shadow-md backdrop-blur-sm focus:outline-none list-none"
-                  >
-                    <svg
-                      class="w-5 h-5"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        d="M10 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4z"
-                      />
-                    </svg>
-                  </button>
-                  <div x-show="open" x-transition @click.outside="open = false">
-                    <ul class="nav-dropdown-menu dropdown-end p-4">
-                      <li>
-                        <button
-                          class="shared-button-flex-secondary shadow-none"
-                        >
-                          Elimina
-                        </button>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </template>
-          </div>
-        </div>
+            alt="Thumbnail"
+            class="object-cover w-full h-full"
+          />
+        </figure>
         <form
           @submit.prevent="submitForm"
           class="flex flex-col text-p-medium gap-5 bg-white p-8 rounded-3xl shadow-sm border border-p-soft"
