@@ -88,11 +88,15 @@ export class Board {
   _arrMgr
   _boardMgr
   _defaultArrMgr = new defaultArrManager()
+  dropZoneStyle
+  dropZoneText
   constructor(name, boardMgr, params = {}) {
     this._name = name
     this._boardMgr = boardMgr
     this._doControls = params.doControls ? params.doControls : false
     this._arrMgr = params.arrManager ? params.arrManager : this._defaultArrMgr
+    this.dropZoneStyle = params.dropZoneStyle ? params.dropZoneStyle : ''
+    this.dropZoneText = params.dropZoneText ? params.dropZoneText : ''
   }
   get name() {
     return this._name
