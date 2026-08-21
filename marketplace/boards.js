@@ -12,14 +12,16 @@ export class BoardManager {
     this.overBoard = null
   }
   onDragStart(board, item, idx) {
+    this.draggingBoard = board
     this.dragging = item
     this.draggingIdx = idx
-    this.draggingBoard = board
     this.overIdx = null
     this.overBoard = null
   }
 
   onDragEnd() {
+    if (this.draggingBoard?.arrManager)
+      this.draggingBoard.arrManager.del(this.draggingIdx)
     this.dragging = null
     this.draggingIdx = null
     this.draggingBoard = null
@@ -29,7 +31,7 @@ export class BoardManager {
 
   onDragOver(board, idx) {
     if (
-      this.dragging &&
+      this.dragging !== null &&
       (this.draggingBoard !== board || this.draggingIdx !== idx)
     ) {
       this.overIdx = idx
@@ -66,10 +68,13 @@ export class defaultArrManager {
     this._arr.push(item)
   }
   put(item, idx) {
-    this._arr.splice(idx, 0, item)
+    this._arr.splice(idx, 0, item)[0]
+  }
+  get(idx) {
+    return this._arr.at(idx)
   }
   del(idx) {
-    return this._arr.splice(idx, 1)
+    return this._arr.splice(idx, 1)[0]
   }
   clear() {
     this._arr = []
@@ -112,13 +117,27 @@ export class Board {
     return this._arrMgr
   }
 
-  onDragStart(idx) {
-    this._boardMgr.onDragStart(this, this._arrMgr.del(idx), idx)
+  isOver(idx) {
+    this._boardMgr.isOver(this, idx)
+  }
+  onDragOver(idx, event) {
+    return this._boardMgr.onDragOver(this, idx, event)
+  }
+  onDragLeave(idx) {
+    return this._boardMgr.onDragLeave(this, idx)
+  }
+  isDragging(idx) {
+    return this._boardMgr.isDragging(this, idx)
+  }
+  onDragStart(idx, _event) {
+    let rem = this._arrMgr.get(idx)
+    this._boardMgr.onDragStart(this, rem, idx)
   }
 
   onDragEnd() {
     this._boardMgr.onDragEnd()
   }
+
   onDrop(idx, event) {
     const dragging = this._boardMgr.dragging
     const draggingIdx = this._boardMgr.draggingIdx
@@ -132,7 +151,6 @@ export class Board {
     if (event.clientY > rect.top + rect.height / 2) insertIdx++
     if (insertIdx > arrMgr.length) insertIdx = arrMgr.length
     arrMgr.put(dragging, insertIdx > idx ? insertIdx - 1 : insertIdx)
-    this.dragDrop.onDragEnd()
   }
 
   onDropEmpty(event) {
@@ -147,9 +165,8 @@ export class Board {
     else {
       const rect = event.target.getBoundingClientRect()
       const middle = rect.top + rect.height / 2
-      insertIdx = event.clientY < middle ? 0 : arrMgr.length
+      let insertIdx = event.clientY < middle ? 0 : arrMgr.length
       arrMgr.put(dragging, insertIdx)
     }
-    this._boardMgr.onDragEnd()
   }
 }

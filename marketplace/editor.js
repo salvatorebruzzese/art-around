@@ -24,17 +24,20 @@ document.addEventListener('alpine:init', () => {
         this._arr[this.ctx.currentItemId] = [i]
       }
     }
+    get(idx) {
+      return this._arr[this.ctx.currentItemId].at(idx)
+    }
     put(i, idx) {
       if (!this.ctx.currentItemId) return
       if (this._arr[this.ctx.currentItemId])
-        this._arr[this.ctx.currentItemId].splice(idx, 0, i)
+        this._arr[this.ctx.currentItemId].splice(idx, 0, i)[0]
       else {
         this._arr[this.ctx.currentItemId] = [i] // hmm what?
       }
     }
     del(idx) {
       if (!this.ctx.currentItemId) return null
-      return this._arr[this.ctx.currentItemId]?.splice(idx, 1)
+      return this._arr[this.ctx.currentItemId]?.splice(idx, 1)[0]
     }
     clear() {
       if (!this.ctx.currentItemId) return null
