@@ -4,8 +4,10 @@ export class BoardManager {
   draggingBoard
   overIdx
   overBoard
+  dragAccepted
   constructor() {
     this.dragging = null
+    this.dragAccepted = false
     this.draggingIdx = null
     this.draggingBoard = null
     this.overIdx = null
@@ -20,9 +22,11 @@ export class BoardManager {
   }
 
   onDragEnd() {
-    if (this.draggingBoard?.arrManager)
+    if (this.draggingBoard?.arrManager && this.dragAccepted) {
       this.draggingBoard.arrManager.del(this.draggingIdx)
+    }
     this.dragging = null
+    this.dragAccepted = false
     this.draggingIdx = null
     this.draggingBoard = null
     this.overIdx = null
@@ -68,7 +72,7 @@ export class defaultArrManager {
     this._arr.push(item)
   }
   put(item, idx) {
-    this._arr.splice(idx, 0, item)[0]
+    this._arr.splice(idx + 1, 0, item)
   }
   get(idx) {
     return this._arr.at(idx)
@@ -93,6 +97,7 @@ export class Board {
   _arrMgr
   _boardMgr
   _defaultArrMgr = new defaultArrManager()
+  nextFocus = null
   dropZoneStyle
   dropZoneText
   constructor(name, boardMgr, params = {}) {
@@ -151,6 +156,8 @@ export class Board {
     if (event.clientY > rect.top + rect.height / 2) insertIdx++
     if (insertIdx > arrMgr.length) insertIdx = arrMgr.length
     arrMgr.put(dragging, insertIdx > idx ? insertIdx - 1 : insertIdx)
+    this._boardMgr.dragAccepted = true
+    this.nextFocus = dragging // ptr
   }
 
   onDropEmpty(event) {
@@ -161,12 +168,15 @@ export class Board {
 
     if (!dragging || draggingIdx === null || draggingBoard === null) return
 
-    if (arrMgr.length == 0) arrMgr.add(dragging)
-    else {
+    if (arrMgr.length == 0) {
+      arrMgr.add(dragging)
+      this._boardMgr.dragAccepted = true
+    } else {
       const rect = event.target.getBoundingClientRect()
       const middle = rect.top + rect.height / 2
       let insertIdx = event.clientY < middle ? 0 : arrMgr.length
       arrMgr.put(dragging, insertIdx)
+      this._boardMgr.dragAccepted = true
     }
   }
 }

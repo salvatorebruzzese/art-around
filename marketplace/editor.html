@@ -144,7 +144,7 @@
               @drop="if(board.arrManager.length == 0)
                         board.onDropEmpty($event)"
               @dragover.prevent=""
-              style="height: 10vh; overflow: auto"
+              :style="'overflow: auto;' + (board.name == 'itemNav' ? 'height:30vh' : 'height:100px')"
             >
               <div class="w-full">
                 <!-- x-ref="'list-'+board.name" -->
@@ -161,6 +161,7 @@
                     @dragover.prevent="board.onDragOver(idx, $event)"
                     @dragleave="board.onDragLeave(idx)"
                     @drop="board.onDrop(idx, $event)"
+                    x-init="if(item === board.nextFocus){$el.scrollIntoView()}"
                   >
                     <label class="flex items-center cursor-pointer">
                       <input
@@ -172,7 +173,7 @@
                         @input="loadItem(item._id)"
                       />
                       <span
-                        class="flex-1 text-base font-medium text-gray-800 text-center"
+                        class="flex-1 text-sm font-medium text-gray-800 text-center"
                         x-text="item.name"
                       ></span>
                     </label>
