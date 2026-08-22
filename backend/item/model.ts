@@ -104,7 +104,7 @@ const DescriptionSchemaZod = z.object({
     error: 'Level must be either normal, simple or advanced',
   }),
   text: z.string(),
-  duration: z.number().min(0),
+  durationSeconds: z.number().min(0),
 })
 
 export type Description = z.infer<typeof DescriptionSchemaZod>

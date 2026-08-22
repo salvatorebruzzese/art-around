@@ -6,6 +6,7 @@ type KnownError = DBError | NotFound | AccessDenied | ValidationError
 
 export function handleLeft(res: Response) {
   return (error: KnownError) => {
+    console.log(error)
     switch (error.type) {
       case 'DBError':
         return res.status(500).json({ error })

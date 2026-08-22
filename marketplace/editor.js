@@ -2,49 +2,117 @@ import Alpine from 'alpinejs'
 import './userManager.js'
 import './quick-nav.js'
 import { getTour, saveTour } from './api/tours.js'
-import { getItemsByTour, getItem, deleteItem } from './api/items.js'
-import { createItemNav } from './itemNav.js'
-import { createDragDropManager } from './dragDropManager.js'
-import { useBoard } from './boards.js'
-import { createItemFormManager } from './itemFormManager.js'
+import { saveItem, deleteItem, getItemsByTour, getItem } from './api/items.js'
+import { BoardManager, Board, defaultArrManager } from './boards.js'
 
+class refsArrManager extends defaultArrManager {
+  _arr
+  ctx
+  constructor(ctx) {
+    super()
+    this.ctx = ctx
+    this._arr = {}
+    if (ctx.currentItemId) this._arr[ctx.currentItemId] = []
+  }
+  add(i) {
+    if (!this.ctx.currentItemId) return
+    if (this._arr[this.ctx.currentItemId])
+      this._arr[this.ctx.currentItemId].push(i)
+    else {
+      this._arr[this.ctx.currentItemId] = [i]
+    }
+  }
+  get(idx) {
+    return this._arr[this.ctx.currentItemId].at(idx)
+  }
+  put(i, idx) {
+    if (!this.ctx.currentItemId) return
+    if (this._arr[this.ctx.currentItemId])
+      this._arr[this.ctx.currentItemId].splice(idx, 0, i)
+    else {
+      this._arr[this.ctx.currentItemId] = [i] // hmm what?
+    }
+  }
+  del(idx) {
+    if (!this.ctx.currentItemId) return null
+    return this._arr[this.ctx.currentItemId]?.splice(idx, 1)[0]
+  }
+  clear() {
+    if (!this.ctx.currentItemId) return null
+    this._arr[this.ctx.currentItemId] = []
+  }
+  get arr() {
+    if (!this.ctx.currentItemId) return []
+    if (!this._arr[this.ctx.currentItemId]) return []
+    return [...this._arr[this.ctx.currentItemId]] // NOTE: a copy!!!
+  }
+  get length() {
+    if (!this.ctx.currentItemId || !this._arr[this.ctx.currentItemId]) return 0
+    return this._arr[this.ctx.currentItemId].length
+  }
+}
 document.addEventListener('alpine:init', () => {
   Alpine.data('editorState', () => ({
     // Central state
     tour: null,
-    items: [],
+    allMetaItems: [],
+    looseMetaItems: [],
     itemsCache: [],
-    itemNav: null, // instance
     currentItem: null,
     currentItemIdx: -1,
     currentItemId: null,
     boards: {},
-    dragDrop: null,
-    formManager: null,
-    doView: null,
+    boardMgr: null,
+    isSubmitting: false,
+    emptyFormData: {
+      _id: null,
+      name: 'New item',
+      itemAuthor: null,
+      tour: '',
+      license: '',
+      explanations: [
+        { level: 'simple', text: '', durationSeconds: 0 },
+        { level: 'normal', text: '', durationSeconds: 0 },
+        { level: 'advanced', text: '', durationSeconds: 0 },
+      ],
+    },
+    formData: {
+      _id: null,
+      name: 'New item',
+      itemAuthor: null,
+      tour: '',
+      license: '',
+      explanations: [{ level: '', text: '', duration: 0 }],
+    },
+    new_count: 0,
 
     async init() {
       // Setup boards and managers
+      this.boardMgr = new BoardManager()
       this.boards = {
-        items: useBoard('items', [], {
+        itemNav: new Board('itemNav', this.boardMgr, {
           controls: true,
           dropZoneStyle:
             'bg-green-200 border-2 border-dashed border-green-600 text-green-600 cursor-pointer',
           dropZoneText: 'Drop here to order',
         }),
-        stash: useBoard('stash', [], {
+        stash: new Board('stash', this.boardMgr, {
           dropZoneStyle:
             'bg-gray-300 border-2 border-dashed border-gray-400 text-gray-500 cursor-pointer',
           dropZoneText: 'Drop here to stash',
         }),
-        toDelete: useBoard('toDelete', [], {
+        toDelete: new Board('toDelete', this.boardMgr, {
           dropZoneStyle:
             'bg-red-200 border-2 border-dashed border-red-700 text-red-700 cursor-pointer',
           dropZoneText: 'Drop here to delete',
         }),
+        refs: new Board('refs', this.boardMgr, {
+          dropZoneStyle:
+            'bg-blue-200 border-2 border-dashed border-blue-700 text-blue-700 cursor-pointer',
+          dropZoneText: 'Drop here to reference.',
+          arrManager: new refsArrManager(this),
+        }),
       }
-      this.dragDrop = createDragDropManager()
-      this.formManager = createItemFormManager()
 
       // Auth/user state (assuming your user module already inits correctly)
       Alpine.store('userManager')
@@ -60,64 +128,32 @@ document.addEventListener('alpine:init', () => {
 
       // Items from API
       const items = await getItemsByTour(tour._id)
-      this.items = items
+      this.allMetaItems = items
+      this.looseMetaItems = [...items] // shallow
 
       // Set up itemNav and boards
-      this.itemNav = createItemNav(
-        tour.itemNav
-          .map((id) => items.find((i) => i._id === id))
-          .filter(Boolean),
-        items,
-      )
-      this.boards.items.arr = this.itemNav.itemNav
-      // Stash=all not in nav, ToDelete=empty
-      this.boards.stash.arr = items.filter(
-        (item) =>
-          !this.itemNav.itemNav.some((navItem) => navItem._id === item._id),
-      )
-      this.boards.toDelete.clear()
+      let diff = []
+      this.looseMetaItems
+        .filter((i) => tour.itemNav.some((nid) => nid === i._id))
+        .forEach((i) => {
+          this.boards.itemNav.arrManager.add(i)
+          diff.push(i)
+        })
 
-      // Current item index and form setup
-      this.currentItemIdx = this.itemNav.itemNav.findIndex(
-        (i) => i._id === itemId,
+      this.looseMetaItems = this.looseMetaItems.filter(
+        (item) => !diff.includes(item),
       )
-      if (this.currentItemIdx < 0 && this.itemNav.itemNav.length)
-        this.currentItemIdx = 0
-      await this.loadItem(this.itemNav.itemNav[this.currentItemIdx]?._id)
 
-      // Wire up event methods (satisfy Alpine use)
-      Object.assign(this, {
-        onDragStart: this._onDragStart.bind(this),
-        onDragEnd: this._onDragEnd.bind(this),
-        onDragOver: this._onDragOver.bind(this),
-        onDragLeave: this._onDragLeave.bind(this),
-        onDrop: this._onDrop.bind(this),
-        onDropEmpty: this._onDropEmpty.bind(this),
-        isDragging: this._isDragging.bind(this),
-        isOver: this._isOver.bind(this),
-        submitForm: this._submitForm.bind(this),
-        upItems: () => this.itemNav.up(),
-        downItems: () => this.itemNav.down(),
-        resetItems: () => this.itemNav.reset(this.currentItemIdx),
-        doView: (id) => this.itemNav.doView(id),
-        saveItemNav: this._saveItemNav.bind(this),
-        deleteItem: this._deleteItem.bind(this),
-        loadItem: this.loadItem.bind(this),
-        addItem: this._addItem.bind(this),
-      })
-    },
-
-    getRefs() {
-      if (!this.currentItem) return
-      return this.items.filter((i) =>
-        this.currentItem.refs?.some((rid) => i._id === rid),
-      )
+      this.loadItem(itemId)
     },
 
     // Form and item load logic
     async loadItem(itemId) {
       if (!itemId) return
-      let idx = this.itemNav.itemNav.findIndex((i) => i._id === itemId)
+      const idx_query = Object.values(this.boards).find(
+        (board) => board.arr.findIndex((i) => i === itemId) !== -1,
+      ) // rets null
+      let idx = idx_query ? idx_query : -1
       if (idx !== -1) this.currentItemIdx = idx
       let cacheIdx = this.itemsCache.findIndex((i) => i._id === itemId)
       let item = this.itemsCache[cacheIdx]
@@ -127,130 +163,182 @@ document.addEventListener('alpine:init', () => {
       }
       this.currentItem = item
       this.currentItemId = itemId
-      this.formManager.populateFormData(item)
-      if (!this.itemNav.itemNav.length && !this.boards.stash.arr.length) {
-        this.boards.stash.add(item)
+      this.populateFormData(item)
+      if (item.refs) {
+        this.boards.refs.arrManager.clear()
+        this.looseMetaItems
+          .filter((i) => item.refs.some((r) => r === i._id))
+          .forEach((i) => this.boards.refs.arrManager.put(i))
       }
     },
 
-    async _submitForm() {
-      await this.formManager.submitForm(this.itemsCache)
+    populateFormData(item) {
+      this.formData = {
+        _id: item?._id || null,
+        name: item?.name || '',
+        tour: item?.tour || '',
+        license: item?.license || '',
+        explanations:
+          Array.isArray(item?.explanations) && item.explanations.length > 0
+            ? [
+                {
+                  level: item.explanations[0]?.level || '',
+                  text: item.explanations[0]?.text || '',
+                  durationSeconds: 0, // Placeholder; customize if you have duration data
+                },
+              ]
+            : [
+                {
+                  level: '',
+                  text: '',
+                  durationSeconds: 0,
+                },
+              ],
+      }
+    },
+    async submitForm() {
+      try {
+        this.isSubmitting = true
+        // Remove cached version, if any
+        const idx = this.itemsCache.findIndex(
+          (i) => i._id === this.formData._id,
+        )
+        if (idx > -1) this.itemsCache.splice(idx, 1)
+
+        // inject author and tour
+        this.formData.itemAuthor = this.user._id
+        this.formData.tour = this.tour._id
+
+        // handle new item creation
+        let old_id = this.formData._id
+        const isNewItem = typeof old_id === 'number' && !isNaN(old_id)
+        if (isNewItem) this.formData._id = null
+
+        let res = await saveItem(this.formData)
+
+        // handle new item id
+        if (isNewItem) {
+          Object.values(this.boards).forEach((board) => {
+            let idx = board.arrManager.arr.findIndex((i) => i._id === old_id)
+            if (idx != -1) {
+              let meta = board.arrManager.get(idx)
+              meta._id = res._id
+            }
+          })
+        }
+
+        // update boards
+        Object.values(this.boards).forEach((board) => {
+          let idx = board.arrManager.arr.findIndex((i) => i._id === res._id)
+          if (idx != -1) {
+            let meta = board.arrManager.get(idx)
+            meta.name = res.name // this is the only thing displayed on the cards
+          }
+        })
+
+        this.isSubmitting = false
+        this.loadItem(res._id)
+        alert('Modifiche salvate con successo.')
+      } catch (err) {
+        this.isSubmitting = false
+        if (err.json) {
+          const data = await err.json().catch(() => ({}))
+          alert('Errore nel salvataggio: ' + (data.error?.message || ''))
+        } else {
+          alert('Errore di rete: ' + err.message)
+        }
+      }
     },
 
     // Add item (simplified: creates blank/new form, does NOT POST until submit)
-    _addItem() {
+    // Side-effect: loads the (fake) item
+    newItem() {
       this.currentItem = null
+      this.currentItemIdx = -1
       this.currentItemId = null
-      this.formManager.formData = structuredClone(
-        this.formManager.emptyFormData,
+      console.log(this.emptyFormData)
+      // HACK: circumven Alpine PROXY
+      this.formData = structuredClone(
+        JSON.parse(JSON.stringify(this.emptyFormData)),
       )
+      this.formData._id = this.new_count
+      let meta_item = {
+        _id: ++this.new_count, // TODO: don't push this
+        name: this.formData.name,
+        itemAuthor: this.user._id,
+        tour: this.tour._id,
+        license: this.formData.license,
+      }
+      this.boards.stash.arrManager.add(meta_item)
+      this.boards.stash.nextFocus = meta_item
+      // HACK: load meta to cache, undefined fields will be populated
+      this.itemsCache.push(meta_item)
+      this.loadItem(meta_item._id)
     },
 
     // Delete: move from any board to ToDelete
-    _deleteItem(item) {
-      for (const boardName of ['items', 'stash']) {
-        let board = this.boards[boardName]
-        if (board.arr.find((i) => i._id === item._id)) {
-          board.remove(item)
-          this.boards.toDelete.add(item)
-          break
+    // _deleteItem(item) {
+    //   for (const boardName of ['items', 'stash']) {
+    //     let board = this.boards[boardName]
+    //     if (board.arr.find((i) => i._id === item._id)) {
+    //       board.remove(item)
+    //       this.boards.toDelete.add(item)
+    //       break
+    //     }
+    //   }
+    //   // Reset form if needed
+    //   if (item._id === this.formManager.formData._id) {
+    //     this.formManager.formData = structuredClone(
+    //       this.formManager.emptyFormData,
+    //     )
+    //   }
+    //   // Load fallback item if available
+    //   if (this.boards.items.length === 0 && this.items.length > 0) {
+    //     let fallback = this.items.find(
+    //       (i) => !this.boards.toDelete.arr.find((j) => j._id === i._id),
+    //     )
+    //     if (fallback) this.loadItem(fallback._id)
+    //   } else if (this.boards.items.arr[0]) {
+    //     this.loadItem(this.boards.items.arr[0]._id)
+    //   }
+    // },
+    addItem(selId) {
+      let found = this.looseMetaItems.find((item) => item._id === selId)
+      if (!found) {
+        Object.values(this.boards).forEach((board) => {
+          if (found) return
+          else found = board.arr.find((item) => item._id === selId)
+        })
+      }
+      if (found) {
+        if (this.looseMetaItems.includes(found)) {
+          this.boards.stash.arrManager.add(found)
+        } else {
+          this.loadItem(found._id)
         }
       }
-      // Reset form if needed
-      if (item._id === this.formManager.formData._id) {
-        this.formManager.formData = structuredClone(
-          this.formManager.emptyFormData,
-        )
-      }
-      // Load fallback item if available
-      if (this.boards.items.length === 0 && this.items.length > 0) {
-        let fallback = this.items.find(
-          (i) => !this.boards.toDelete.arr.find((j) => j._id === i._id),
-        )
-        if (fallback) this.loadItem(fallback._id)
-      } else if (this.boards.items.arr[0]) {
-        this.loadItem(this.boards.items.arr[0]._id)
-      }
     },
-
-    async _saveItemNav() {
+    async saveItemNav() {
       try {
         await saveTour({
           _id: this.tour._id,
-          itemNav: this.boards.items.arr.map((item) => item._id),
+          itemNav: this.boards.itemNav.arr.map((item) => item._id),
           items: Array.from(
-            new Set([...this.items, ...this.boards.stash.arr]),
+            new Set([
+              ...this.looseMetaItems,
+              ...this.boards.itemNav.arr,
+              ...this.boards.stash.arr,
+            ]),
           ).map((i) => i._id),
         })
         for (const item of this.boards.toDelete.arr) {
           await deleteItem(item._id)
         }
-        this.boards.toDelete.clear()
+        this.boards.toDelete.arrManager.clear()
         alert('Modifiche salvate con successo.')
       } catch (e) {
         alert('Errore: ' + (e.message || 'unknown'))
       }
-    },
-
-    // === DRAG & DROP DELEGATION ===
-    _onDragStart(board, idx) {
-      this.dragDrop.onDragStart(board, idx)
-    },
-    _onDragEnd() {
-      this.dragDrop.onDragEnd()
-    },
-    _onDragOver(board, idx, _event) {
-      this.dragDrop.onDragOver(board, idx)
-    },
-    _onDragLeave(board, idx) {
-      this.dragDrop.onDragLeave(board, idx)
-    },
-
-    _onDrop(board, idx, event) {
-      if (
-        !this.dragDrop.dragging ||
-        this.dragDrop.draggingIdx === null ||
-        this.dragDrop.draggingBoard === null
-      )
-        return
-      if (
-        this.dragDrop.draggingBoard === board &&
-        this.dragDrop.draggingIdx === idx
-      )
-        return
-
-      // Defensive: get source/target boards
-      const src = this.boards[this.dragDrop.draggingBoard]
-      const tgt = this.boards[board]
-      // Remove from source
-      const moved = src.arr.splice(this.dragDrop.draggingIdx, 1)[0]
-      let insertIdx = idx
-      const rect = event.target.getBoundingClientRect()
-      if (event.clientY > rect.top + rect.height / 2) insertIdx++
-      if (insertIdx > tgt.arr.length) insertIdx = tgt.arr.length
-      tgt.arr.splice(insertIdx > idx ? insertIdx - 1 : insertIdx, 0, moved)
-      this.dragDrop.onDragEnd()
-    },
-
-    _onDropEmpty(board, _event) {
-      if (
-        !this.dragDrop.dragging ||
-        this.dragDrop.draggingIdx === null ||
-        this.dragDrop.draggingBoard === null
-      )
-        return
-      const src = this.boards[this.dragDrop.draggingBoard]
-      const tgt = this.boards[board]
-      const moved = src.arr.splice(this.dragDrop.draggingIdx, 1)[0]
-      tgt.arr.push(moved)
-      this.dragDrop.onDragEnd()
-    },
-
-    _isDragging(board, idx) {
-      return this.dragDrop.isDragging(board, idx)
-    },
-    _isOver(board, idx) {
-      return this.dragDrop.isOver(board, idx)
     },
   }))
 })

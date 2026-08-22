@@ -3,145 +3,117 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Editor (New Modular Refactor)</title>
+    <title>Editor</title>
     <link href="../styles.css" rel="stylesheet" type="text/css" />
     <script type="module" src="./editor.js" defer></script>
     <script type="module" src="./shared.js" defer></script>
   </head>
   <body
     x-data="editorState()"
-    class="p-6 md:p-10 min-h-screen font-sans text-p-dark bg-white"
+    class="h-screen flex flex-col p-6 md:p-10 min-h-screen font-sans text-p-dark bg-white"
   >
     <header
       class="flex flex-wrap justify-center items-center gap-6 mb-10 w-full max-w-7xl mx-auto"
     >
       <quick-nav></quick-nav>
     </header>
-    <div class="flex w-full max-w-7xl mx-auto gap-4">
-      <!-- Reorderable List Sidebar -->
-      <div class="min-h-50 shrink-0 w-72 flex flex-col items-start pt-2">
-        <div class="flex gap-2 w-full">
-          <button class="shared-button w-full" @click="saveItemNav()">
+    <main class="flex-1 flex max-w-7xl max-h-screen mx-auto gap-8">
+      <!-- Main form -->
+      <form
+        @submit.prevent="submitForm"
+        class="w-1/2 mx-auto flex flex-col text-p-medium gap-5 bg-white p-8 rounded-3xl shadow-sm border border-p-soft"
+      >
+        <div class="border-b border-p-soft pb-4 mb-2">
+          <h1 class="text-2xl text-p-medium font-bold">Modifica Item</h1>
+        </div>
+        <div class="flex flex-col gap-1 w-full">
+          <label class="text-sm font-medium">Nome dell'item</label>
+          <input
+            type="text"
+            x-model="formData.name"
+            required
+            class="w-full px-4 py-2 rounded-xl border border-p-soft bg-white text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium transition-shadow"
+          />
+        </div>
+        <div class="flex flex-col gap-1 w-full">
+          <label class="text-sm font-medium">Licenza d'uso</label>
+          <input
+            type="text"
+            x-model="formData.license"
+            class="w-full px-4 py-2 rounded-xl border border-p-soft bg-white text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium"
+          />
+        </div>
+        <fieldset
+          class="border border-p-soft p-5 rounded-2xl bg-p-soft/20 mt-2"
+        >
+          <legend class="font-semibold bg-p-light rounded-lg">
+            Spiegazione
+          </legend>
+          <div class="flex flex-col gap-4 mt-2">
+            <div class="flex flex-col gap-1 w-full md:w-1/2">
+              <label class="text-sm font-medium">Livello</label>
+              <select
+                x-model="formData.explanations[0].level"
+                required
+                class="w-full px-4 py-2 rounded-xl border border-p-soft bg-white text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium"
+              >
+                <option value="simple">Semplice</option>
+                <option value="normal">Normale</option>
+                <option value="advanced">Avanzato</option>
+              </select>
+            </div>
+            <div class="flex flex-col gap-1 w-full">
+              <label class="text-sm font-medium">Testo</label>
+              <textarea
+                x-model="formData.explanations[0].text"
+                required
+                rows="4"
+                class="w-full px-4 py-2 rounded-xl border border-p-soft bg-white text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium resize-none"
+              ></textarea>
+            </div>
+          </div>
+        </fieldset>
+        <button
+          type="submit"
+          class="shared-button-full-primary"
+          x-text="typeof formData._id !== 'number'? 'Salva Modifiche':'Crea'"
+        ></button>
+      </form>
+      <!-- Reorderable Lists -->
+
+      <div class="w-1/2 flex flex-col">
+        <div class="flex flex-row col-span-6 gap-2 w-full">
+          <button class="shared-button w-30" @click="saveItemNav()">
             Save Order
           </button>
-          <button class="shared-button-full-primary w-14" @click="addItem()">
-            +
-          </button>
-        </div>
-        <template x-for="board in Object.values(boards)" :key="board.name">
-          <aside
-            class="gap-2 min-h-50 shrink-0 w-full flex flex-col items-start pt-2"
-            @wheel.prevent="((e)=>{if(board.controls){if(e.deltaY>0){downItems();}else if(e.deltaY<0){upItems();}}})($event)"
-          >
-            <template x-if="board.controls">
-              <div class="flex w-full gap-2">
-                <button
-                  class="shared-button-full-primary w-full"
-                  @click="upItems()"
-                >
-                  UP
-                </button>
-                <button class="shared-button w-14" @click="resetItems()">
-                  RE
-                </button>
-              </div>
-            </template>
-            <div
-              class="flex flex-col min-h-50 w-full p-3 items-center justify-center rounded-lg"
-              :class="board.dropZoneStyle"
-              @drop="onDropEmpty(board.name, $event)"
-              @dragover.prevent=""
+          <div class="w-full flex gap-2" x-data="{sel:{}}">
+            <select
+              x-model="sel"
+              class="w-full select select-bordered rounded-full w-56 border-p-soft bg-white text-p-dark focus:border-p-medium focus:ring-2 focus:ring-p-soft focus:outline-none font-medium shadow-sm cursor-pointer transition-all"
             >
-              <div class="w-full" x-ref="'list-'+board.name">
-                <template x-for="(item, idx) in board.arr" :key="item._id">
-                  <div
-                    class="draggable-item flex items-center justify-between rounded-lg bg-white shadow mb-3 px-4 py-3 cursor-grab transition-all select-none"
-                    :class="{
-              'ring-2 ring-red-400 opacity-80': dragDrop.isDragging(board.name, idx),
-              'bg-gray-100': dragDrop.isOver(board.name, idx)
-            }"
-                    draggable="true"
-                    @dragstart="onDragStart(board.name, idx)"
-                    @dragend="onDragEnd"
-                    @dragover.prevent="onDragOver(board.name, idx, $event)"
-                    @dragleave="onDragLeave(board.name, idx)"
-                    @drop="onDrop(board.name, idx, $event)"
-                    x-show="board.name === 'items' && doView ? doView(item._id) : true"
-                  >
-                    <label class="flex items-center cursor-pointer">
-                      <input
-                        type="radio"
-                        class="form-radio text-blue-600 mr-3"
-                        name="itemRadio"
-                        x-model="currentItemId"
-                        :value="item._id"
-                        @input="loadItem(item._id)"
-                      />
-                      <span
-                        class="flex-1 text-base font-medium text-gray-800 text-center"
-                        x-text="item.name"
-                      ></span>
-                    </label>
-                    <div x-data="{open: false}" class="dropdown dropdown-end">
-                      <button
-                        @click="open = !open"
-                        class="btn btn-sm btn-circle bg-white/80 hover:bg-white text-p-dark border-none shadow-md backdrop-blur-sm focus:outline-none list-none"
-                      >
-                        <svg
-                          class="w-5 h-5"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path
-                            d="M10 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4z"
-                          />
-                        </svg>
-                      </button>
-                      <div
-                        x-show="open"
-                        x-transition
-                        @click.outside="open = false"
-                      >
-                        <ul class="nav-dropdown-menu dropdown-end p-4">
-                          <li>
-                            <button
-                              @click="deleteItem(item)"
-                              class="shared-button-flex-secondary shadow-none"
-                            >
-                              Elimina
-                            </button>
-                          </li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                </template>
-                <p
-                  x-show="board.arr.length === 0"
-                  x-transition:enter
-                  x-transition:leave.opacity
-                  x-text="board.dropZoneText"
-                  class="text-center"
-                ></p>
-              </div>
-            </div>
-            <template x-if="board.controls">
-              <button class="shared-button-full-primary" @click="downItems()">
-                DOWN
-              </button>
-            </template>
-          </aside>
-        </template>
-      </div>
-      <!-- Main Content -->
-      <main
-        class="flex-1 grid lg:grid-cols-2 gap-10 items-start w-full max-w-7xl mx-auto"
-      >
-        <div class="flex flex-col gap-6">
+              <template x-for="item in allMetaItems">
+                <option :value="item._id" x-text="item.name"></option
+              ></template>
+            </select>
+            <button
+              class="shared-button-full-primary w-14"
+              @click="addItem(sel)"
+            >
+              Add
+            </button>
+            <button class="shared-button-full-primary w-12" @click="newItem()">
+              +
+            </button>
+          </div>
+        </div>
+        <div
+          class="grid grid-cols-6 grid-rows-3 gap-4 min-h-50 h-full shrink-0 items-start pt-2"
+        >
           <figure
-            class="w-full aspect-video lg:aspect-square bg-white rounded-3xl overflow-hidden shadow-sm border border-p-soft"
+            class="col-span-3 w-full aspect-video lg:aspect-square bg-white rounded-3xl shadow-sm border border-p-soft"
           >
             <img
+              class="rounded-3xl"
               x-data="{cache: null}"
               x-bind:src="
               if(currentItem?.image != cache || !cache){
@@ -154,145 +126,105 @@
               class="object-cover w-full h-full"
             />
           </figure>
-          <!-- REFS -->
-          <div
-            class="flex flex-col flex-wrap gap-2 bg-blue-300 w-full h-72 rounded-xl"
-          >
-            <template x-for="ref in getRefs">
+          <template x-for="board in Object.values(boards)" :key="board.name">
+            <aside
+              class="flex flex-row min-h-50 gap-2 shrink-0 scroll-auto"
+              :class="board.name == 'itemNav' ? 'col-span-3' : 'col-span-2'"
+            >
               <div
-                class="flex justify-between rounded-lg bg-white shadow m-3 px-4 py-3 cursor-grab transition-all select-none"
+                class="min-h-50 h-full w-full p-3 items-center justify-center rounded-lg"
+                :class="board.dropZoneStyle"
+                @drop="if(board.arrManager.length == 0)
+                        board.onDropEmpty($event)"
+                @dragover.prevent=""
+                :style="'overflow: auto;' + (board.name == 'itemNav' ? 'height:30vh' : 'height:100px')"
               >
-                <label class="flex items-center cursor-pointer">
-                  <input
-                    type="radio"
-                    class="form-radio text-blue-600 mr-3"
-                    name="itemRadio"
-                    x-model="currentItemId"
-                    :value="ref._id"
-                    @input="loadItem(ref._id)"
-                  />
-                  <span
-                    class="flex-1 text-base font-medium text-gray-800 text-center"
-                    x-text="ref.name"
-                  ></span>
-                </label>
-                <div x-data="{open: false}" class="dropdown dropdown-end">
-                  <button
-                    @click="open = !open"
-                    class="btn btn-sm btn-circle bg-white/80 hover:bg-white text-p-dark border-none shadow-md backdrop-blur-sm focus:outline-none list-none"
-                  >
-                    <svg
-                      class="w-5 h-5"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
+                <div class="w-full">
+                  <!-- x-ref="'list-'+board.name" -->
+                  <template x-for="(item, idx) in board.arr" :key="item._id">
+                    <div
+                      draggable="true"
+                      class="bg-white flex justify-between rounded-lg bg-white shadow mb-3 px-4 py-3 cursor-grab transition-all select-none"
+                      :class="{
+                           'ring-2 ring-red-400 opacity-80': board.isDragging(idx),
+                           'bg-gray-100': board.isOver(idx)
+                      }"
+                      @dragstart="board.onDragStart(idx, $event)"
+                      @dragend="board.onDragEnd()"
+                      @dragover.prevent="board.onDragOver(idx, $event)"
+                      @dragleave="board.onDragLeave(idx)"
+                      @drop="board.onDrop(idx, $event)"
+                      x-init=" if(item === currentItem){
+                                    $el.checked = true
+                               }else{
+                               console.log(currentItem)
+                               }
+                               if(item === board.nextFocus){
+                                    $el.scrollIntoView()
+                                    board.nextFocus = null
+                               }"
                     >
-                      <path
-                        d="M10 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4z"
-                      />
-                    </svg>
-                  </button>
-                  <div x-show="open" x-transition @click.outside="open = false">
-                    <ul class="nav-dropdown-menu dropdown-end p-4">
-                      <li>
+                      <label class="flex items-center cursor-pointer">
+                        <input
+                          type="radio"
+                          class="form-radio text-blue-600 mr-3"
+                          name="itemRadio"
+                          x-model="currentItemId"
+                          :value="item._id"
+                          @input="loadItem(item._id)"
+                        />
+                        <span
+                          class="flex-1 text-sm font-medium text-gray-800 text-center"
+                          x-text="item.name"
+                        ></span>
+                      </label>
+                      <div x-data="{open: false}" class="dropdown dropdown-end">
                         <button
-                          class="shared-button-flex-secondary shadow-none"
+                          @click="open = !open"
+                          class="btn btn-sm btn-circle bg-white/80 hover:bg-white text-p-dark border-none shadow-md backdrop-blur-sm focus:outline-none list-none"
                         >
-                          Elimina
+                          <svg
+                            class="w-5 h-5"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              d="M10 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4z"
+                            />
+                          </svg>
                         </button>
-                      </li>
-                    </ul>
-                  </div>
+                        <div
+                          x-show="open"
+                          x-transition
+                          @click.outside="open = false"
+                        >
+                          <ul class="nav-dropdown-menu dropdown-end p-4">
+                            <li>
+                              <button
+                                @click="deleteItem(item)"
+                                class="shared-button-flex-secondary shadow-none"
+                              >
+                                Elimina
+                              </button>
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+                  <p
+                    x-transition:enter
+                    x-transition:leave.opacity
+                    x-text="board.dropZoneText"
+                    x-show="board.arrManager.length == 0"
+                    class="text-center"
+                  ></p>
                 </div>
               </div>
-            </template>
-          </div>
+            </aside>
+          </template>
         </div>
-        <form
-          @submit.prevent="submitForm"
-          class="flex flex-col text-p-medium gap-5 bg-white p-8 rounded-3xl shadow-sm border border-p-soft"
-        >
-          <div class="border-b border-p-soft pb-4 mb-2">
-            <h1 class="text-2xl text-p-medium font-bold">Modifica Item</h1>
-          </div>
-          <div class="flex flex-col gap-1 w-full">
-            <label class="text-sm font-medium">Nome dell'item</label>
-            <input
-              type="text"
-              x-model="formManager.formData.name"
-              required
-              class="w-full px-4 py-2 rounded-xl border border-p-soft bg-white text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium transition-shadow"
-            />
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="flex flex-col gap-1 w-full">
-              <label class="text-sm font-medium"
-                >Tipo di item (deprecato)</label
-              >
-              <select
-                class="w-full px-4 py-2 rounded-xl border border-p-soft bg-white text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium"
-              >
-                <option value="artist">Artista</option>
-                <option value="style">Stile</option>
-                <option value="technique">Tecnica</option>
-                <option value="artwork">Opera</option>
-                <option value="other">Altro</option>
-              </select>
-            </div>
-            <div class="flex flex-col gap-1 w-full">
-              <label class="text-sm font-medium">Tour</label>
-              <input
-                type="text"
-                x-model="formManager.formData.tour"
-                required
-                class="w-full px-4 py-2 rounded-xl border border-p-soft bg-white text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium"
-              />
-            </div>
-          </div>
-          <div class="flex flex-col gap-1 w-full">
-            <label class="text-sm font-medium">Licenza d'uso</label>
-            <input
-              type="text"
-              x-model="formManager.formData.license"
-              class="w-full px-4 py-2 rounded-xl border border-p-soft bg-white text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium"
-            />
-          </div>
-          <fieldset
-            class="border border-p-soft p-5 rounded-2xl bg-p-soft/20 mt-2"
-          >
-            <legend class="font-semibold bg-p-light rounded-lg">
-              Spiegazione
-            </legend>
-            <div class="flex flex-col gap-4 mt-2">
-              <div class="flex flex-col gap-1 w-full md:w-1/2">
-                <label class="text-sm font-medium">Livello</label>
-                <select
-                  x-model="formManager.formData.explanations[0].level"
-                  required
-                  class="w-full px-4 py-2 rounded-xl border border-p-soft bg-white text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium"
-                >
-                  <option value="simple">Semplice</option>
-                  <option value="normal">Normale</option>
-                  <option value="advanced">Avanzato</option>
-                </select>
-              </div>
-              <div class="flex flex-col gap-1 w-full">
-                <label class="text-sm font-medium">Testo</label>
-                <textarea
-                  x-model="formManager.formData.explanations[0].text"
-                  required
-                  rows="4"
-                  class="w-full px-4 py-2 rounded-xl border border-p-soft bg-white text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium resize-none"
-                ></textarea>
-              </div>
-            </div>
-          </fieldset>
-          <button
-            type="submit"
-            class="shared-button-full-primary"
-            x-text="formManager.formData._id ? 'Salva Modifiche':'Crea'"
-          ></button>
-        </form>
-      </main>
-    </div>
+      </div>
+    </main>
   </body>
 </html>
