@@ -1,59 +1,57 @@
 import Alpine from 'alpinejs'
 import './userManager.js'
 import './quick-nav.js'
-import { getTour } from './api/tours.js'
-import { getItemsByTour, getItem } from './api/items.js'
+import { getTour, saveTour } from './api/tours.js'
+import { saveItem, deleteItem, getItemsByTour, getItem } from './api/items.js'
 import { BoardManager, Board, defaultArrManager } from './boards.js'
-import { createItemFormManager } from './itemFormManager.js'
 
-document.addEventListener('alpine:init', () => {
-  class refsArrManager extends defaultArrManager {
-    _arr
-    ctx
-    constructor(ctx) {
-      super()
-      this.ctx = ctx
-      if (ctx.currentItemId) this._arr[ctx.currentItemId] = []
-      else this._arr = {}
-    }
-    add(i) {
-      if (!this.ctx.currentItemId) return
-      if (this._arr[this.ctx.currentItemId])
-        this._arr[this.ctx.currentItemId].push(i)
-      else {
-        this._arr[this.ctx.currentItemId] = [i]
-      }
-    }
-    get(idx) {
-      return this._arr[this.ctx.currentItemId].at(idx)
-    }
-    put(i, idx) {
-      if (!this.ctx.currentItemId) return
-      if (this._arr[this.ctx.currentItemId])
-        this._arr[this.ctx.currentItemId].splice(idx, 0, i)[0]
-      else {
-        this._arr[this.ctx.currentItemId] = [i] // hmm what?
-      }
-    }
-    del(idx) {
-      if (!this.ctx.currentItemId) return null
-      return this._arr[this.ctx.currentItemId]?.splice(idx, 1)[0]
-    }
-    clear() {
-      if (!this.ctx.currentItemId) return null
-      this._arr[this.ctx.currentItemId] = []
-    }
-    get arr() {
-      if (!this.ctx.currentItemId) return []
-      if (!this._arr[this.ctx.currentItemId]) return []
-      return [...this._arr[this.ctx.currentItemId]] // NOTE: a copy!!!
-    }
-    get length() {
-      if (!this.ctx.currentItemId || !this._arr[this.ctx.currentItemId])
-        return 0
-      return this._arr[this.ctx.currentItemId].length
+class refsArrManager extends defaultArrManager {
+  _arr
+  ctx
+  constructor(ctx) {
+    super()
+    this.ctx = ctx
+    this._arr = {}
+    if (ctx.currentItemId) this._arr[ctx.currentItemId] = []
+  }
+  add(i) {
+    if (!this.ctx.currentItemId) return
+    if (this._arr[this.ctx.currentItemId])
+      this._arr[this.ctx.currentItemId].push(i)
+    else {
+      this._arr[this.ctx.currentItemId] = [i]
     }
   }
+  get(idx) {
+    return this._arr[this.ctx.currentItemId].at(idx)
+  }
+  put(i, idx) {
+    if (!this.ctx.currentItemId) return
+    if (this._arr[this.ctx.currentItemId])
+      this._arr[this.ctx.currentItemId].splice(idx, 0, i)
+    else {
+      this._arr[this.ctx.currentItemId] = [i] // hmm what?
+    }
+  }
+  del(idx) {
+    if (!this.ctx.currentItemId) return null
+    return this._arr[this.ctx.currentItemId]?.splice(idx, 1)[0]
+  }
+  clear() {
+    if (!this.ctx.currentItemId) return null
+    this._arr[this.ctx.currentItemId] = []
+  }
+  get arr() {
+    if (!this.ctx.currentItemId) return []
+    if (!this._arr[this.ctx.currentItemId]) return []
+    return [...this._arr[this.ctx.currentItemId]] // NOTE: a copy!!!
+  }
+  get length() {
+    if (!this.ctx.currentItemId || !this._arr[this.ctx.currentItemId]) return 0
+    return this._arr[this.ctx.currentItemId].length
+  }
+}
+document.addEventListener('alpine:init', () => {
   Alpine.data('editorState', () => ({
     // Central state
     tour: null,
@@ -64,8 +62,14 @@ document.addEventListener('alpine:init', () => {
     currentItemId: null,
     boards: {},
     boardMgr: null,
-    formManager: null,
-    doView: null,
+    isSubmitting: false,
+    formData: {
+      _id: null,
+      name: '',
+      tour: '',
+      license: '',
+      explanations: [{ level: '', text: '', duration: 0 }],
+    },
 
     async init() {
       // Setup boards and managers
@@ -94,7 +98,6 @@ document.addEventListener('alpine:init', () => {
           arrManager: new refsArrManager(this),
         }),
       }
-      this.formManager = createItemFormManager()
 
       // Auth/user state (assuming your user module already inits correctly)
       Alpine.store('userManager')
@@ -135,7 +138,7 @@ document.addEventListener('alpine:init', () => {
       }
       this.currentItem = item
       this.currentItemId = itemId
-      this.formManager.populateFormData(item)
+      this.populateFormData(item)
       if (item.refs) {
         this.boards.refs.arrManager.clear()
         this.items
@@ -144,8 +147,49 @@ document.addEventListener('alpine:init', () => {
       }
     },
 
-    async _submitForm() {
-      await this.formManager.submitForm(this.itemsCache)
+    populateFormData(item) {
+      this.formData = {
+        _id: item?._id || null,
+        name: item?.name || '',
+        tour: item?.tour || '',
+        license: item?.license || '',
+        explanations:
+          Array.isArray(item?.explanations) && item.explanations.length > 0
+            ? [
+                {
+                  level: item.explanations[0]?.level || '',
+                  text: item.explanations[0]?.text || '',
+                  duration: 0, // Placeholder; customize if you have duration data
+                },
+              ]
+            : [
+                {
+                  level: '',
+                  text: '',
+                  duration: 0,
+                },
+              ],
+      }
+    },
+    async submitForm() {
+      this.isSubmitting = true
+      // Remove cached version, if any
+      const idx = this.itemsCache.findIndex((i) => i._id === this.formData._id)
+      if (idx > -1) this.itemsCache.splice(idx, 1)
+
+      try {
+        await saveItem(this.formData)
+        this.isSubmitting = false
+        alert('Modifiche salvate con successo.')
+      } catch (err) {
+        this.isSubmitting = false
+        if (err.json) {
+          const data = await err.json().catch(() => ({}))
+          alert('Errore nel salvataggio: ' + (data.error?.message || ''))
+        } else {
+          alert('Errore di rete: ' + err.message)
+        }
+      }
     },
 
     // Add item (simplified: creates blank/new form, does NOT POST until submit)
@@ -153,9 +197,7 @@ document.addEventListener('alpine:init', () => {
       this.currentItem = null
       this.currentItemIdx = -1
       this.currentItemId = null
-      this.formManager.formData = structuredClone(
-        this.formManager.emptyFormData,
-      )
+      this.formData = structuredClone(this.emptyFormData)
       // TODO: plop into stash
     },
 

@@ -67,7 +67,10 @@ export class BoardManager {
 }
 
 export class defaultArrManager {
-  _arr = []
+  _arr
+  constructor() {
+    this._arr = []
+  }
   add(item) {
     this._arr.push(item)
   }

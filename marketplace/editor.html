@@ -30,7 +30,7 @@
           <label class="text-sm font-medium">Nome dell'item</label>
           <input
             type="text"
-            x-model="formManager.formData.name"
+            x-model="formData.name"
             required
             class="w-full px-4 py-2 rounded-xl border border-p-soft bg-white text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium transition-shadow"
           />
@@ -52,7 +52,7 @@
             <label class="text-sm font-medium">Tour</label>
             <input
               type="text"
-              x-model="formManager.formData.tour"
+              x-model="formData.tour"
               required
               class="w-full px-4 py-2 rounded-xl border border-p-soft bg-white text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium"
             />
@@ -62,7 +62,7 @@
           <label class="text-sm font-medium">Licenza d'uso</label>
           <input
             type="text"
-            x-model="formManager.formData.license"
+            x-model="formData.license"
             class="w-full px-4 py-2 rounded-xl border border-p-soft bg-white text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium"
           />
         </div>
@@ -76,7 +76,7 @@
             <div class="flex flex-col gap-1 w-full md:w-1/2">
               <label class="text-sm font-medium">Livello</label>
               <select
-                x-model="formManager.formData.explanations[0].level"
+                x-model="formData.explanations[0].level"
                 required
                 class="w-full px-4 py-2 rounded-xl border border-p-soft bg-white text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium"
               >
@@ -88,7 +88,7 @@
             <div class="flex flex-col gap-1 w-full">
               <label class="text-sm font-medium">Testo</label>
               <textarea
-                x-model="formManager.formData.explanations[0].text"
+                x-model="formData.explanations[0].text"
                 required
                 rows="4"
                 class="w-full px-4 py-2 rounded-xl border border-p-soft bg-white text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium resize-none"
@@ -99,7 +99,7 @@
         <button
           type="submit"
           class="shared-button-full-primary"
-          x-text="formManager.formData._id ? 'Salva Modifiche':'Crea'"
+          x-text="formData._id ? 'Salva Modifiche':'Crea'"
         ></button>
       </form>
       <!-- Reorderable Lists -->
