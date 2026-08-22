@@ -47,15 +47,11 @@ router.post('/', ensureAuth, async (req: Request, res: Response) => {
   if (validation.isLeft())
     return res.status(400).json({ error: validation.extract() })
   const input = validation.unsafeCoerce()
+  console.log(validation)
   const result = await ItemService.createItem(input, req.user!._id)
   result.caseOf({
     Right: (item) => res.status(201).json(item),
-    Left: (error) => {
-      switch (error.type) {
-        case 'DBError':
-          return res.status(500).json({ error })
-      }
-    },
+    Left: handleLeft(res),
   })
 })
 

@@ -63,13 +63,27 @@ document.addEventListener('alpine:init', () => {
     boards: {},
     boardMgr: null,
     isSubmitting: false,
+    emptyFormData: {
+      _id: null,
+      name: 'New item',
+      itemAuthor: null,
+      tour: '',
+      license: '',
+      explanations: [
+        { level: 'simple', text: '', durationSeconds: 0 },
+        { level: 'normal', text: '', durationSeconds: 0 },
+        { level: 'advanced', text: '', durationSeconds: 0 },
+      ],
+    },
     formData: {
       _id: null,
-      name: '',
+      name: 'New item',
+      itemAuthor: null,
       tour: '',
       license: '',
       explanations: [{ level: '', text: '', duration: 0 }],
     },
+    new_count: 0,
 
     async init() {
       // Setup boards and managers
@@ -128,7 +142,10 @@ document.addEventListener('alpine:init', () => {
     // Form and item load logic
     async loadItem(itemId) {
       if (!itemId) return
-      let idx = this.boards.itemNav.arr.findIndex((i) => i === itemId)
+      const idx_query = Object.values(this.boards).find(
+        (board) => board.arr.findIndex((i) => i === itemId) !== -1,
+      ) // rets null
+      let idx = idx_query ? idx_query : -1
       if (idx !== -1) this.currentItemIdx = idx
       let cacheIdx = this.itemsCache.findIndex((i) => i._id === itemId)
       let item = this.itemsCache[cacheIdx]
@@ -159,27 +176,60 @@ document.addEventListener('alpine:init', () => {
                 {
                   level: item.explanations[0]?.level || '',
                   text: item.explanations[0]?.text || '',
-                  duration: 0, // Placeholder; customize if you have duration data
+                  durationSeconds: 0, // Placeholder; customize if you have duration data
                 },
               ]
             : [
                 {
                   level: '',
                   text: '',
-                  duration: 0,
+                  durationSeconds: 0,
                 },
               ],
       }
     },
     async submitForm() {
-      this.isSubmitting = true
-      // Remove cached version, if any
-      const idx = this.itemsCache.findIndex((i) => i._id === this.formData._id)
-      if (idx > -1) this.itemsCache.splice(idx, 1)
-
       try {
-        await saveItem(this.formData)
+        this.isSubmitting = true
+        // Remove cached version, if any
+        const idx = this.itemsCache.findIndex(
+          (i) => i._id === this.formData._id,
+        )
+        if (idx > -1) this.itemsCache.splice(idx, 1)
+
+        // inject author and tour
+        this.formData.itemAuthor = this.user._id
+        this.formData.tour = this.tour._id
+
+        // handle new item creation
+        let old_id = this.formData._id
+        const isNewItem = typeof old_id === 'number' && !isNaN(old_id)
+        if (isNewItem) this.formData._id = null
+
+        let res = await saveItem(this.formData)
+
+        // handle new item id
+        if (isNewItem) {
+          Object.values(this.boards).forEach((board) => {
+            let idx = board.arrManager.arr.findIndex((i) => i._id === old_id)
+            if (idx != -1) {
+              let meta = board.arrManager.get(idx)
+              meta._id = res._id
+            }
+          })
+        }
+
+        // update boards
+        Object.values(this.boards).forEach((board) => {
+          let idx = board.arrManager.arr.findIndex((i) => i._id === res._id)
+          if (idx != -1) {
+            let meta = board.arrManager.get(idx)
+            meta.name = res.name // this is the only thing displayed on the cards
+          }
+        })
+
         this.isSubmitting = false
+        this.loadItem(res._id)
         alert('Modifiche salvate con successo.')
       } catch (err) {
         this.isSubmitting = false
@@ -193,12 +243,29 @@ document.addEventListener('alpine:init', () => {
     },
 
     // Add item (simplified: creates blank/new form, does NOT POST until submit)
-    _addItem() {
+    // Side-effect: loads the (fake) item
+    addItem() {
       this.currentItem = null
       this.currentItemIdx = -1
       this.currentItemId = null
-      this.formData = structuredClone(this.emptyFormData)
-      // TODO: plop into stash
+      console.log(this.emptyFormData)
+      // HACK: circumven Alpine PROXY
+      this.formData = structuredClone(
+        JSON.parse(JSON.stringify(this.emptyFormData)),
+      )
+      this.formData._id = this.new_count
+      let meta_item = {
+        _id: ++this.new_count, // TODO: don't push this
+        name: this.formData.name,
+        itemAuthor: this.user._id,
+        tour: this.tour._id,
+        license: this.formData.license,
+      }
+      this.boards.stash.arrManager.add(meta_item)
+      this.boards.stash.nextFocus = meta_item
+      // add it to cache, it won't be found on the server
+      this.itemsCache.push(meta_item)
+      this.loadItem(meta_item._id)
     },
 
     // Delete: move from any board to ToDelete
@@ -228,13 +295,13 @@ document.addEventListener('alpine:init', () => {
     //   }
     // },
 
-    async _saveItemNav() {
+    async saveItemNav() {
       try {
         await saveTour({
           _id: this.tour._id,
-          itemNav: this.boards.items.arr.map((item) => item._id),
+          itemNav: this.boards.itemNav.arr.map((item) => item._id),
           items: Array.from(
-            new Set([...this.items, ...this.boards.stash.arr]),
+            new Set([...this.boards.itemNav.arr, ...this.boards.stash.arr]),
           ).map((i) => i._id),
         })
         for (const item of this.boards.toDelete.arr) {

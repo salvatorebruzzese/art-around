@@ -99,7 +99,7 @@
         <button
           type="submit"
           class="shared-button-full-primary"
-          x-text="formData._id ? 'Salva Modifiche':'Crea'"
+          x-text="typeof formData._id !== 'number'? 'Salva Modifiche':'Crea'"
         ></button>
       </form>
       <!-- Reorderable Lists -->
@@ -161,7 +161,15 @@
                     @dragover.prevent="board.onDragOver(idx, $event)"
                     @dragleave="board.onDragLeave(idx)"
                     @drop="board.onDrop(idx, $event)"
-                    x-init="if(item === board.nextFocus){$el.scrollIntoView()}"
+                    x-init=" if(item === currentItem){
+                                    $el.checked = true
+                               }else{
+                               console.log(currentItem)
+                               }
+                               if(item === board.nextFocus){
+                                    $el.scrollIntoView()
+                                    board.nextFocus = null
+                               }"
                   >
                     <label class="flex items-center cursor-pointer">
                       <input
