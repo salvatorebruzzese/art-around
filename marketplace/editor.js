@@ -55,7 +55,8 @@ document.addEventListener('alpine:init', () => {
   Alpine.data('editorState', () => ({
     // Central state
     tour: null,
-    items: [],
+    allMetaItems: [],
+    looseMetaItems: [],
     itemsCache: [],
     currentItem: null,
     currentItemIdx: -1,
@@ -127,16 +128,23 @@ document.addEventListener('alpine:init', () => {
 
       // Items from API
       const items = await getItemsByTour(tour._id)
-      this.items = items
+      this.allMetaItems = items
+      this.looseMetaItems = [...items] // shallow
 
       // Set up itemNav and boards
-      this.items
+      let diff = []
+      this.looseMetaItems
         .filter((i) => tour.itemNav.some((nid) => nid === i._id))
         .forEach((i) => {
           this.boards.itemNav.arrManager.add(i)
+          diff.push(i)
         })
 
-      await this.loadItem(itemId)
+      this.looseMetaItems = this.looseMetaItems.filter(
+        (item) => !diff.includes(item),
+      )
+
+      this.loadItem(itemId)
     },
 
     // Form and item load logic
@@ -158,7 +166,7 @@ document.addEventListener('alpine:init', () => {
       this.populateFormData(item)
       if (item.refs) {
         this.boards.refs.arrManager.clear()
-        this.items
+        this.looseMetaItems
           .filter((i) => item.refs.some((r) => r === i._id))
           .forEach((i) => this.boards.refs.arrManager.put(i))
       }
@@ -244,7 +252,7 @@ document.addEventListener('alpine:init', () => {
 
     // Add item (simplified: creates blank/new form, does NOT POST until submit)
     // Side-effect: loads the (fake) item
-    addItem() {
+    newItem() {
       this.currentItem = null
       this.currentItemIdx = -1
       this.currentItemId = null
@@ -263,7 +271,7 @@ document.addEventListener('alpine:init', () => {
       }
       this.boards.stash.arrManager.add(meta_item)
       this.boards.stash.nextFocus = meta_item
-      // add it to cache, it won't be found on the server
+      // HACK: load meta to cache, undefined fields will be populated
       this.itemsCache.push(meta_item)
       this.loadItem(meta_item._id)
     },
@@ -294,14 +302,33 @@ document.addEventListener('alpine:init', () => {
     //     this.loadItem(this.boards.items.arr[0]._id)
     //   }
     // },
-
+    addItem(selId) {
+      let found = this.looseMetaItems.find((item) => item._id === selId)
+      if (!found) {
+        Object.values(this.boards).forEach((board) => {
+          if (found) return
+          else found = board.arr.find((item) => item._id === selId)
+        })
+      }
+      if (found) {
+        if (this.looseMetaItems.includes(found)) {
+          this.boards.stash.arrManager.add(found)
+        } else {
+          this.loadItem(found._id)
+        }
+      }
+    },
     async saveItemNav() {
       try {
         await saveTour({
           _id: this.tour._id,
           itemNav: this.boards.itemNav.arr.map((item) => item._id),
           items: Array.from(
-            new Set([...this.boards.itemNav.arr, ...this.boards.stash.arr]),
+            new Set([
+              ...this.looseMetaItems,
+              ...this.boards.itemNav.arr,
+              ...this.boards.stash.arr,
+            ]),
           ).map((i) => i._id),
         })
         for (const item of this.boards.toDelete.arr) {
