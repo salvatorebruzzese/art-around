@@ -1,6 +1,7 @@
-<script setup>
+<script setup lang="ts">
 import { ref, watch } from 'vue'
 
+const activeTab = ref<'otp' | 'search'>('otp')
 const searchQuery = ref('')
 const searchResults = ref([])
 const selectedMuseum = ref(null)
@@ -214,10 +215,43 @@ function selectMuseum(museum) {
     </div>
   </div>
 
-  <!-- Search View -->
-  <div v-else class="flex h-screen items-center justify-center">
+  <!-- Main Container -->
+  <div v-else class="flex flex-col gap-4 h-screen items-center justify-center">
+    <!-- View 1: OTP Code -->
     <div
-      class="rounded-xl border border-p-soft shadow-xl p-8 gap-4 text-center overflow-visible"
+      v-if="activeTab === 'otp'"
+      class="flex flex-col items-center rounded-xl border border-p-soft shadow-xl p-8 gap-4 text-center overflow-visible"
+    >
+      <h1 class="text-4xl text-p-medium mb-4">Hai ricevuto un codice?</h1>
+      <label class="otp">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <input
+          type="text"
+          autocomplete="one-time-code"
+          inputmode="numeric"
+          maxlength="6"
+          pattern="[0-9]{6}"
+          required
+        />
+      </label>
+
+      <button
+        @click="activeTab = 'search'"
+        class="mt-4 text-sm text-p-medium hover:underline cursor-pointer focus:outline-none"
+      >
+        Vuoi scegliere una visita?
+      </button>
+    </div>
+
+    <!-- View 2: Search Visit -->
+    <div
+      v-else
+      class="flex flex-col items-center rounded-xl border border-p-soft shadow-xl p-8 gap-4 text-center overflow-visible"
     >
       <h1 class="text-4xl text-p-medium mb-4">Scegli una visita</h1>
 
@@ -254,6 +288,13 @@ function selectMuseum(museum) {
           </li>
         </ul>
       </div>
+
+      <button
+        @click="activeTab = 'otp'"
+        class="mt-4 text-sm text-p-medium hover:underline cursor-pointer focus:outline-none"
+      >
+        Hai ricevuto un codice?
+      </button>
     </div>
   </div>
 </template>
