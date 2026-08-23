@@ -1,11 +1,39 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+
+const searchQuery = ref('')
+const searchResults = ref([])
+const selectedMuseum = ref(null)
 
 const isMapView = ref(false)
-const wasVisitChosen = ref(localStorage.getItem('wasVisitChosen') === 'true')
+const isDropdownOpen = ref(false)
+const wasVisitChosen = ref(false)
 
-localStorage.removeItem('wasVisitChosen')
-localStorage.removeItem('selectedTourId')
+// Fetch filtered museums from backend
+watch(searchQuery, async (newQuery) => {
+  if (!newQuery.trim()) {
+    searchResults.value = []
+    isDropdownOpen.value = false
+    return
+  }
+
+  try {
+    const res = await fetch(`/api/museums?name=${encodeURIComponent(newQuery)}`)
+    if (res.ok) {
+      searchResults.value = await res.json()
+      isDropdownOpen.value = searchResults.value.length > 0
+    }
+  } catch (err) {
+    console.error('Errore nel recupero musei:', err)
+  }
+})
+
+function selectMuseum(museum) {
+  selectedMuseum.value = museum
+  searchQuery.value = museum.name
+  isDropdownOpen.value = false
+  wasVisitChosen.value = true
+}
 </script>
 
 <template>
@@ -38,7 +66,9 @@ localStorage.removeItem('selectedTourId')
         <div class="grid grid-cols-2 gap-4">
           <div class="flex flex-col">
             <h2 class="text-xs font-semibold text-p-medium uppercase">Museo</h2>
-            <p class="text-p-dark">Museum of Modern Art</p>
+            <p class="text-p-dark">
+              {{ selectedMuseum?.name || 'Museum of Modern Art' }}
+            </p>
           </div>
           <div class="flex flex-col">
             <h2 class="text-xs font-semibold text-p-medium uppercase">Data</h2>
@@ -51,11 +81,10 @@ localStorage.removeItem('selectedTourId')
             Descrizione
           </h2>
           <p class="text-p-dark font-sans mt-1">
-            La Notte stellata è uno dei capolavori più celebri di Vincent van
-            Gogh. Dipinto nel giugno del 1889, rappresenta la vista dalla sua
-            camera da letto nel manicomio di Saint-Rémy-de-Provence, arricchita
-            dall'immaginazione dell'artista con vortici di colore e stelle
-            luminose che illuminano il cielo notturno.
+            {{
+              selectedMuseum?.description ||
+              "La Notte stellata è uno dei capolavori più celebri di Vincent van Gogh. Dipinto nel giugno del 1889, rappresenta la vista dalla sua camera da letto nel manicomio di Saint-Rémy-de-Provence, arricchita dall'immaginazione dell'artista con vortici di colore e stelle luminose che illuminano il cielo notturno."
+            }}
           </p>
         </div>
       </div>
@@ -184,16 +213,47 @@ localStorage.removeItem('selectedTourId')
       </div>
     </div>
   </div>
+
+  <!-- Search View -->
   <div v-else class="flex h-screen items-center justify-center">
     <div
-      class="rounded-xl border border-p-soft shadow-xl p-8 gap-4 text-center"
+      class="rounded-xl border border-p-soft shadow-xl p-8 gap-4 text-center overflow-visible"
     >
-      <h1 class="text-4xl text-p-medium mb-4">Scegli un visita</h1>
-      <a
-        class="shared-button-full-secondary-secondary-primary"
-        href="../../marketplace/"
-        >Torna al marketplace</a
-      >
+      <h1 class="text-4xl text-p-medium mb-4">Scegli una visita</h1>
+
+      <div class="relative flex-1 max-w-lg min-w-[250px]">
+        <input
+          v-model="searchQuery"
+          @focus="isDropdownOpen = searchResults.length > 0"
+          type="text"
+          placeholder="Cerca museo..."
+          class="input input-bordered rounded-full w-full pr-12 border-p-soft bg-white text-p-dark placeholder-p-medium focus:border-p-medium focus:ring-2 focus:ring-p-soft focus:outline-none transition-all shadow-sm"
+        />
+
+        <!-- Dropdown Result List -->
+        <ul
+          v-if="isDropdownOpen"
+          class="absolute left-0 right-0 mt-2 bg-white border border-p-soft rounded-2xl shadow-xl max-h-60 overflow-y-auto z-50 p-2 space-y-1 text-left"
+        >
+          <li
+            v-for="museum in searchResults"
+            :key="museum._id"
+            @click="selectMuseum(museum)"
+            class="p-3 hover:bg-p-soft/20 rounded-xl cursor-pointer transition-colors"
+          >
+            <p class="font-bold text-p-medium">{{ museum.name }}</p>
+            <p v-if="museum.address" class="text-xs text-p-dark/70">
+              {{ museum.address }}
+            </p>
+            <p
+              v-if="museum.description"
+              class="text-sm text-p-dark line-clamp-2 mt-1"
+            >
+              {{ museum.description }}
+            </p>
+          </li>
+        </ul>
+      </div>
     </div>
   </div>
 </template>

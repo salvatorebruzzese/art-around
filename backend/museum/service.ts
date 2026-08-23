@@ -27,12 +27,18 @@ async function getMuseum(
 async function listMuseums(
   rawQuery: unknown,
 ): Promise<Either<ValidationError | DBError, Partial<IMuseum>[]>> {
-  // Validate query using Zod
   const validation = MuseumQuery.validate(rawQuery)
   if (validation.isLeft()) return validation
+
   const query = validation.unsafeCoerce()
+
   try {
-    const items = await Museum.find(query).lean().exec()
+    const filter: Record<string, unknown> = { ...query }
+    if (filter.name) {
+      filter.name = { $regex: filter.name, $options: 'i' }
+    }
+
+    const items = await Museum.find(filter).lean().exec()
     return Right(items)
   } catch (e) {
     return Left(dbError(undefined, () => String(e)))
