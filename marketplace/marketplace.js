@@ -19,7 +19,7 @@ document.addEventListener('alpine:init', () => {
     user: null,
     showPreview: false,
     currPreview: null,
-    tours: [],
+    cartTours: [],
 
     get filteredTours() {
       const fmus = this.filters.museum
