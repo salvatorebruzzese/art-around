@@ -13,7 +13,7 @@
   >
     <main
       x-data="marketplace()"
-      class="flex-1 flex flex-col mx-4 mt-12 sm:max-w-[70%]"
+      class="w-full p-4 sm:p-0 flex flex-col mx-4 mt-12 sm:max-w-[70%]"
     >
       <!-- HEADER CON FILTRI E ICONE SVG -->
       <header
@@ -26,10 +26,10 @@
 
         <!-- Controls: Search, Select Museo e Toggle -->
         <div
-          class="flex flex-wrap gap-6 justify-center items-center flex-1 min-w-[300px]"
+          class="flex flex-col sm:flex-row sm:flex-wrap w-full flex-1 min-w-[300px] gap-6 justify-center items-center"
         >
           <!-- Search Bar -->
-          <div class="relative flex-1 max-w-lg min-w-[250px]">
+          <div class="relative w-full sm:flex-1 max-w-lg min-w-[250px]">
             <input
               x-model="filters.search"
               type="text"
@@ -58,10 +58,13 @@
           </div>
 
           <!-- Dropdown Musei -->
-          <div :class="{ 'text-p-soft rounded-full': !filters.museum }">
+          <div
+            :class="{ 'text-p-soft rounded-full': !filters.museum }"
+            class="w-full md:w-56"
+          >
             <select
               x-model="filters.museum"
-              class="select select-bordered rounded-full w-56 border-p-soft bg-white text-p-dark focus:border-p-medium focus:ring-2 focus:ring-p-soft focus:outline-none font-medium shadow-sm cursor-pointer transition-all"
+              class="select select-bordered rounded-full w-full border-p-soft bg-white text-p-dark focus:border-p-medium focus:ring-2 focus:ring-p-soft focus:outline-none font-medium shadow-sm cursor-pointer transition-all"
             >
               <option value="">Tutti i musei</option>
               <template x-for="museum in museums" :key="museum._id">
@@ -135,7 +138,7 @@
         <!-- Item card -->
         <div
           x-show="view == 'item'"
-          class="grid grid-cols-[repeat(auto-fit,minmax(280px,0.5fr))] justify-center gap-8"
+          class="w-full flex flex-col sm:grid sm:grid-cols-[repeat(auto-fit,minmax(280px,0.5fr))] justify-center gap-8"
         >
           <template x-for="itemMeta in filteredItems" :key="itemMeta._id">
             <div
@@ -240,7 +243,7 @@
         <div
           x-data
           x-show="view == 'tour'"
-          class="grid grid-cols-[repeat(auto-fit,minmax(280px,0.5fr))] justify-center gap-8"
+          class="w-full flex flex-col sm:grid sm:grid-cols-[repeat(auto-fit,minmax(280px,0.5fr))] justify-center gap-8"
         >
           <template
             x-data
