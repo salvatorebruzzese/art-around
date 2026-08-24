@@ -1,22 +1,25 @@
 <template>
   <div class="min-h-screen bg-gray-50 pb-20">
     <!-- Museums List -->
-    <div v-for="museum in museums" :key="museum.id" class="mb-8">
+    <div v-for="museum in museums" :key="museum._id" class="mb-8">
       <h2 class="text-xl font-bold underline mb-3 px-4 text-gray-800">
-        {{ museum.title }}
+        {{ museum.name }}
       </h2>
       <!-- Horizontally swipeable tours -->
       <div class="overflow-x-auto px-2 -mx-2">
         <div class="flex flex-nowrap gap-4">
           <div
             v-for="tour in museum.tours"
-            :key="tour.id"
+            :key="tour._id"
             class="flex-none w-64 bg-white rounded-xl shadow relative"
           >
             <!-- Photo with overlay -->
             <div class="relative">
               <img
-                :src="tour.photo"
+                :src="
+                  `/api/assets/${tour.thumbnail}` ||
+                  'https://dummyimage.com/320x240/efefef/a3a3a3.jpg&text=Tour'
+                "
                 alt="tour"
                 class="rounded-t-xl w-full h-36 object-cover"
                 style="margin-left: 0; margin-right: 0"
@@ -34,9 +37,9 @@
                   "
                 >
                   {{
-                    tour.review.length > 60
+                    tour.review && tour.review.length > 60
                       ? tour.review.slice(0, 60) + '…'
-                      : tour.review
+                      : tour.review || ''
                   }}
                 </div>
               </div>
@@ -44,7 +47,7 @@
             <!-- Info Area -->
             <div class="p-4 flex flex-col gap-1">
               <div class="font-semibold text-gray-900 text-base truncate">
-                {{ tour.title }}
+                {{ tour.name }}
               </div>
               <div class="flex items-center text-xs text-gray-500 gap-2">
                 <span>
@@ -69,7 +72,7 @@
                       fill="none"
                     ></circle>
                   </svg>
-                  {{ tour.time }} min
+                  {{ tour.time || '--' }} min
                 </span>
                 <span class="ml-3">
                   <svg
@@ -85,12 +88,12 @@
                       d="M12 8c1.104 0 2-.896 2-2s-.896-2-2-2-2 .896-2 2 .896 2 2 2zm0 4c-2.21 0-4 1.12-4 2.5v2.5h8V14.5c0-1.38-1.79-2.5-4-2.5z"
                     ></path>
                   </svg>
-                  €{{ tour.price }}
+                  €{{ tour.price || '--' }}
                 </span>
                 <span
                   class="ml-auto bg-gray-100 rounded-full px-2 py-0.5 text-gray-600 text-xs"
                 >
-                  {{ tour.author }}
+                  {{ getAuthorName(tour.author) || 'Unknown' }}
                 </span>
               </div>
             </div>
@@ -272,10 +275,10 @@
             <ul>
               <li
                 v-for="item in searchResults"
-                :key="item.id"
+                :key="item._id"
                 class="py-2 border-b last:border-b-0"
               >
-                <span class="text-gray-800 font-medium">{{ item.title }}</span>
+                <span class="text-gray-800 font-medium">{{ item.name }}</span>
                 <span class="text-gray-400 text-xs block">{{ item.type }}</span>
               </li>
               <li v-if="!searchResults.length" class="text-gray-400 py-2">
@@ -362,64 +365,7 @@ export default {
   name: 'MuseumsToursMobile',
   data() {
     return {
-      museums: [
-        {
-          id: 1,
-          title: 'Louvre Museum',
-          tours: [
-            {
-              id: 101,
-              title: 'Classic Masterpieces',
-              photo:
-                'https://images.unsplash.com/photo-1506744038136-46273834b3fb?fit=crop&w=480&q=80',
-              review:
-                'A wonderful and enlightening tour through the most famous artworks of the world. The guide was knowledgeable and engaging...',
-              time: 90,
-              price: 22,
-              author: 'Marie Curie',
-            },
-            {
-              id: 102,
-              title: 'Ancient History Tour',
-              photo:
-                'https://images.unsplash.com/photo-1464983953574-0892a716854b?fit=crop&w=480&q=80',
-              review:
-                'The exhibits on ancient civilizations are spectacular. Highly recommend this in-depth journey for history lovers.',
-              time: 70,
-              price: 18,
-              author: 'Paul Ricard',
-            },
-          ],
-        },
-        {
-          id: 2,
-          title: 'Uffizi Gallery',
-          tours: [
-            {
-              id: 201,
-              title: 'The Renaissance Route',
-              photo:
-                'https://images.unsplash.com/photo-1509228468518-180dd4864904?fit=crop&w=480&q=80',
-              review:
-                'A breathtaking experience surrounded by the art and genius of Florence. Beautifully curated tour.',
-              time: 120,
-              price: 25,
-              author: 'G. Vasari',
-            },
-            {
-              id: 202,
-              title: 'Hidden Gems',
-              photo:
-                'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?fit=crop&w=480&q=80',
-              review:
-                "Found so many works I'd never noticed before. Our guide brought the gallery to life!",
-              time: 100,
-              price: 21,
-              author: 'Marta Rossi',
-            },
-          ],
-        },
-      ],
+      museums: [],
       showMenu: false,
       showSearch: false,
       showProfile: false,
@@ -430,6 +376,7 @@ export default {
         avatar: '',
         initials: 'AB',
       },
+      authors: {}, // authorId -> authorName
     }
   },
   computed: {
@@ -438,12 +385,16 @@ export default {
       const searchLower = this.search.toLowerCase()
       let results = []
       for (const m of this.museums) {
-        if (m.title.toLowerCase().includes(searchLower)) {
-          results.push({ id: 'm' + m.id, title: m.title, type: 'Museum' })
+        if (m.name && m.name.toLowerCase().includes(searchLower)) {
+          results.push({ _id: m._id, name: m.name, type: 'Museum' })
         }
-        for (const t of m.tours) {
-          if (t.title.toLowerCase().includes(searchLower)) {
-            results.push({ id: 't' + t.id, title: t.title, type: m.title })
+        for (const t of m.tours || []) {
+          if (t.name && t.name.toLowerCase().includes(searchLower)) {
+            results.push({
+              _id: t._id,
+              name: t.name,
+              type: m.name || 'Tour',
+            })
           }
         }
       }
@@ -452,8 +403,93 @@ export default {
   },
   methods: {
     onMore(museum) {
-      // Dummy: alert or route to more
-      alert('More tours from ' + museum.title)
+      alert('More tours from ' + (museum.name || ''))
+    },
+    getAuthorName(authorId) {
+      if (!authorId) return ''
+      return this.authors[authorId] || ''
+    },
+    async fetchAuthor(authorId) {
+      if (!authorId || this.authors[authorId] !== undefined) return
+      try {
+        const res = await fetch(`/api/users/${authorId}`)
+        if (!res.ok) throw new Error('Not found')
+        const user = await res.json()
+        this.authors[authorId] = user.username || 'Unknown'
+      } catch (e) {
+        this.authors[authorId] = 'Unknown'
+      }
+    },
+    async fetchMuseumsAndTours() {
+      try {
+        // Fetch all museums metadata
+        const museumsRes = await fetch('/api/museums')
+        let museumsMeta = await museumsRes.json()
+        // For each museum metadata, fetch the full item (to get referenced tours)
+        const museums = await Promise.all(
+          museumsMeta.map(async (meta) => {
+            try {
+              const fullRes = await fetch(`/api/museums/${meta._id}`)
+              const fullMuseum = await fullRes.json()
+              // Assume tours references (array of tour ids) are under fullMuseum.tours as ids
+              let tours = []
+              if (
+                Array.isArray(fullMuseum.tours) &&
+                fullMuseum.tours.length > 0
+              ) {
+                // Fetch all referenced tours as metadata (not full for each)
+                const toursRes = await fetch(
+                  `/api/tours?museum=${fullMuseum._id}`,
+                )
+                tours = await toursRes.json()
+              }
+              return { ...fullMuseum, tours }
+            } catch (err) {
+              return { ...meta, tours: [] }
+            }
+          }),
+        )
+        this.museums = museums
+
+        // After museums/tours are fetched, collect unique author ids
+        const authorIds = new Set()
+        for (const museum of museums) {
+          for (const tour of museum.tours || []) {
+            if (tour.author) {
+              authorIds.add(tour.author)
+            }
+          }
+        }
+        // Fetch all author names in parallel, only if not already present
+        await Promise.all(
+          Array.from(authorIds).map((id) => this.fetchAuthor(id)),
+        )
+      } catch (err) {
+        this.museums = []
+      }
+    },
+  },
+  mounted() {
+    this.fetchMuseumsAndTours()
+  },
+  watch: {
+    museums: {
+      deep: true,
+      immediate: false,
+      handler(newMuseums) {
+        // Whenever museums change, fetch missing authors
+        const authorIds = new Set()
+        for (const museum of newMuseums) {
+          for (const tour of museum.tours || []) {
+            if (tour.author && this.authors[tour.author] === undefined) {
+              authorIds.add(tour.author)
+            }
+          }
+        }
+        if (authorIds.size > 0) {
+          Promise.all(Array.from(authorIds).map((id) => this.fetchAuthor(id)))
+        }
+      },
     },
   },
 }
