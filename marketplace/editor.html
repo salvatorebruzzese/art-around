@@ -261,7 +261,6 @@
                       :class="boards.refs.dropZoneStyle"
                       @dragover.prevent
                       @drop="
-          boards.refs.arrManager.ctx.currentItemId = item._id;
           boards.refs.onDropEmpty($event)
         "
                     >
@@ -338,22 +337,29 @@
               </div>
             </div>
           </template>
-          <!-- ToDelete board (place somewhere else on the page as needed) -->
-          <template x-if="boards.toDelete">
-            <div class="mt-4">
+          <div
+            class="fixed bottom-4 right-4 z-50"
+            x-data="{ expanded: false }"
+            @mouseenter="expanded = true"
+            @mouseleave="expanded = false"
+            @dragover.prevent="expanded = true"
+          >
+            <template x-if="expanded">
               <div
-                class="p-3 min-h-16 rounded-lg"
-                :class="boards.toDelete.dropZoneStyle"
+                class="w-80 bg-white p-3 min-h-16 rounded-lg shadow-lg transition-all duration-200"
+                :class="boards.toDelete?.dropZoneStyle"
                 @dragover.prevent=""
-                @drop="boards.toDelete.onDropEmpty($event)"
+                @dragleave=""
+                @drop="boards.toDelete?.onDropEmpty($event)"
+                style="min-width: 20rem"
               >
                 <span
                   class="font-semibold text-xs"
-                  x-text="boards.toDelete.dropZoneText"
+                  x-text="boards.toDelete?.dropZoneText"
                 ></span>
                 <ul class="mt-2">
                   <template
-                    x-for="(item, idx) in boards.toDelete.arr"
+                    x-for="(item, idx) in boards.toDelete?.arr"
                     :key="item._id"
                   >
                     <li
@@ -381,8 +387,19 @@
                   </template>
                 </ul>
               </div>
+            </template>
+            <div
+              class="float-right w-10 h-10 bg-red-100 flex items-center justify-center rounded-lg shadow cursor-pointer transition-all duration-200"
+            >
+              <svg
+                class="w-6 h-6 text-red-400"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <rect x="4" y="8" width="12" height="4"></rect>
+              </svg>
             </div>
-          </template>
+          </div>
         </div>
       </div>
     </main>
