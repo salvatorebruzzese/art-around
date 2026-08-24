@@ -23,14 +23,18 @@ router.get('/', async (req: Request, res: Response) => {
 })
 
 router.get('/:id', async (req, res) => {
-  const assetID = Array.isArray(req.params.id)
-    ? req.params.id[0]
-    : req.params.id
+  const validation = AssetQuery.validate(req.params)
+
+  if (validation.isLeft()) {
+    return res.status(400).json({ error: validation.extract() })
+  }
+
+  const assetID = req.params.id as string
 
   if (!mongoose.Types.ObjectId.isValid(assetID))
     return res.status(400).json({ message: 'Malformed asset ID' })
-  const id = new Types.ObjectId(assetID)
 
+  const id = new Types.ObjectId(assetID)
   const result = req.user
     ? await AssetService.getAsset(id, req.user!._id)
     : await AssetService.getAsset(id)

@@ -18,6 +18,7 @@ document.addEventListener('alpine:init', () => {
     view: 'tour', // | 'item'
     user: null,
     showPreview: false,
+    currPreview: null,
 
     get filteredTours() {
       const fmus = this.filters.museum

@@ -337,11 +337,10 @@
                   >
                     Apri
                   </a>
-                  <!-- Preview apri TODO: implementare preview e/o ripensare ui -->
                   <button
                     x-show="!user?.purchasedTours.includes(tour._id) && !user?.authoredTours.includes(tour._id)"
                     class="shared-button-full-secondary"
-                    @click="window.history.pushState({}, '', '/marketplace/preview/' + tour._id); showPreview = true;"
+                    @click="window.history.pushState({}, '', '/marketplace/preview/' + tour._id); showPreview = true; currPreview = tour;"
                   >
                     Anteprima
                   </button>
@@ -377,14 +376,39 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- Image Container -->
             <figure
-              class="w-full aspect-square rounded-2xl overflow-hidden justify-self-center self-center"
+              class="w-full aspect-square rounded-2xl overflow-hidden justify-self-center self-center bg-p-soft/20"
             >
-              <img
-                :src="'/api/assets/' + item.image"
-                :alt="item.name"
-                class="object-cover w-full h-full"
-              />
+              <template x-if="currPreview">
+                <img
+                  class="object-cover w-full h-full"
+                  :src="'/api/assets/' + currPreview?.thumbnail"
+                  :alt="currPreview?.name"
+                />
+              </template>
             </figure>
+
+            <div class="flex flex-col font-sans justify-start space-y-4">
+              <h1
+                class="text-2xl md:text-4xl font-bold text-p-medium"
+                x-text="currPreview?.name"
+              ></h1>
+              <h2
+                x-data="{ museumName: '' }"
+                x-init="$watch('showPreview', async (value) => {
+                  if (value && currPreview?.museum) {
+                    const res = await fetch('/api/museums/' + currPreview.museum);
+                    const data = await res.json();
+                    museumName = data.name;
+                  }
+                })"
+                x-text="museumName"
+                class="text-md text-p-medium/50 truncate"
+              ></h2>
+              <p
+                class="text-p-dark leading-relaxed"
+                x-text="currPreview?.description"
+              ></p>
+            </div>
           </div>
 
           <!-- Bottone Chiudi integrato -->
