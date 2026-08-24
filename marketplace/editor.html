@@ -142,10 +142,10 @@
           </div>
         </div>
         <div
-          class="grid grid-cols-6 grid-rows-3 gap-4 min-h-50 h-full shrink-0 items-start pt-2"
+          class="grid grid-cols-2 gap-4 min-h-50 h-full shrink-0 items-start pt-2"
         >
           <figure
-            class="col-span-3 w-full aspect-video lg:aspect-square bg-white rounded-3xl shadow-sm border border-p-soft"
+            class="w-full aspect-video lg:aspect-square bg-white rounded-3xl shadow-sm border border-p-soft"
           >
             <img
               class="rounded-3xl"
@@ -161,102 +161,227 @@
               class="object-cover w-full h-full"
             />
           </figure>
-          <template x-for="board in Object.values(boards)" :key="board.name">
-            <aside
-              class="flex flex-row min-h-50 gap-2 shrink-0 scroll-auto"
-              :class="board.name == 'itemNav' ? 'col-span-3' : 'col-span-2'"
+          <template x-if="boards.itemNav">
+            <ul
+              class="w-full bg-white rounded-lg shadow divide-y divide-gray-200"
+              x-data="{
+                   expanded: null,
+                   }
+                   "
             >
-              <div
-                class="min-h-50 h-full w-full p-3 items-center justify-center rounded-lg"
-                :class="board.dropZoneStyle"
-                @drop="if(board.arrManager.length == 0)
-                        board.onDropEmpty($event)"
-                @dragover.prevent=""
-                :style="'overflow: auto;' + (board.name == 'itemNav' ? 'height:30vh' : 'height:100px')"
+              <template
+                x-for="(item, idx) in boards.itemNav.arr"
+                :key="item._id"
               >
-                <div class="w-full">
-                  <!-- x-ref="'list-'+board.name" -->
-                  <template x-for="(item, idx) in board.arr" :key="item._id">
+                <div
+                  class="reordItem"
+                  @drop="boards.itemNav.onDrop(idx, $event)"
+                  @dragover.prevent="boards.itemNav.onDragOver(idx, $event)"
+                  @dragleave="boards.itemNav.onDragLeave(idx)"
+                >
+                  <li class="relative group flex items-center">
+                    <!-- Drag Handle -->
                     <div
+                      class="cursor-grab flex items-center justify-center h-8 w-8 rounded-md hover:bg-gray-100 transition mr-2"
                       draggable="true"
-                      class="bg-white flex justify-between rounded-lg bg-white shadow mb-3 px-4 py-3 cursor-grab transition-all select-none"
-                      :class="{
-                           'ring-2 ring-red-400 opacity-80': board.isDragging(idx),
-                           'bg-gray-100': board.isOver(idx)
-                      }"
-                      @dragstart="board.onDragStart(idx, $event)"
-                      @dragend="board.onDragEnd()"
-                      @dragover.prevent="board.onDragOver(idx, $event)"
-                      @dragleave="board.onDragLeave(idx)"
-                      @drop="board.onDrop(idx, $event)"
-                      x-init=" if(item === currentItem){
-                                    $el.checked = true
-                               }else{
-                               console.log(currentItem)
-                               }
-                               if(item === board.nextFocus){
-                                    $el.scrollIntoView()
-                                    board.nextFocus = null
-                               }"
+                      @dragstart="boards.itemNav.onDragStart(idx, $event)"
+                      @dragend="boards.itemNav.onDragEnd()"
                     >
-                      <label class="flex items-center cursor-pointer">
-                        <input
-                          type="radio"
-                          class="form-radio text-blue-600 mr-3"
-                          name="itemRadio"
-                          x-model="currentItemId"
-                          :value="item._id"
-                          @input="loadItem(item._id)"
-                        />
-                        <span
-                          class="flex-1 text-sm font-medium text-gray-800 text-center"
-                          x-text="item.name"
-                        ></span>
-                      </label>
-                      <div x-data="{open: false}" class="dropdown dropdown-end">
-                        <button
-                          @click="open = !open"
-                          class="btn btn-sm btn-circle bg-white/80 hover:bg-white text-p-dark border-none shadow-md backdrop-blur-sm focus:outline-none list-none"
+                      <svg
+                        class="w-4 h-4 text-gray-400"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <circle cx="5" cy="6" r="1"></circle>
+                        <circle cx="5" cy="10" r="1"></circle>
+                        <circle cx="5" cy="14" r="1"></circle>
+                        <circle cx="13" cy="6" r="1"></circle>
+                        <circle cx="13" cy="10" r="1"></circle>
+                        <circle cx="13" cy="14" r="1"></circle>
+                      </svg>
+                    </div>
+                    <!-- Item Label -->
+                    <button
+                      class="flex-1 text-left px-2 py-4 focus:outline-none bg-transparent"
+                      :class="{'bg-blue-100': expanded === item._id }"
+                      @click="
+          expanded = expanded === item._id ? null : item._id; loadItem(item._id)
+        "
+                    >
+                      <span
+                        class="font-medium text-gray-800"
+                        x-text="item.name"
+                      ></span>
+                    </button>
+                    <!-- Options: delete or more -->
+                    <div x-data="{open: false}" class="relative">
+                      <button
+                        @click="open = !open"
+                        class="btn btn-sm btn-circle bg-white/80 hover:bg-white text-p-dark border-none shadow-md backdrop-blur-sm focus:outline-none list-none"
+                      >
+                        <svg
+                          class="w-5 h-5"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
                         >
-                          <svg
-                            class="w-5 h-5"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              d="M10 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4z"
-                            />
-                          </svg>
-                        </button>
-                        <div
-                          x-show="open"
-                          x-transition
-                          @click.outside="open = false"
-                        >
-                          <ul class="nav-dropdown-menu dropdown-end p-4">
-                            <li>
-                              <button
-                                @click="deleteItem(item)"
-                                class="shared-button-flex-secondary shadow-none"
-                              >
-                                Elimina
-                              </button>
-                            </li>
-                          </ul>
-                        </div>
+                          <path
+                            d="M10 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4z"
+                          />
+                        </svg>
+                      </button>
+                      <div
+                        x-show="open"
+                        x-transition
+                        @click.outside="open = false"
+                        class="absolute right-0 z-10 bg-white rounded shadow p-2 min-w-[8rem]"
+                      >
+                        <ul>
+                          <li>
+                            <button
+                              @click="deleteItem(item); open = false"
+                              class="w-full text-left px-4 py-2 text-red-700 hover:bg-red-50 rounded"
+                            >
+                              Elimina
+                            </button>
+                          </li>
+                          <!-- Add more options here if needed -->
+                        </ul>
                       </div>
                     </div>
-                  </template>
-                  <p
-                    x-transition:enter
-                    x-transition:leave.opacity
-                    x-text="board.dropZoneText"
-                    x-show="board.arrManager.length == 0"
-                    class="text-center"
-                  ></p>
+                    <!-- Drag-under styling (optional) -->
+                    <!-- <div -->
+                    <!-- x-show="boards.itemNav.isOver(idx)" -->
+                    <!-- class="absolute left-0 right-0 bottom-0 h-2 bg-blue-300 opacity-30 pointer-events-none" -->
+                    <!-- ></div> -->
+                  </li>
+                  <!-- Expandable Refs Section -->
+                  <li x-show="expanded === item._id" class="p-2">
+                    <div
+                      class="p-3 rounded-lg mb-2 mt-1"
+                      :class="boards.refs.dropZoneStyle"
+                      @dragover.prevent
+                      @drop="
+          boards.refs.arrManager.ctx.currentItemId = item._id;
+          boards.refs.onDropEmpty($event)
+        "
+                    >
+                      <span
+                        class="font-semibold text-xs text-blue-700"
+                        x-text="boards.refs.dropZoneText"
+                      ></span>
+                      <ul class="mt-3">
+                        <template
+                          x-for="(ref, rIdx) in boards.refs.arrManager.arr"
+                          :key="ref._id"
+                        >
+                          <li
+                            class="reordItem flex items-center px-2 py-2 rounded hover:bg-blue-100 cursor-pointer text-xs text-blue-700"
+                            @click="expanded = ref._id; loadItem(ref._id)"
+                            draggable="true"
+                            @dragstart="boards.refs.onDragStart(rIdx, $event)"
+                            @dragend="boards.refs.onDragEnd()"
+                            @dragover.prevent="boards.refs.onDragOver(rIdx, $event)"
+                            @dragleave="boards.refs.onDragLeave(rIdx)"
+                            @drop="boards.refs.onDrop(rIdx, $event)"
+                            x-text="ref.name"
+                          ></li>
+                        </template>
+                      </ul>
+                    </div>
+                  </li>
                 </div>
+              </template>
+            </ul>
+          </template>
+          <!-- Stash board (place somewhere else on the page as needed) -->
+          <template x-if="boards.stash">
+            <div class="mt-4">
+              <div
+                class="p-3 min-h-16 rounded-lg"
+                :class="boards.stash.dropZoneStyle"
+                @dragover.prevent=""
+                @drop="boards.stash.onDropEmpty($event)"
+              >
+                <span
+                  class="font-semibold text-xs"
+                  x-text="boards.stash.dropZoneText"
+                ></span>
+                <ul class="mt-2">
+                  <template
+                    x-for="(item, idx) in boards.stash.arr"
+                    :key="item._id"
+                  >
+                    <li
+                      class="flex items-center px-2 py-2 rounded hover:bg-gray-200 cursor-pointer"
+                      draggable="true"
+                      @dragstart="boards.stash.onDragStart(idx, $event)"
+                      @dragend="boards.stash.onDragEnd()"
+                      @dragover.prevent="boards.stash.onDragOver(idx, $event)"
+                      @dragleave="boards.stash.onDragLeave(idx)"
+                      @drop="boards.stash.onDrop(idx, $event)"
+                      @click="expanded = item._id; loadItem(item._id)"
+                    >
+                      <svg
+                        class="w-4 h-4 mr-2 text-gray-400 pointer-events-none"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <circle cx="10" cy="10" r="7"></circle>
+                      </svg>
+                      <span
+                        class="flex-1 text-xs text-gray-800"
+                        x-text="item.name"
+                      ></span>
+                    </li>
+                  </template>
+                </ul>
               </div>
-            </aside>
+            </div>
+          </template>
+          <!-- ToDelete board (place somewhere else on the page as needed) -->
+          <template x-if="boards.toDelete">
+            <div class="mt-4">
+              <div
+                class="p-3 min-h-16 rounded-lg"
+                :class="boards.toDelete.dropZoneStyle"
+                @dragover.prevent=""
+                @drop="boards.toDelete.onDropEmpty($event)"
+              >
+                <span
+                  class="font-semibold text-xs"
+                  x-text="boards.toDelete.dropZoneText"
+                ></span>
+                <ul class="mt-2">
+                  <template
+                    x-for="(item, idx) in boards.toDelete.arr"
+                    :key="item._id"
+                  >
+                    <li
+                      class="flex items-center px-2 py-2 rounded hover:bg-red-100 cursor-pointer"
+                      draggable="true"
+                      @dragstart="boards.toDelete.onDragStart(idx, $event)"
+                      @dragend="boards.toDelete.onDragEnd()"
+                      @dragover.prevent="boards.toDelete.onDragOver(idx, $event)"
+                      @dragleave="boards.toDelete.onDragLeave(idx)"
+                      @drop="boards.toDelete.onDrop(idx, $event)"
+                      @click="expanded = item._id; loadItem(item._id)"
+                    >
+                      <svg
+                        class="w-4 h-4 mr-2 text-red-400 pointer-events-none"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <rect x="4" y="8" width="12" height="4"></rect>
+                      </svg>
+                      <span
+                        class="flex-1 text-xs text-red-800"
+                        x-text="item.name"
+                      ></span>
+                    </li>
+                  </template>
+                </ul>
+              </div>
+            </div>
           </template>
         </div>
       </div>

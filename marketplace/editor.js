@@ -3,54 +3,8 @@ import './userManager.js'
 import './quick-nav.js'
 import { getTour, saveTour } from './api/tours.js'
 import { saveItem, deleteItem, getItemsByTour, getItem } from './api/items.js'
-import { BoardManager, Board, defaultArrManager } from './boards.js'
+import { BoardManager, Board, refsArrManager } from './boards.js'
 
-class refsArrManager extends defaultArrManager {
-  _arr
-  ctx
-  constructor(ctx) {
-    super()
-    this.ctx = ctx
-    this._arr = {}
-    if (ctx.currentItemId) this._arr[ctx.currentItemId] = []
-  }
-  add(i) {
-    if (!this.ctx.currentItemId) return
-    if (this._arr[this.ctx.currentItemId])
-      this._arr[this.ctx.currentItemId].push(i)
-    else {
-      this._arr[this.ctx.currentItemId] = [i]
-    }
-  }
-  get(idx) {
-    return this._arr[this.ctx.currentItemId].at(idx)
-  }
-  put(i, idx) {
-    if (!this.ctx.currentItemId) return
-    if (this._arr[this.ctx.currentItemId])
-      this._arr[this.ctx.currentItemId].splice(idx, 0, i)
-    else {
-      this._arr[this.ctx.currentItemId] = [i] // hmm what?
-    }
-  }
-  del(idx) {
-    if (!this.ctx.currentItemId) return null
-    return this._arr[this.ctx.currentItemId]?.splice(idx, 1)[0]
-  }
-  clear() {
-    if (!this.ctx.currentItemId) return null
-    this._arr[this.ctx.currentItemId] = []
-  }
-  get arr() {
-    if (!this.ctx.currentItemId) return []
-    if (!this._arr[this.ctx.currentItemId]) return []
-    return [...this._arr[this.ctx.currentItemId]] // NOTE: a copy!!!
-  }
-  get length() {
-    if (!this.ctx.currentItemId || !this._arr[this.ctx.currentItemId]) return 0
-    return this._arr[this.ctx.currentItemId].length
-  }
-}
 document.addEventListener('alpine:init', () => {
   Alpine.data('editorState', () => ({
     // Central state
