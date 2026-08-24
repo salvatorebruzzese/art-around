@@ -311,11 +311,7 @@ document.addEventListener('alpine:init', () => {
         })
       }
       if (found) {
-        if (this.looseMetaItems.includes(found)) {
-          this.boards.stash.arrManager.add(found)
-        } else {
-          this.loadItem(found._id)
-        }
+        this.boards.stash.arrManager.add(found)
       }
     },
     async saveItemNav() {

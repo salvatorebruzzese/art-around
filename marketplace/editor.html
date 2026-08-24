@@ -80,30 +80,65 @@
         ></button>
       </form>
       <!-- Reorderable Lists -->
-
       <div class="w-1/2 flex flex-col">
         <div class="flex flex-row col-span-6 gap-2 w-full">
           <button class="shared-button w-30" @click="saveItemNav()">
             Save Order
           </button>
-          <div class="w-full flex gap-2" x-data="{sel:{}}">
-            <select
-              x-model="sel"
-              class="w-full select select-bordered rounded-full w-56 border-p-soft bg-white text-p-dark focus:border-p-medium focus:ring-2 focus:ring-p-soft focus:outline-none font-medium shadow-sm cursor-pointer transition-all"
-            >
-              <template x-for="item in allMetaItems">
-                <option :value="item._id" x-text="item.name"></option
-              ></template>
-            </select>
+          <div class="w-full flex gap-2" x-data="{ overlayOpen: false }">
             <button
-              class="shared-button-full-primary w-14"
-              @click="addItem(sel)"
+              class="p-2 shared-button-full-primary w-14"
+              @click="overlayOpen = true"
             >
-              Add
+              Select
             </button>
-            <button class="shared-button-full-primary w-12" @click="newItem()">
+            <button
+              class="rounded-full shared-button-full-primary w-min-10 w-max-10 w-10"
+              @click="newItem()"
+            >
               +
             </button>
+            <div
+              x-show="overlayOpen"
+              x-transition
+              style="background: rgba(0, 0, 0, 0.3)"
+              class="fixed inset-0 flex items-center justify-center z-50"
+              @click.self="overlayOpen = false"
+              x-init="$watch('overlayOpen', v => { if(v){ document.body.style.overflow = 'hidden' } else { document.body.style.overflow = '' } })"
+            >
+              <div
+                class="bg-white rounded-xl shadow-lg p-6 min-w-[300px] w-1/2 flex flex-col gap-4 relative"
+                @click.stop
+              >
+                <button
+                  @click="overlayOpen = false"
+                  class="absolute top-2 right-2 text-gray-500 hover:text-black cursor-pointer rounded-full bg-gray-100 w-7 h-7 flex items-center justify-center"
+                >
+                  &times;
+                </button>
+                <div class="font-bold text-lg text-p-dark mb-2">
+                  Stash Items
+                </div>
+                <div class="flex flex-col gap-2 max-h-72 overflow-auto">
+                  <template x-for="item in allMetaItems" :key="item._id">
+                    <div
+                      class="flex items-center justify-between group p-2 rounded hover:bg-p-extralight transition-all"
+                    >
+                      <span class="text-p-dark" x-text="item.name"></span>
+                      <button
+                        class="rounded-full w-9 shared-button"
+                        @click="addItem(item._id)"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </template>
+                  <template x-if="!allMetaItems || allMetaItems.length === 0">
+                    <div class="text-gray-400">No items available.</div>
+                  </template>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <div
