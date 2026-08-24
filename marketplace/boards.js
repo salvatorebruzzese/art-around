@@ -202,17 +202,8 @@ export class Board {
     let insertIdx = idx
     const rect = event.target.getBoundingClientRect()
     if (event.clientY > rect.top + rect.height / 2) insertIdx++
-    console.log(
-      event.clientY,
-      '>',
-      rect.top + rect.height / 2,
-      event.clientY > rect.top + rect.height / 2,
-    )
-    console.log(idx, '->', insertIdx)
     if (insertIdx > arrMgr.length) insertIdx = arrMgr.length
-    console.log(this.arr)
     arrMgr.put(dragging, insertIdx > idx ? insertIdx - 1 : insertIdx)
-    console.log('put', this.arr)
     this._boardMgr.dragAccepted = true
     // this.nextFocus = dragging // ptr
   }

@@ -113,17 +113,20 @@ document.addEventListener('alpine:init', () => {
       let item = this.itemsCache[cacheIdx]
       if (!item) {
         item = await getItem(itemId)
+        this.currentItemId = itemId // HACK: needed for refs
         this.itemsCache.push(item)
+        // HACK: initialize refs only when not cached
+        if (item.refs) {
+          this.looseMetaItems
+            .filter((i) => item.refs.some((r) => r === i._id))
+            .forEach((i) => {
+              this.boards.refs.arrManager.put(i)
+            })
+        }
       }
       this.currentItem = item
       this.currentItemId = itemId
       this.populateFormData(item)
-      if (item.refs) {
-        this.boards.refs.arrManager.clear()
-        this.looseMetaItems
-          .filter((i) => item.refs.some((r) => r === i._id))
-          .forEach((i) => this.boards.refs.arrManager.put(i))
-      }
     },
 
     populateFormData(item) {
@@ -210,7 +213,6 @@ document.addEventListener('alpine:init', () => {
       this.currentItem = null
       this.currentItemIdx = -1
       this.currentItemId = null
-      console.log(this.emptyFormData)
       // HACK: circumven Alpine PROXY
       this.formData = structuredClone(
         JSON.parse(JSON.stringify(this.emptyFormData)),
