@@ -19,6 +19,7 @@ document.addEventListener('alpine:init', () => {
     user: null,
     showPreview: false,
     currPreview: null,
+    tours: [],
 
     get filteredTours() {
       const fmus = this.filters.museum
@@ -63,6 +64,13 @@ document.addEventListener('alpine:init', () => {
       this.allTours = tours
       this.allItems = items
       this.user = await Alpine.store('userManager').getUser() // NOTE: a refresh i needed to change user
+    },
+
+    hasAccess(tourId) {
+      return Boolean(
+        this.user?.purchasedTours?.includes(tourId) ||
+        this.user?.authoredTours?.includes(tourId),
+      )
     },
   }))
 })

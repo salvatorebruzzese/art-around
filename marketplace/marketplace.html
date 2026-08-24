@@ -127,7 +127,11 @@
       </header>
 
       <!-- GRIGLIA DI RENDER CARDS -->
-      <div id="cards-container" class="pb-4">
+      <div
+        id="cards-container"
+        class="pb-4 transition-all duration-300"
+        :class="{ 'pb-32': tours.length > 0 }"
+      >
         <!-- Item card -->
         <div
           x-show="view == 'item'"
@@ -329,18 +333,17 @@
                 </div>
                 <div class="flex gap-4">
                   <a
-                    x-show="user
-                           &&(user.purchasedTours.includes(tour._id)
-                           || user.authoredTours.includes(tour._id))"
-                    class="shared-button-full-secondary"
+                    x-show="hasAccess(tour._id)"
                     :href="'/marketplace/' + tour._id"
+                    class="shared-button-full-secondary"
                   >
                     Apri
                   </a>
+
                   <button
-                    x-show="!user?.purchasedTours.includes(tour._id) && !user?.authoredTours.includes(tour._id)"
-                    class="shared-button-full-secondary"
+                    x-show="!hasAccess(tour._id)"
                     @click="window.history.pushState({}, '', '/marketplace/preview/' + tour._id); showPreview = true; currPreview = tour;"
+                    class="shared-button-full-secondary"
                   >
                     Anteprima
                   </button>
@@ -348,9 +351,28 @@
                     class="shared-button-full-primary"
                     x-show="user && !user?.purchasedTours.includes(tour._id)
                            && !user?.authoredTours.includes(tour._id)"
-                    :href="'/checkout/' + tour._id"
+                    @click="if (!tours.includes(tour._id)) tours.push(tour._id); console.log(tours)"
                   >
-                    Acquista
+                    <span class="mr-1">Aggiungi</span>
+                    <!-- Shopping cart icon -->
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="inline-block fill-current align-middle ml-1"
+                    >
+                      <circle cx="9" cy="21" r="1"></circle>
+                      <circle cx="20" cy="21" r="1"></circle>
+                      <path
+                        d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"
+                      ></path>
+                    </svg>
                   </button>
                 </div>
               </div>
@@ -420,6 +442,48 @@
               Torna indietro
             </button>
           </div>
+        </div>
+      </div>
+
+      <!-- Floating Cart Box Overlay -->
+      <div
+        x-show="tours.length > 0"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0 translate-y-8"
+        x-transition:enter-end="opacity-100 translate-y-0"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100 translate-y-0"
+        x-transition:leave-end="opacity-0 translate-y-8"
+        class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-11/12 max-w-2xl bg-white/70 backdrop-blur-md border border-p-soft/60 rounded-2xl p-4 shadow-xl flex items-center justify-between gap-4"
+      >
+        <!-- List of Cart Items -->
+        <div class="flex items-center gap-2 overflow-x-auto py-1">
+          <template x-for="(tourId, index) in tours" :key="index">
+            <div
+              x-data="{ itemDetail: null }"
+              x-init="fetch('/api/tours/' + tourId).then(r => r.json()).then(data => itemDetail = data)"
+              class="flex items-center gap-2 bg-p-light/80 px-3 py-1.5 rounded-xl border border-p-soft/40 flex-shrink-0 text-sm font-sans"
+            >
+              <span
+                x-text="itemDetail ? itemDetail.name : 'Caricamento...'"
+                class="font-medium text-p-dark truncate max-w-[120px]"
+              ></span>
+              <button
+                @click="tours.splice(tours.indexOf(tourId), 1)"
+                class="text-p-medium/60 hover:text-p-dark transition-colors font-bold ml-1"
+                aria-label="Rimuovi elemento"
+              >
+                &times;
+              </button>
+            </div>
+          </template>
+        </div>
+
+        <!-- Cart Action Button -->
+        <div class="flex items-center gap-3">
+          <button class="shared-button-flex-primary px-4 shadow-md">
+            Carrello
+          </button>
         </div>
       </div>
     </main>
