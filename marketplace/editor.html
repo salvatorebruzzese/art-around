@@ -292,14 +292,21 @@
               </template>
             </ul>
           </template>
-          <!-- Stash board (place somewhere else on the page as needed) -->
-          <template x-if="boards.stash">
-            <div class="mt-4">
+          <div
+            class="fixed flex flex-row bottom-20 right-4 z-50"
+            x-data="{ expanded: false }"
+            @mouseenter="expanded = true; newStash=false"
+            @mouseleave="expanded = false"
+            @dragover.prevent="expanded = true; newStash=false"
+          >
+            <template x-if="expanded && boards.stash">
               <div
-                class="p-3 min-h-16 rounded-lg"
+                class="w-80 bg-white p-3 min-h-16 rounded-lg shadow-lg transition-all duration-200"
                 :class="boards.stash.dropZoneStyle"
                 @dragover.prevent=""
+                @dragleave=""
                 @drop="boards.stash.onDropEmpty($event)"
+                style="min-width: 20rem"
               >
                 <span
                   class="font-semibold text-xs"
@@ -311,7 +318,7 @@
                     :key="item._id"
                   >
                     <li
-                      class="flex items-center px-2 py-2 rounded hover:bg-gray-200 cursor-pointer"
+                      class="flex items-center px-2 py-2 rounded hover:bg-gray-100 cursor-pointer"
                       draggable="true"
                       @dragstart="boards.stash.onDragStart(idx, $event)"
                       @dragend="boards.stash.onDragEnd()"
@@ -335,10 +342,23 @@
                   </template>
                 </ul>
               </div>
+            </template>
+            <div
+              class="right-0 bottom-0 w-10 h-10 bg-gray-100 flex items-center justify-center rounded-lg shadow cursor-pointer transition-all duration-200"
+              :class="newStash ? 'animate-bounce' : ''"
+            >
+              <svg
+                class="w-6 h-6 text-gray-400"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <circle cx="10" cy="10" r="7"></circle>
+              </svg>
             </div>
-          </template>
+          </div>
+
           <div
-            class="fixed bottom-4 right-4 z-50"
+            class="fixed flex flex-row bottom-4 right-4 z-50"
             x-data="{ expanded: false }"
             @mouseenter="expanded = true"
             @mouseleave="expanded = false"

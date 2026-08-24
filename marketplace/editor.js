@@ -17,6 +17,7 @@ document.addEventListener('alpine:init', () => {
     currentItemId: null,
     boards: {},
     boardMgr: null,
+    newStash: false,
     isSubmitting: false,
     emptyFormData: {
       _id: null,
@@ -226,6 +227,7 @@ document.addEventListener('alpine:init', () => {
         license: this.formData.license,
       }
       this.boards.stash.arrManager.add(meta_item)
+      this.newStash = true
       this.boards.stash.nextFocus = meta_item
       // HACK: load meta to cache, undefined fields will be populated
       this.itemsCache.push(meta_item)
@@ -268,6 +270,7 @@ document.addEventListener('alpine:init', () => {
       }
       if (found) {
         this.boards.stash.arrManager.add(found)
+        this.newStash = true
       }
     },
     async saveItemNav() {
