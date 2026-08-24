@@ -1,7 +1,5 @@
-import { Types } from 'mongoose'
-import { ItemType, IDescription, IItem } from '../backend/item/model.js'
-
-export const sampleExplanations: Record<string, IDescription[]> = {
+import { ItemType } from '../backend/item/model.js'
+export const sampleExplanations = {
   simple: [
     {
       level: 'simple',
@@ -39,7 +37,6 @@ export const sampleExplanations: Record<string, IDescription[]> = {
     },
   ],
 }
-
 const itemTemplates = [
   {
     name: 'Ritratto e Identità',
@@ -82,21 +79,19 @@ const itemTemplates = [
     tags: ['paesaggio', 'natura'],
   },
 ]
-
 export function generateItemsForTour(
-  museumName: string,
-  userId: Types.ObjectId,
-  tourId: Types.ObjectId,
-  assetIds: Types.ObjectId[],
-  count: number = 8,
+  museumName,
+  userId,
+  tourId,
+  assetIds,
+  count = 8,
 ) {
   return Array.from({ length: count }).map((_, index) => {
     const template = itemTemplates[index % itemTemplates.length]
     const expKeys = Object.keys(sampleExplanations)
     const selectedExplanations =
       sampleExplanations[expKeys[index % expKeys.length]]
-
-    const res: Partial<IItem> = {
+    const res = {
       name: `${template.name} - ${museumName} #${index + 1}`,
       itemAuthor: userId,
       image: assetIds.length == 1 ? assetIds.at(0) : assetIds.pop(),
