@@ -1,34 +1,40 @@
 <template>
-  <div class="min-h-screen bg-gray-50 pb-20">
+  <div
+    class="min-h-screen pb-32 bg-p-light font-serif text-p-dark selection:bg-p-soft overflow-x-hidden"
+  >
     <!-- Museums List -->
-    <div v-for="museum in museums" :key="museum._id" class="mb-8">
-      <h2 class="text-xl font-bold underline mb-3 px-4 text-gray-800">
+    <div v-for="museum in museums" :key="museum._id" class="mb-14">
+      <h2
+        class="text-2xl font-bold underline mb-3 px-4 font-serif text-p-dark/90"
+      >
         {{ museum.name }}
       </h2>
       <!-- Horizontally swipeable tours -->
       <div class="overflow-x-auto px-2 -mx-2">
-        <div class="flex flex-nowrap gap-4">
+        <div class="flex flex-nowrap gap-6">
           <div
             v-for="tour in museum.tours"
             :key="tour._id"
-            class="flex-none w-64 bg-white rounded-xl shadow relative"
+            class="flex-none w-72 h-96 bg-white rounded-2xl shadow-md border border-p-soft/40 relative transition-all hover:shadow-xl"
           >
             <!-- Photo with overlay -->
-            <div class="relative">
+            <div
+              class="relative h-48 rounded-t-2xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-p-light to-p-soft/20"
+            >
               <img
                 :src="
-                  `/api/assets/${tour.thumbnail}` ||
-                  'https://dummyimage.com/320x240/efefef/a3a3a3.jpg&text=Tour'
+                  tour.thumbnail
+                    ? `/api/assets/${tour.thumbnail}`
+                    : 'https://dummyimage.com/320x240/efefef/a3a3a3.jpg&text=Tour'
                 "
                 alt="tour"
-                class="rounded-t-xl w-full h-36 object-cover"
-                style="margin-left: 0; margin-right: 0"
+                class="absolute inset-0 w-full h-full object-cover mix-blend-multiply"
               />
               <div
-                class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-4 py-2 rounded-b-xl"
+                class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-p-dark/70 to-transparent px-4 py-2 rounded-b-2xl"
               >
                 <div
-                  class="text-xs text-white truncate"
+                  class="text-xs text-p-light/90 truncate font-sans"
                   :title="tour.review"
                   style="
                     white-space: nowrap;
@@ -45,14 +51,20 @@
               </div>
             </div>
             <!-- Info Area -->
-            <div class="p-4 flex flex-col gap-1">
-              <div class="font-semibold text-gray-900 text-base truncate">
+            <div
+              class="p-5 flex flex-col gap-2 bg-p-soft/10 rounded-b-2xl h-[calc(100%-12rem)]"
+            >
+              <div
+                class="font-semibold text-p-medium text-lg truncate font-serif"
+              >
                 {{ tour.name }}
               </div>
-              <div class="flex items-center text-xs text-gray-500 gap-2">
-                <span>
+              <div
+                class="flex items-center text-xs text-p-medium/70 gap-3 font-sans"
+              >
+                <span class="flex items-center gap-1">
                   <svg
-                    class="inline w-4 h-4 mr-1 -mt-0.5"
+                    class="inline w-4 h-4 -mt-0.5"
                     fill="none"
                     stroke="currentColor"
                     stroke-width="2"
@@ -74,9 +86,9 @@
                   </svg>
                   {{ tour.time || '--' }} min
                 </span>
-                <span class="ml-3">
+                <span class="flex items-center gap-1">
                   <svg
-                    class="inline w-4 h-4 mr-1 -mt-0.5"
+                    class="inline w-4 h-4 -mt-0.5"
                     fill="none"
                     stroke="currentColor"
                     stroke-width="2"
@@ -91,7 +103,7 @@
                   €{{ tour.price || '--' }}
                 </span>
                 <span
-                  class="ml-auto bg-gray-100 rounded-full px-2 py-0.5 text-gray-600 text-xs"
+                  class="ml-auto bg-p-soft/40 rounded-full px-2 py-0.5 text-p-medium text-xs font-sans"
                 >
                   {{ getAuthorName(tour.author) || 'Unknown' }}
                 </span>
@@ -101,28 +113,24 @@
         </div>
       </div>
       <!-- More Button -->
-      <div class="text-right px-4 mt-2">
+      <div class="text-right px-4 mt-3">
         <button
-          class="text-sm font-medium text-blue-700 hover:underline"
+          class="shared-button-fit-secondary px-5 font-sans"
           @click="onMore(museum)"
         >
-          More &rarr;
+          Mostra altro &rarr;
         </button>
       </div>
     </div>
 
     <!-- NavBar Fixed Bottom -->
     <nav
-      class="fixed z-40 bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex items-center justify-between px-5 py-2 shadow"
-      style="min-height: 58px"
+      class="fixed z-40 bottom-0 left-0 right-0 bg-white/80 backdrop-blur border-t border-p-soft/60 flex items-center justify-between px-4 py-3 shadow-lg"
+      style="min-height: 56px"
     >
-      <button
-        @click="showMenu = true"
-        aria-label="Menu"
-        class="p-2 rounded-full hover:bg-gray-200"
-      >
+      <button @click="showMenu = true" aria-label="Menu" class="nav-icon-link">
         <svg
-          class="h-6 w-6 text-gray-700"
+          class="w-6 h-6 text-p-dark"
           fill="none"
           stroke="currentColor"
           stroke-width="2"
@@ -141,10 +149,10 @@
         class="flex-1 mx-4"
       >
         <div
-          class="flex items-center w-full bg-gray-100 rounded-full px-4 py-2"
+          class="flex items-center w-full bg-p-soft/20 rounded-full px-5 py-2 shadow-sm transition-all font-sans hover:bg-p-soft/40"
         >
           <svg
-            class="w-5 h-5 text-gray-500 mr-2"
+            class="w-5 h-5 text-p-medium mr-2"
             fill="none"
             stroke="currentColor"
             stroke-width="2"
@@ -157,23 +165,23 @@
               d="M21 21l-4.35-4.35"
             />
           </svg>
-          <span class="text-gray-500 text-sm">Search...</span>
+          <span class="text-p-medium/60 text-sm">Cerca tour, musei…</span>
         </div>
       </button>
       <button
         @click="showProfile = true"
         aria-label="Profile"
-        class="p-1 rounded-full hover:bg-gray-200"
+        class="nav-avatar-trigger"
       >
         <img
           v-if="user.avatar"
           :src="user.avatar"
-          class="rounded-full w-9 h-9 object-cover border-2 border-blue-300"
+          class="rounded-full w-14 h-14 object-cover border-2 border-p-soft"
           alt="profile"
         />
         <div
           v-else
-          class="bg-blue-400 text-white rounded-full w-9 h-9 flex items-center justify-center font-bold text-lg"
+          class="bg-p-medium text-white rounded-full w-14 h-14 flex items-center justify-center font-bold text-lg"
         >
           {{ user.initials }}
         </div>
@@ -184,16 +192,15 @@
     <transition name="fade">
       <div
         v-if="showMenu"
-        class="fixed inset-0 z-50 bg-black/50 flex items-end"
+        class="fixed inset-0 z-50 bg-p-dark/50 backdrop-blur-sm flex items-end"
         @click.self="showMenu = false"
       >
-        <div class="w-full bg-white rounded-t-2xl p-6">
-          <div class="flex items-center justify-between mb-4">
-            <div class="font-bold text-lg text-gray-800">Menu</div>
-            <button
-              @click="showMenu = false"
-              class="text-gray-600 p-2 rounded hover:bg-gray-100"
-            >
+        <div
+          class="w-full bg-white rounded-t-2xl border border-p-soft shadow-2xl p-8"
+        >
+          <div class="flex items-center justify-between mb-6">
+            <div class="font-bold text-2xl text-p-dark font-serif">Menu</div>
+            <button @click="showMenu = false" class="nav-icon-link">
               <svg
                 class="w-6 h-6"
                 fill="none"
@@ -211,23 +218,23 @@
           </div>
           <ul class="space-y-4">
             <li>
-              <button class="w-full text-left text-gray-700 font-medium">
+              <button class="shared-button-full-secondary w-full font-sans">
                 Home
               </button>
             </li>
             <li>
-              <button class="w-full text-left text-gray-700 font-medium">
-                Explore
+              <button class="shared-button-full-secondary w-full font-sans">
+                Esplora
               </button>
             </li>
             <li>
-              <button class="w-full text-left text-gray-700 font-medium">
-                My Tickets
+              <button class="shared-button-full-secondary w-full font-sans">
+                I miei ticket
               </button>
             </li>
             <li>
-              <button class="w-full text-left text-gray-700 font-medium">
-                Help
+              <button class="shared-button-full-secondary w-full font-sans">
+                Assistenza
               </button>
             </li>
           </ul>
@@ -239,16 +246,15 @@
     <transition name="fade">
       <div
         v-if="showSearch"
-        class="fixed inset-0 z-50 bg-black/50 flex items-end"
+        class="fixed inset-0 z-50 bg-p-dark/50 backdrop-blur-sm flex items-end"
         @click.self="showSearch = false"
       >
-        <div class="w-full bg-white rounded-t-2xl p-6">
-          <div class="flex items-center justify-between mb-4">
-            <div class="font-bold text-lg text-gray-800">Search</div>
-            <button
-              @click="showSearch = false"
-              class="text-gray-600 p-2 rounded hover:bg-gray-100"
-            >
+        <div
+          class="w-full bg-white rounded-t-2xl border border-p-soft shadow-2xl p-8"
+        >
+          <div class="flex items-center justify-between mb-6">
+            <div class="font-bold text-2xl text-p-dark font-serif">Cerca</div>
+            <button @click="showSearch = false" class="nav-icon-link">
               <svg
                 class="w-6 h-6"
                 fill="none"
@@ -267,22 +273,24 @@
           <input
             type="text"
             v-model="search"
-            class="w-full border rounded-lg px-4 py-2 mb-2"
-            placeholder="Type to search tours, museums..."
+            class="input input-bordered rounded-full w-full border-p-soft bg-white text-p-dark placeholder-p-medium focus:border-p-medium focus:ring-2 focus:ring-p-soft focus:outline-none font-sans font-normal shadow-sm px-6 py-3 mb-3 text-lg"
+            placeholder="Cerca tra tour e musei…"
           />
-          <div v-if="search" class="mt-3">
-            <div class="text-sm text-gray-500 mb-1">Results</div>
-            <ul>
+          <div v-if="search" class="mt-4">
+            <div class="text-sm text-p-medium/60 mb-2 font-sans">Risultati</div>
+            <ul class="font-sans">
               <li
                 v-for="item in searchResults"
                 :key="item._id"
-                class="py-2 border-b last:border-b-0"
+                class="py-2 border-b border-p-soft/30 last:border-b-0"
               >
-                <span class="text-gray-800 font-medium">{{ item.name }}</span>
-                <span class="text-gray-400 text-xs block">{{ item.type }}</span>
+                <span class="text-p-dark font-semibold">{{ item.name }}</span>
+                <span class="text-p-medium/80 text-xs block">{{
+                  item.type
+                }}</span>
               </li>
-              <li v-if="!searchResults.length" class="text-gray-400 py-2">
-                No results found.
+              <li v-if="!searchResults.length" class="text-p-medium/50 py-2">
+                Nessun risultato trovato.
               </li>
             </ul>
           </div>
@@ -294,34 +302,35 @@
     <transition name="fade">
       <div
         v-if="showProfile"
-        class="fixed inset-0 z-50 bg-black/50 flex items-end"
+        class="fixed inset-0 z-50 bg-p-dark/50 backdrop-blur-sm flex items-end"
         @click.self="showProfile = false"
       >
-        <div class="w-full bg-white rounded-t-2xl p-6">
-          <div class="flex items-center justify-between mb-4">
+        <div
+          class="w-full bg-white rounded-t-2xl border border-p-soft shadow-2xl p-8"
+        >
+          <div class="flex items-center justify-between mb-6">
             <div class="flex items-center gap-3">
               <img
                 v-if="user.avatar"
                 :src="user.avatar"
-                class="rounded-full w-12 h-12 object-cover border-2 border-blue-300"
+                class="rounded-full w-16 h-16 object-cover border-2 border-p-soft"
               />
               <div
                 v-else
-                class="bg-blue-400 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-lg"
+                class="bg-p-medium text-white rounded-full w-16 h-16 flex items-center justify-center font-bold text-2xl"
               >
                 {{ user.initials }}
               </div>
               <div>
-                <div class="font-bold text-lg text-gray-800">
+                <div class="font-bold text-xl text-p-dark font-serif">
                   {{ user.name }}
                 </div>
-                <div class="text-gray-500 text-sm">{{ user.email }}</div>
+                <div class="text-p-medium/70 text-sm font-sans">
+                  {{ user.email }}
+                </div>
               </div>
             </div>
-            <button
-              @click="showProfile = false"
-              class="text-gray-600 p-2 rounded hover:bg-gray-100"
-            >
+            <button @click="showProfile = false" class="nav-icon-link">
               <svg
                 class="w-6 h-6"
                 fill="none"
@@ -339,18 +348,18 @@
           </div>
           <ul class="space-y-3 mt-4">
             <li>
-              <button class="w-full text-left text-gray-700 font-medium">
-                Account Settings
+              <button class="shared-button-full-secondary w-full font-sans">
+                Impostazioni account
               </button>
             </li>
             <li>
-              <button class="w-full text-left text-gray-700 font-medium">
-                Bookings
+              <button class="shared-button-full-secondary w-full font-sans">
+                Prenotazioni
               </button>
             </li>
             <li>
-              <button class="w-full text-left text-blue-700 font-medium">
-                Log Out
+              <button class="shared-button-full-primary w-full font-sans">
+                Logout
               </button>
             </li>
           </ul>
@@ -376,7 +385,7 @@ export default {
         avatar: '',
         initials: 'AB',
       },
-      authors: {}, // authorId -> authorName
+      authors: {},
     }
   },
   computed: {
@@ -386,7 +395,7 @@ export default {
       let results = []
       for (const m of this.museums) {
         if (m.name && m.name.toLowerCase().includes(searchLower)) {
-          results.push({ _id: m._id, name: m.name, type: 'Museum' })
+          results.push({ _id: m._id, name: m.name, type: 'Museo' })
         }
         for (const t of m.tours || []) {
           if (t.name && t.name.toLowerCase().includes(searchLower)) {
@@ -403,7 +412,7 @@ export default {
   },
   methods: {
     onMore(museum) {
-      alert('More tours from ' + (museum.name || ''))
+      alert('Mostra altri tour per ' + (museum.name || ''))
     },
     getAuthorName(authorId) {
       if (!authorId) return ''
@@ -422,22 +431,18 @@ export default {
     },
     async fetchMuseumsAndTours() {
       try {
-        // Fetch all museums metadata
         const museumsRes = await fetch('/api/museums')
         let museumsMeta = await museumsRes.json()
-        // For each museum metadata, fetch the full item (to get referenced tours)
         const museums = await Promise.all(
           museumsMeta.map(async (meta) => {
             try {
               const fullRes = await fetch(`/api/museums/${meta._id}`)
               const fullMuseum = await fullRes.json()
-              // Assume tours references (array of tour ids) are under fullMuseum.tours as ids
               let tours = []
               if (
                 Array.isArray(fullMuseum.tours) &&
                 fullMuseum.tours.length > 0
               ) {
-                // Fetch all referenced tours as metadata (not full for each)
                 const toursRes = await fetch(
                   `/api/tours?museum=${fullMuseum._id}`,
                 )
@@ -451,7 +456,6 @@ export default {
         )
         this.museums = museums
 
-        // After museums/tours are fetched, collect unique author ids
         const authorIds = new Set()
         for (const museum of museums) {
           for (const tour of museum.tours || []) {
@@ -460,7 +464,6 @@ export default {
             }
           }
         }
-        // Fetch all author names in parallel, only if not already present
         await Promise.all(
           Array.from(authorIds).map((id) => this.fetchAuthor(id)),
         )
@@ -477,7 +480,6 @@ export default {
       deep: true,
       immediate: false,
       handler(newMuseums) {
-        // Whenever museums change, fetch missing authors
         const authorIds = new Set()
         for (const museum of newMuseums) {
           for (const tour of museum.tours || []) {
