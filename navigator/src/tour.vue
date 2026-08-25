@@ -7,8 +7,8 @@
       class="relative w-full aspect-[4/3] bg-p-soft/30 flex items-center justify-center overflow-hidden"
     >
       <img
-        v-if="currentItem && currentItem.photo"
-        :src="`/api/assets/${currentItem.photo}`"
+        v-if="currentItem && currentItem.image"
+        :src="`/api/assets/${currentItem.image}`"
         alt="Item image"
         class="absolute inset-0 object-cover w-full h-full"
       />
@@ -178,8 +178,8 @@
             @click="openRefItem(item._id)"
           >
             <img
-              v-if="item.photo"
-              :src="`/api/assets/${item.photo}`"
+              v-if="item.image"
+              :src="`/api/assets/${item.image}`"
               alt="ref"
               class="w-24 h-24 object-cover rounded-lg bg-p-soft mb-2"
             />
@@ -349,6 +349,7 @@ export default {
       audioRate: 1,
       // for touch gesture
       touch0: null,
+      loadedItemsMap: {}, // _id : item obj
     }
   },
   computed: {
@@ -405,7 +406,6 @@ export default {
   },
   methods: {
     async initTour() {
-      // Get tour id from URL query param "?tour=", fallback to route or a demo id
       let tourId = ''
       if (typeof window !== 'undefined') {
         const urlParams = new URLSearchParams(window.location.search)
@@ -414,7 +414,6 @@ export default {
         }
       }
       if (!tourId) {
-        // fallback to Vue Router if present
         tourId =
           this.$route?.params?.id || this.$route?.query?.tour || 'demo-tour'
       }
@@ -426,14 +425,27 @@ export default {
         this.itemNav = Array.isArray(this.tour.itemNav)
           ? this.tour.itemNav.slice()
           : []
-        // fetch items (all referenced in itemNav, and all in .items)
-        if (Array.isArray(this.tour.items) && this.tour.items.length > 0) {
-          this.items = this.tour.items
-        } else {
-          // fallback: fetch all items
-          const itemsRes = await fetch(`/api/items?tour=${this.tour._id}`)
-          this.items = await itemsRes.json()
+        // At this point, this.tour.items and this.tour.itemNav are arrays of item ids.
+        // We want to get ALL used item ids (nav, .items, .refs recursively) and fetch each via GET /api/items/<id>
+        let allItemIds = new Set()
+        if (Array.isArray(this.tour.itemNav)) {
+          this.tour.itemNav.forEach(
+            (id) => typeof id === 'string' && allItemIds.add(id),
+          )
         }
+        if (Array.isArray(this.tour.items)) {
+          this.tour.items.forEach(
+            (id) => typeof id === 'string' && allItemIds.add(id),
+          )
+        }
+        // We'll fill up loadedItemsMap as we go.
+        // Fetch main nav and items ids
+        await this.fetchItemIdsRecursive(Array.from(allItemIds))
+        // Now fill items array in nav order
+        const itemsArr = Array.from(allItemIds)
+          .map((id) => this.loadedItemsMap[id])
+          .filter(Boolean)
+        this.items = itemsArr
         // default to first item in nav
         this.curItemIdx = 0
         this.detachedStack = []
@@ -441,6 +453,41 @@ export default {
         this.tour = null
         this.items = []
         this.itemNav = []
+      }
+    },
+    async fetchItemIdsRecursive(ids) {
+      // ids: string[]
+      // Use loadedItemsMap to avoid duplicates
+      const toFetch = ids.filter((id) => id && !this.loadedItemsMap[id])
+      // fetch all
+      const fetches = toFetch.map(async (id) => {
+        try {
+          const res = await fetch(`/api/items/${id}`)
+          if (!res.ok) return null
+          const item = await res.json()
+          this.loadedItemsMap[id] = item
+          return item
+        } catch (e) {
+          this.loadedItemsMap[id] = null
+          return null
+        }
+      })
+      const itemsObjs = await Promise.all(fetches)
+      // Now recursively fetch referenced items (.refs array per item) if any
+      let refsToFetch = []
+      for (const item of itemsObjs) {
+        if (item && Array.isArray(item.refs)) {
+          for (let refId of item.refs) {
+            if (refId && !this.loadedItemsMap[refId]) {
+              refsToFetch.push(refId)
+            }
+          }
+        }
+      }
+      // Remove dups
+      refsToFetch = [...new Set(refsToFetch)]
+      if (refsToFetch.length > 0) {
+        await this.fetchItemIdsRecursive(refsToFetch)
       }
     },
     getCurrentIdxObj() {
