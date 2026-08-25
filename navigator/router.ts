@@ -10,8 +10,12 @@ router.get('/', (req, res) => {
   res.sendFile(join(rootDir, 'navigator/index.html'))
 })
 
-router.get('/test', (req, res) => {
-  res.sendFile(join(rootDir, 'navigator/src/test.html'))
+router.get('/selection', (req, res) => {
+  res.sendFile(join(rootDir, 'navigator/src/selection.html'))
+})
+
+router.get('/tour', (req, res) => {
+  res.sendFile(join(rootDir, 'navigator/src/tour.html'))
 })
 
 export default router

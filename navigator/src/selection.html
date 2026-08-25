@@ -7,6 +7,12 @@
   </head>
   <body>
     <div id="app"></div>
-    <script type="module" src="/src/test.js"></script>
+    <script type="module">
+      import { createApp } from 'vue'
+      import SelectionVue from './selection.vue'
+      import './styles.css'
+
+      createApp(SelectionVue).mount('#app')
+    </script>
   </body>
 </html>
