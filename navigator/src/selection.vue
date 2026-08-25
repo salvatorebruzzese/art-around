@@ -543,8 +543,36 @@ export default {
         window.location.href = `/navigator/tour?tour=${this.selectedTour._id}`
       }
     },
+    async checkLoggedIn() {
+      try {
+        const res = await fetch('/api/profile')
+        const result = await res.json()
+        if (!result) {
+          window.location.href = '/login'
+          return false
+        }
+        // Optionally update user data if provided
+        if (result.name) {
+          this.user.name = result.name
+          this.user.email = result.email || this.user.email
+          this.user.avatar = result.avatar || ''
+          this.user.initials =
+            result.name
+              .split(' ')
+              .map((n) => n[0])
+              .join('')
+              .toUpperCase() || this.user.initials
+        }
+        return true
+      } catch (e) {
+        window.location.href = '/login'
+        return false
+      }
+    },
   },
-  mounted() {
+  async mounted() {
+    const loggedIn = await this.checkLoggedIn()
+    if (!loggedIn) return
     this.fetchMuseumsAndTours()
   },
   watch: {
