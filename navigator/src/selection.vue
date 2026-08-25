@@ -15,7 +15,8 @@
           <div
             v-for="tour in museum.tours"
             :key="tour._id"
-            class="flex-none w-72 h-96 bg-white rounded-2xl shadow-md border border-p-soft/40 relative transition-all hover:shadow-xl"
+            class="flex-none w-72 h-96 bg-white rounded-2xl shadow-md border border-p-soft/40 relative transition-all hover:shadow-xl cursor-pointer"
+            @click="showTourConfirm(tour)"
           >
             <!-- Photo with overlay -->
             <div
@@ -366,6 +367,62 @@
         </div>
       </div>
     </transition>
+
+    <!-- Tour Start Confirmation Overlay -->
+    <transition name="fade">
+      <div
+        v-if="showTourConfirmOverlay"
+        class="fixed inset-0 z-50 bg-p-dark/40 backdrop-blur-sm flex items-end"
+        @click.self="closeTourConfirm"
+      >
+        <div
+          class="w-full bg-white rounded-t-2xl border border-p-soft shadow-2xl p-8"
+        >
+          <div class="flex items-center justify-between mb-6">
+            <div class="font-bold text-2xl text-p-dark font-serif">
+              Avvia tour?
+            </div>
+            <button @click="closeTourConfirm" class="nav-icon-link">
+              <svg
+                class="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+          <div class="mb-6">
+            <div class="font-bold text-lg text-p-dark font-serif mb-1">
+              {{ selectedTour?.name }}
+            </div>
+            <div class="text-p-medium text-base font-sans mb-2">
+              Sei sicuro di voler iniziare questo tour?
+            </div>
+          </div>
+          <div class="flex gap-4">
+            <button
+              class="shared-button-full-primary flex-1 font-sans"
+              @click="confirmStartTour"
+            >
+              Ok
+            </button>
+            <button
+              class="shared-button-full-secondary flex-1 font-sans"
+              @click="closeTourConfirm"
+            >
+              Annulla
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -386,6 +443,8 @@ export default {
         initials: 'AB',
       },
       authors: {},
+      showTourConfirmOverlay: false,
+      selectedTour: null,
     }
   },
   computed: {
@@ -469,6 +528,19 @@ export default {
         )
       } catch (err) {
         this.museums = []
+      }
+    },
+    showTourConfirm(tour) {
+      this.selectedTour = tour
+      this.showTourConfirmOverlay = true
+    },
+    closeTourConfirm() {
+      this.showTourConfirmOverlay = false
+      this.selectedTour = null
+    },
+    confirmStartTour() {
+      if (this.selectedTour && this.selectedTour._id) {
+        window.location.href = `/navigator/tour?tour=${this.selectedTour._id}`
       }
     },
   },
