@@ -151,9 +151,26 @@
           </div>
         </div>
       </div>
-      <!-- Description (pick first for now) -->
+      <!-- Explanation (One At A Time) -->
+      <div v-if="explanations && explanations.length" class="mb-10 mt-3">
+        <div class="mb-5">
+          <div class="text-p-medium font-semibold font-sans mb-1 capitalize">
+            {{ getLevelLabel(selectedExplanation.level) }}
+            <span
+              v-if="selectedExplanation.durationSeconds"
+              class="text-p-dark/50 font-sans text-sm ml-2"
+            >
+              ({{ formatDuration(selectedExplanation.durationSeconds) }})
+            </span>
+          </div>
+          <div class="text-lg font-serif text-p-dark/90 leading-relaxed">
+            {{ selectedExplanation.text }}
+          </div>
+        </div>
+      </div>
+      <!-- Fallback description if no explanations -->
       <div
-        v-if="currentItem && currentItem.description"
+        v-else-if="currentItem && currentItem.description"
         class="text-lg font-serif text-p-dark/90 leading-relaxed mb-10 mt-3"
       >
         {{
@@ -216,7 +233,26 @@
                 </button>
               </div>
             </div>
-
+            <!-- Explanation select -->
+            <div v-if="explanations && explanations.length > 1" class="w-full">
+              <label
+                class="font-semibold mb-2 text-base text-p-dark/70 font-sans block"
+                >Livello spiegazione</label
+              >
+              <select
+                v-model="selectedExplanationIdx"
+                @change="onExplanationIdxChange"
+                class="mt-1 block w-full rounded-lg border border-p-soft px-3 py-2 font-sans text-base focus:ring-2 focus:ring-p-medium"
+              >
+                <option
+                  v-for="(ex, idx) in explanations"
+                  :key="ex.level || idx"
+                  :value="idx"
+                >
+                  {{ getLevelLabel(ex.level) }}
+                </option>
+              </select>
+            </div>
             <!-- Questions -->
             <div>
               <div
@@ -249,7 +285,7 @@
 
 <script>
 import { ref } from 'vue'
-import swipeOverlay from './swipeOverlay.vue' // make sure the component file is
+import swipeOverlay from './swipeOverlay.vue'
 export default {
   components: {
     swipeOverlay,
@@ -268,21 +304,22 @@ export default {
       bottomOverlay: false,
       audioPlaying: false,
       audioRate: 1,
-      // for touch gesture
       touch0: null,
       openTouch0: null,
-      loadedItemsMap: {}, // _id : item obj
+      loadedItemsMap: {},
       overlayVisible: ref(false),
+      audioMuted: false,
+      audioVolume: 1,
+      selectedExplanationIdx: 0,
+      userSelectedLevel: null,
     }
   },
   computed: {
-    // Which item we are showing
     currentItem() {
       const idxObj = this.getCurrentIdxObj()
       if (!idxObj) return null
       return this.items.find((i) => i._id === idxObj)
     },
-    // For main navigation. True if can move
     canGoPrev() {
       return this.detachedStack.length === 0 && this.curItemIdx > 0
     },
@@ -291,6 +328,28 @@ export default {
         this.detachedStack.length === 0 &&
         this.curItemIdx < this.itemNav.length - 1
       )
+    },
+    explanations() {
+      if (
+        this.currentItem &&
+        Array.isArray(this.currentItem.explanations) &&
+        this.currentItem.explanations.length > 0
+      ) {
+        return this.currentItem.explanations.filter(
+          (ex) =>
+            ex &&
+            typeof ex === 'object' &&
+            typeof ex.text === 'string' &&
+            ex.text.trim().length > 0,
+        )
+      }
+      return []
+    },
+    selectedExplanation() {
+      // returns the currently selected explanation, fallback to first
+      const exps = this.explanations
+      if (!exps.length) return {}
+      return exps[this.selectedExplanationIdx] || exps[0]
     },
   },
   watch: {
@@ -306,10 +365,14 @@ export default {
         } else {
           this.refsItems = []
         }
-        // Set up audio src & params if needed
         this.stopAudio()
+        // select explanation index based on cached level if possible, else fallback
+        this.setBestExplanationIdx()
       },
       immediate: true,
+    },
+    explanations(newList, oldList) {
+      this.setBestExplanationIdx()
     },
     audioMuted(muted) {
       this.syncAudioProps()
@@ -345,8 +408,6 @@ export default {
         this.itemNav = Array.isArray(this.tour.itemNav)
           ? this.tour.itemNav.slice()
           : []
-        // At this point, this.tour.items and this.tour.itemNav are arrays of item ids.
-        // We want to get ALL used item ids (nav, .items, .refs recursively) and fetch each via GET /api/items/<id>
         let allItemIds = new Set()
         if (Array.isArray(this.tour.itemNav)) {
           this.tour.itemNav.forEach(
@@ -358,15 +419,11 @@ export default {
             (id) => typeof id === 'string' && allItemIds.add(id),
           )
         }
-        // We'll fill up loadedItemsMap as we go.
-        // Fetch main nav and items ids
         await this.fetchItemIdsRecursive(Array.from(allItemIds))
-        // Now fill items array in nav order
         const itemsArr = Array.from(allItemIds)
           .map((id) => this.loadedItemsMap[id])
           .filter(Boolean)
         this.items = itemsArr
-        // default to first item in nav
         this.curItemIdx = 0
         this.detachedStack = []
       } catch (e) {
@@ -376,10 +433,7 @@ export default {
       }
     },
     async fetchItemIdsRecursive(ids) {
-      // ids: string[]
-      // Use loadedItemsMap to avoid duplicates
       const toFetch = ids.filter((id) => id && !this.loadedItemsMap[id])
-      // fetch all
       const fetches = toFetch.map(async (id) => {
         try {
           const res = await fetch(`/api/items/${id}`)
@@ -393,7 +447,6 @@ export default {
         }
       })
       const itemsObjs = await Promise.all(fetches)
-      // Now recursively fetch referenced items (.refs array per item) if any
       let refsToFetch = []
       for (const item of itemsObjs) {
         if (item && Array.isArray(item.refs)) {
@@ -404,7 +457,6 @@ export default {
           }
         }
       }
-      // Remove dups
       refsToFetch = [...new Set(refsToFetch)]
       if (refsToFetch.length > 0) {
         await this.fetchItemIdsRecursive(refsToFetch)
@@ -428,24 +480,19 @@ export default {
         this.curItemIdx++
       }
     },
-    // Open a referenced item (may or may not be in nav)
     openRefItem(itemId) {
       if (!itemId) return
-      // If itemId in the nav, just jump to it.
       const navIdx = this.itemNav.findIndex((x) => x === itemId)
       if (navIdx !== -1) {
         this.curItemIdx = navIdx
         this.detachedStack = []
       } else {
-        // else: push to stack, "detached" navigation
         this.detachedStack.push(itemId)
       }
     },
-    // Return from detached ref navigation
     returnToNav() {
       this.detachedStack.pop()
     },
-    // === AUDIO ===
     togglePlay() {
       if (!this.currentItem || !this.currentItem.audio) return
       const audioEl = this.$refs.audioEl
@@ -480,6 +527,90 @@ export default {
           audioEl.playbackRate = this.audioRate
         }
       })
+    },
+    getLevelLabel(level) {
+      if (!level) return 'Descrizione'
+      switch (level) {
+        case 'simple':
+          return 'Semplice'
+        case 'normal':
+          return 'Normale'
+        case 'advanced':
+          return 'Avanzata'
+        default:
+          return level && typeof level === 'string'
+            ? level.charAt(0).toUpperCase() + level.slice(1)
+            : 'Descrizione'
+      }
+    },
+    formatDuration(seconds) {
+      if (typeof seconds !== 'number' || isNaN(seconds)) return ''
+      const m = Math.floor(seconds / 60)
+      const s = Math.round(seconds % 60)
+      return m > 0 ? `${m}m ${s}s` : `${s}s`
+    },
+    onExplanationIdxChange() {
+      // store user-selected level string for later cache
+      const exps = this.explanations
+      if (!exps.length) {
+        this.userSelectedLevel = null
+        return
+      }
+      const idx = this.selectedExplanationIdx
+      if (exps[idx] && exps[idx].level) {
+        this.userSelectedLevel = exps[idx].level
+      } else {
+        this.userSelectedLevel = null
+      }
+    },
+    setBestExplanationIdx() {
+      // On current item or explanations change, try to select the cached user-selected level if possible.
+      const exps = this.explanations
+      // If no explanations, reset
+      if (!exps.length) {
+        this.selectedExplanationIdx = 0
+        return
+      }
+      // If only one, always 0
+      if (exps.length === 1) {
+        this.selectedExplanationIdx = 0
+        return
+      }
+      // Try to find user preferred level
+      if (this.userSelectedLevel) {
+        // Try exact match first
+        const prefIdx = exps.findIndex(
+          (ex) => ex.level === this.userSelectedLevel,
+        )
+        if (prefIdx !== -1) {
+          this.selectedExplanationIdx = prefIdx
+          return
+        }
+        // If not found, try to find the nearest
+        const possibleLevels = ['simple', 'normal', 'advanced']
+        const userIdx = possibleLevels.indexOf(this.userSelectedLevel)
+        // pick the first available in order nearest the userIdx
+        let nearestIdx = null
+        let nearestDistance = Infinity
+        exps.forEach((ex, idx) => {
+          const exIdx = possibleLevels.indexOf(ex.level)
+          if (exIdx === -1 || userIdx === -1) return
+          const dist = Math.abs(exIdx - userIdx)
+          if (dist < nearestDistance) {
+            nearestDistance = dist
+            nearestIdx = idx
+          }
+        })
+        if (nearestIdx !== null) {
+          this.selectedExplanationIdx = nearestIdx
+          return
+        }
+        // Fallback: select the first
+        this.selectedExplanationIdx = 0
+        return
+      }
+      // No cached level, default to 0
+      this.selectedExplanationIdx = 0
     },
   },
 }
