@@ -226,8 +226,11 @@
                 <button
                   v-for="rate in [0.75, 1, 1.25, 1.5, 2]"
                   :key="rate"
-                  @click="audioRate = rate"
-                  class="shared-button-flex-secondary whitespace-nowrap"
+                  @click="onAudioRateChange(rate)"
+                  :class="[
+                    'shared-button-flex-secondary whitespace-nowrap',
+                    audioRate === rate ? 'ring-2 ring-p-medium font-bold' : '',
+                  ]"
                 >
                   <span>&times {{ rate }}</span>
                 </button>
@@ -386,6 +389,18 @@ export default {
   },
   created() {
     this.initTour()
+    // Restore cached audioRate if present, else set default
+    if (typeof window !== 'undefined') {
+      const cachedRate = localStorage.getItem('audioRate')
+      const r = parseFloat(cachedRate)
+      if (!isNaN(r) && [0.75, 1, 1.25, 1.5, 2].includes(r)) {
+        this.audioRate = r
+      } else {
+        this.audioRate = 1
+      }
+    } else {
+      this.audioRate = 1
+    }
   },
   methods: {
     async initTour() {
@@ -527,6 +542,13 @@ export default {
           audioEl.playbackRate = this.audioRate
         }
       })
+    },
+    onAudioRateChange(rate) {
+      this.audioRate = rate
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('audioRate', rate)
+      }
+      this.syncAudioProps()
     },
     getLevelLabel(level) {
       if (!level) return 'Descrizione'
