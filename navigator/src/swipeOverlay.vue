@@ -252,7 +252,7 @@ export default {
 .swipe-content {
   flex: 1;
   overflow-y: auto;
-  padding: 20px 20px 40px 20px;
+  padding-top: 40px;
   background: none;
   transition: opacity 0.2s;
 }

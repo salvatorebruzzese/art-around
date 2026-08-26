@@ -146,7 +146,7 @@
             {{
               currentItem && currentItem.audio
                 ? 'Audio descrizione'
-                : 'Nessuna audio'
+                : 'Nessun audio'
             }}
           </div>
         </div>
@@ -200,107 +200,48 @@
     <!-- Bottom swipe-up panel -->
     <swipeOverlay>
       <template #default>
-        <!-- Full media controls -->
         <div class="no-swipe">
-          <div class="flex items-center gap-4 mb-6">
-            <button
-              @click="togglePlay"
-              class="w-14 h-14 rounded-full shadow bg-p-dark text-white hover:bg-p-dark/80 flex items-center justify-center"
-            >
-              <svg
-                v-if="!audioPlaying"
-                class="w-8 h-8"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-              >
-                <polygon points="8,5 21,12 8,19" fill="currentColor" />
-              </svg>
-              <svg
-                v-else
-                class="w-8 h-8"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-              >
-                <rect x="6" y="5" width="4" height="14" fill="currentColor" />
-                <rect x="14" y="5" width="4" height="14" fill="currentColor" />
-              </svg>
-            </button>
-            <button
-              @click="toggleMute"
-              class="text-p-medium/80 hover:text-p-dark"
-            >
-              <svg
-                v-if="audioMuted"
-                class="w-8 h-8"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-              >
-                <path d="M1 1l22 22" />
-                <path d="M9 9v6h4l5 5V4l-5 5H9z" />
-              </svg>
-              <svg
-                v-else
-                class="w-8 h-8"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-              >
-                <path d="M9 9v6h4l5 5V4l-5 5H9z" />
-              </svg>
-            </button>
-            <label class="flex items-center gap-2 font-sans text-p-medium ml-4">
-              Volume
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.01"
-                v-model.number="audioVolume"
-                class="w-24 accent-p-medium"
-              />
-            </label>
-            <label class="flex items-center gap-2 font-sans text-p-medium ml-4">
-              Velocità
-              <select
-                v-model.number="audioRate"
-                class="border px-2 rounded text-base bg-p-soft/20"
-              >
-                <option :value="0.7">0.7x</option>
-                <option :value="1">1x</option>
-                <option :value="1.3">1.3x</option>
-                <option :value="1.5">1.5x</option>
-                <option :value="2">2x</option>
-              </select>
-            </label>
-          </div>
+          <div class="flex flex-col items-center font-sans ml-4 mr-4 gap-6">
+            <!-- velocity controls -->
+            <div class="flex w-full gap-4">
+              <label class="flex items-center text-p-medium">Velocità</label>
+              <div class="flex gap-2 flex-1">
+                <button
+                  v-for="rate in [0.75, 1, 1.25, 1.5, 2]"
+                  :key="rate"
+                  @click="audioRate = rate"
+                  class="shared-button-flex-secondary whitespace-nowrap"
+                >
+                  <span>&times {{ rate }}</span>
+                </button>
+              </div>
+            </div>
 
-          <!-- Questions -->
-          <div>
-            <div class="font-semibold mb-2 text-base text-p-dark/70 font-sans">
-              Domande
-            </div>
-            <div class="flex flex-wrap gap-3">
-              <button
-                v-for="q in 3"
-                :key="q"
-                class="shared-button-fit-secondary font-sans px-4"
+            <!-- Questions -->
+            <div>
+              <div
+                class="font-semibold mb-2 text-base text-p-dark/70 font-sans"
               >
-                Domanda {{ q }}
-              </button>
+                Domande
+              </div>
+              <div class="flex flex-wrap gap-3">
+                <button
+                  v-for="q in 3"
+                  :key="q"
+                  class="shared-button-fit-secondary font-sans px-4"
+                >
+                  Domanda {{ q }}
+                </button>
+              </div>
             </div>
           </div>
-          <audio
-            ref="audioEl"
-            v-if="currentItem && currentItem.audio"
-            :src="`/api/assets/${currentItem.audio}`"
-            @ended="audioPlaying = false"
-          />
         </div>
+        <audio
+          ref="audioEl"
+          v-if="currentItem && currentItem.audio"
+          :src="`/api/assets/${currentItem.audio}`"
+          @ended="audioPlaying = false"
+        />
       </template>
     </swipeOverlay>
   </div>
@@ -326,8 +267,6 @@ export default {
       refsItems: [],
       bottomOverlay: false,
       audioPlaying: false,
-      audioMuted: false,
-      audioVolume: 1,
       audioRate: 1,
       // for touch gesture
       touch0: null,
@@ -371,9 +310,6 @@ export default {
         this.stopAudio()
       },
       immediate: true,
-    },
-    audioVolume(vol) {
-      this.syncAudioProps()
     },
     audioMuted(muted) {
       this.syncAudioProps()
