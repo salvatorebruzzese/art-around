@@ -3,6 +3,9 @@ import fuzzysearch from 'fuzzysearch'
 import './userManager'
 import './quick-nav.js'
 
+window.addEventListener('popstate', () => {
+  window.location.reload()
+})
 document.addEventListener('alpine:init', () => {
   Alpine.data('marketplace', () => ({
     cardDecorator:

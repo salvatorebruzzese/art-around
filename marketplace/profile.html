@@ -60,12 +60,19 @@
             </dd>
           </div>
           <div class="flex justify-end mt-10 mr-4 rounded-2xl">
-            <a
+            <button
+              x-data
               class="shared-button-fit-secondary px-4 mr-4"
-              href="../marketplace/"
+              @click="
+        if (window.history.length > 1) {
+          window.history.back()
+        } else {
+          window.location.href = '/marketplace/'
+        }
+                     "
             >
               Torna indietro
-            </a>
+            </button>
             <button
               x-data
               class="shared-button-fit-warning px-4"

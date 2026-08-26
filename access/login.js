@@ -18,7 +18,11 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify({ username, password }),
       })
       if (res.ok) {
-        window.location.href = '/marketplace/'
+        if (window.history.length > 1) {
+          window.history.back()
+        } else {
+          window.location.href = '/marketplace/'
+        }
       } else {
         const data = await res.json().catch(() => ({ error: 'Login failed' }))
         errorDiv.textContent = data.error || 'Login failed.'

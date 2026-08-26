@@ -170,7 +170,7 @@
         </div>
       </button>
       <button
-        @click="showProfile = true"
+        @click="openProfile"
         aria-label="Profile"
         class="nav-avatar-trigger"
       >
@@ -299,74 +299,7 @@
       </div>
     </transition>
 
-    <!-- Profile Overlay -->
-    <transition name="fade">
-      <div
-        v-if="showProfile"
-        class="fixed inset-0 z-50 bg-p-dark/50 backdrop-blur-sm flex items-end"
-        @click.self="showProfile = false"
-      >
-        <div
-          class="w-full bg-white rounded-t-2xl border border-p-soft shadow-2xl p-8"
-        >
-          <div class="flex items-center justify-between mb-6">
-            <div class="flex items-center gap-3">
-              <img
-                v-if="user.avatar"
-                :src="user.avatar"
-                class="rounded-full w-16 h-16 object-cover border-2 border-p-soft"
-              />
-              <div
-                v-else
-                class="bg-p-medium text-white rounded-full w-16 h-16 flex items-center justify-center font-bold text-2xl"
-              >
-                {{ user.initials }}
-              </div>
-              <div>
-                <div class="font-bold text-xl text-p-dark font-serif">
-                  {{ user.name }}
-                </div>
-                <div class="text-p-medium/70 text-sm font-sans">
-                  {{ user.email }}
-                </div>
-              </div>
-            </div>
-            <button @click="showProfile = false" class="nav-icon-link">
-              <svg
-                class="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-          </div>
-          <ul class="space-y-3 mt-4">
-            <li>
-              <button class="shared-button-full-secondary w-full font-sans">
-                Impostazioni account
-              </button>
-            </li>
-            <li>
-              <button class="shared-button-full-secondary w-full font-sans">
-                Prenotazioni
-              </button>
-            </li>
-            <li>
-              <button class="shared-button-full-primary w-full font-sans">
-                Logout
-              </button>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </transition>
+    <!-- Profile Overlay (disabled: redirect used instead) -->
 
     <!-- Tour Start Confirmation Overlay -->
     <transition name="fade">
@@ -568,6 +501,9 @@ export default {
         window.location.href = '/login'
         return false
       }
+    },
+    openProfile() {
+      window.location.href = '/profile'
     },
   },
   async mounted() {
