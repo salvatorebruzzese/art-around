@@ -10,7 +10,7 @@
         {{ museum.name }}
       </h2>
       <!-- Horizontally swipeable tours -->
-      <div class="overflow-x-auto px-2 -mx-2">
+      <div class="scrollbar-hide overflow-x-auto px-2 -mx-2">
         <div class="flex flex-nowrap gap-6">
           <div
             v-for="tour in museum.tours"
@@ -32,22 +32,27 @@
                 class="absolute inset-0 w-full h-full object-cover mix-blend-multiply"
               />
               <div
-                class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-p-dark/70 to-transparent px-4 py-2 rounded-b-2xl"
+                x-show="tour.reviews && tour.reviews.length > 0"
+                class="absolute flex flex-row bottom-4 left-1 right-2 roundef-full bg-gradient-to-t from-p-dark/70 to-transparent px-4 py-2 rounded-b-2xl"
               >
                 <div
-                  class="text-xs text-p-light/90 truncate font-sans"
+                  class="text-xs text-p-light/90 truncate font-serif"
                   :title="tour.review"
-                  style="
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                  "
                 >
-                  {{
-                    tour.review && tour.review.length > 60
-                      ? tour.review.slice(0, 60) + '…'
-                      : tour.review || ''
-                  }}
+                  <span class="text-5xl font-serif"> &ldquo; </span>
+                  <span
+                    style="
+                      white-space: nowrap;
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                    "
+                  >
+                    {{
+                      tour.reviews && tour.reviews.length > 0
+                        ? tour.reviews[0]
+                        : ''
+                    }}
+                  </span>
                 </div>
               </div>
             </div>
@@ -85,7 +90,7 @@
                       fill="none"
                     ></circle>
                   </svg>
-                  {{ tour.time || '--' }} min
+                  {{ getItemsDuration(tour.items) || '--' }} min
                 </span>
                 <span class="flex items-center gap-1">
                   <svg
@@ -101,7 +106,7 @@
                       d="M12 8c1.104 0 2-.896 2-2s-.896-2-2-2-2 .896-2 2 .896 2 2 2zm0 4c-2.21 0-4 1.12-4 2.5v2.5h8V14.5c0-1.38-1.79-2.5-4-2.5z"
                     ></path>
                   </svg>
-                  €{{ tour.price || '--' }}
+                  €{{ tour.price != null ? tour.price : '--' }}
                 </span>
                 <span
                   class="ml-auto bg-p-soft/40 rounded-full px-2 py-0.5 text-p-medium text-xs font-sans"
@@ -276,14 +281,16 @@
             v-model="search"
             class="input input-bordered rounded-full w-full border-p-soft bg-white text-p-dark placeholder-p-medium focus:border-p-medium focus:ring-2 focus:ring-p-soft focus:outline-none font-sans font-normal shadow-sm px-6 py-3 mb-3 text-lg"
             placeholder="Cerca tra tour e musei…"
+            @input="onSearchInput"
           />
           <div v-if="search" class="mt-4">
             <div class="text-sm text-p-medium/60 mb-2 font-sans">Risultati</div>
-            <ul class="font-sans">
+            <ul class="font-sans" style="overflow: auto">
               <li
                 v-for="item in searchResults"
                 :key="item._id"
-                class="py-2 border-b border-p-soft/30 last:border-b-0"
+                class="py-2 border-b border-p-soft/30 last:border-b-0 cursor-pointer"
+                @click="goToSearchResult(item)"
               >
                 <span class="text-p-dark font-semibold">{{ item.name }}</span>
                 <span class="text-p-medium/80 text-xs block">{{
@@ -298,8 +305,6 @@
         </div>
       </div>
     </transition>
-
-    <!-- Profile Overlay (disabled: redirect used instead) -->
 
     <!-- Tour Start Confirmation Overlay -->
     <transition name="fade">
@@ -367,44 +372,35 @@ export default {
       museums: [],
       showMenu: false,
       showSearch: false,
-      showProfile: false,
       search: '',
       user: {
-        name: 'Anna Bianchi',
-        email: 'anna.bianchi@email.com',
+        name: '',
+        email: '',
         avatar: '',
-        initials: 'AB',
+        initials: '',
       },
       authors: {},
       showTourConfirmOverlay: false,
       selectedTour: null,
+      allTours: [],
+      allMuseums: [],
+      searchResults: [],
+      itemsMeta: {},
+      itemsByTour: {},
     }
-  },
-  computed: {
-    searchResults() {
-      if (!this.search.trim()) return []
-      const searchLower = this.search.toLowerCase()
-      let results = []
-      for (const m of this.museums) {
-        if (m.name && m.name.toLowerCase().includes(searchLower)) {
-          results.push({ _id: m._id, name: m.name, type: 'Museo' })
-        }
-        for (const t of m.tours || []) {
-          if (t.name && t.name.toLowerCase().includes(searchLower)) {
-            results.push({
-              _id: t._id,
-              name: t.name,
-              type: m.name || 'Tour',
-            })
-          }
-        }
-      }
-      return results
-    },
   },
   methods: {
     onMore(museum) {
-      alert('Mostra altri tour per ' + (museum.name || ''))
+      // you would route to an "all tours" page for this museum
+      window.location.href = `/navigator/museum/${museum._id}`
+    },
+    goToSearchResult(item) {
+      if (item.type === 'Museo') {
+        window.location.href = `/navigator/museum/${item._id}`
+      } else {
+        // type is tour
+        this.showTourConfirm(item._tourObj || item)
+      }
     },
     getAuthorName(authorId) {
       if (!authorId) return ''
@@ -423,21 +419,21 @@ export default {
     },
     async fetchMuseumsAndTours() {
       try {
+        // Fetch all museums
         const museumsRes = await fetch('/api/museums')
         let museumsMeta = await museumsRes.json()
-        const museums = await Promise.all(
+        // Fetch all tours for all museums
+        const allMuseumsFull = await Promise.all(
           museumsMeta.map(async (meta) => {
             try {
               const fullRes = await fetch(`/api/museums/${meta._id}`)
               const fullMuseum = await fullRes.json()
+              // fetch all tours for this museum
               let tours = []
-              if (
-                Array.isArray(fullMuseum.tours) &&
-                fullMuseum.tours.length > 0
-              ) {
-                const toursRes = await fetch(
-                  `/api/tours?museum=${fullMuseum._id}`,
-                )
+              const toursRes = await fetch(
+                `/api/tours?museum=${fullMuseum._id}`,
+              )
+              if (toursRes.ok) {
                 tours = await toursRes.json()
               }
               return { ...fullMuseum, tours }
@@ -446,22 +442,99 @@ export default {
             }
           }),
         )
-        this.museums = museums
+        this.museums = allMuseumsFull
+
+        // Fetch all tours as a list for search
+        let allToursRes = await fetch('/api/tours')
+        let allTours = allToursRes.ok ? await allToursRes.json() : []
+        this.allMuseums = museumsMeta
+        this.allTours = allTours
+
+        // Build tour lookup for search (include the full museum name)
+        for (const m of this.museums) {
+          for (const t of m.tours) {
+            t._museumName = m.name
+            t._tourObj = t
+          }
+        }
 
         const authorIds = new Set()
-        for (const museum of museums) {
+        for (const museum of this.museums) {
           for (const tour of museum.tours || []) {
-            if (tour.author) {
-              authorIds.add(tour.author)
-            }
+            if (tour.author) authorIds.add(tour.author)
           }
         }
         await Promise.all(
           Array.from(authorIds).map((id) => this.fetchAuthor(id)),
         )
+
+        // Flat fetch all items for all tours, and cache by tour
+        await this.fetchAllTourItems()
       } catch (err) {
         this.museums = []
       }
+    },
+    async fetchAllTourItems() {
+      // For each tour in all museums, fetch its details to get items (with explanations/duration)
+      let tourIds = []
+      this.itemsByTour = {}
+      for (const m of this.museums) {
+        for (const tour of m.tours) {
+          if (tour._id) tourIds.push(tour._id)
+        }
+      }
+      const itemsMeta = {}
+      // Use /api/items?tour= for each tour
+      await Promise.all(
+        tourIds.map(async (tid) => {
+          const res = await fetch(`/api/items?tour=${tid}`)
+          if (res.ok) {
+            const items = await res.json()
+            // Now, for each item, fetch details to get explanations
+            const itemDetails = await Promise.all(
+              items.map(async (imeta) => {
+                try {
+                  const idataRes = await fetch(`/api/items/${imeta._id}`)
+                  if (idataRes.ok) {
+                    return await idataRes.json()
+                  }
+                } catch {}
+                return null
+              }),
+            )
+            itemsMeta[tid] = itemDetails.filter(Boolean)
+            this.itemsByTour[tid] = itemDetails.filter(Boolean)
+          }
+        }),
+      )
+      this.itemsMeta = itemsMeta
+    },
+    getItemsDuration(itemIds) {
+      // itemIds is array of objectId strings
+      if (!Array.isArray(itemIds) || !itemIds.length) return '--'
+      // itemsByTour is indexed by tour id, but itemIds may be globally unique
+      let foundItems = []
+      for (const k in this.itemsByTour) {
+        const items = this.itemsByTour[k]
+        if (Array.isArray(items)) {
+          foundItems = foundItems.concat(
+            items.filter((itm) => itemIds.includes(itm._id)),
+          )
+        }
+      }
+      // Fall back: skip if not found
+      let totalSec = 0
+      for (const itm of foundItems) {
+        if (Array.isArray(itm.explanations) && itm.explanations.length) {
+          // select the medium/normal explanation
+          let expl =
+            itm.explanations.find((e) => e.level === 'normal') ||
+            itm.explanations[0]
+          if (expl && typeof expl.durationSeconds === 'number')
+            totalSec += expl.durationSeconds
+        }
+      }
+      return Math.round(totalSec / 60) || '--'
     },
     showTourConfirm(tour) {
       this.selectedTour = tour
@@ -479,22 +552,27 @@ export default {
     async checkLoggedIn() {
       try {
         const res = await fetch('/api/profile')
-        const result = await res.json()
-        if (!result) {
+        if (!res.ok) {
           window.location.href = '/login'
           return false
         }
-        // Optionally update user data if provided
-        if (result.name) {
-          this.user.name = result.name
-          this.user.email = result.email || this.user.email
-          this.user.avatar = result.avatar || ''
+        const result = await res.json()
+        if (!result || !result.username) {
+          window.location.href = '/login'
+          return false
+        }
+        this.user.name = result.username || ''
+        this.user.email = result.email || ''
+        this.user.avatar = result.avatar || ''
+        if (this.user.name) {
           this.user.initials =
-            result.name
+            this.user.name
               .split(' ')
               .map((n) => n[0])
               .join('')
-              .toUpperCase() || this.user.initials
+              .toUpperCase() || ''
+        } else {
+          this.user.initials = ''
         }
         return true
       } catch (e) {
@@ -505,11 +583,42 @@ export default {
     openProfile() {
       window.location.href = '/profile'
     },
+    async onSearchInput() {
+      const search = this.search.trim().toLowerCase()
+      if (!search) {
+        this.searchResults = []
+        return
+      }
+
+      // Aggregate results: search museums and tours as per API docs
+      let results = []
+
+      // Museums
+      for (const m of this.museums) {
+        if (m.name && m.name.toLowerCase().includes(search)) {
+          results.push({ _id: m._id, name: m.name, type: 'Museo' })
+        }
+      }
+      // Tours (attach museum name as label)
+      for (const m of this.museums) {
+        for (const t of m.tours || []) {
+          if (t.name && t.name.toLowerCase().includes(search)) {
+            results.push({
+              _id: t._id,
+              name: t.name,
+              type: m.name || 'Tour',
+              _tourObj: t,
+            })
+          }
+        }
+      }
+      this.searchResults = results
+    },
   },
   async mounted() {
     const loggedIn = await this.checkLoggedIn()
     if (!loggedIn) return
-    this.fetchMuseumsAndTours()
+    await this.fetchMuseumsAndTours()
   },
   watch: {
     museums: {
@@ -541,5 +650,13 @@ export default {
 .fade-enter,
 .fade-leave-to {
   opacity: 0;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
 </style>
