@@ -198,140 +198,122 @@
       </div>
     </div>
     <!-- Bottom swipe-up panel -->
-    <transition name="fade">
-      <div
-        v-if="bottomOverlay"
-        class="fixed left-0 right-0 bottom-0 z-50 bg-white rounded-t-3xl border-t border-p-soft p-6 px-5 shadow-2xl transition-all"
-        @touchstart.passive="onOverlayTouchStart"
-        @touchend.passive="onOverlayTouchEnd"
-      >
-        <div class="w-16 h-1 mx-auto mb-4 rounded-full bg-p-soft/70" />
+    <swipeOverlay>
+      <template #default>
         <!-- Full media controls -->
-        <div class="flex items-center gap-4 mb-6">
-          <button
-            @click="togglePlay"
-            class="w-14 h-14 rounded-full shadow bg-p-dark text-white hover:bg-p-dark/80 flex items-center justify-center"
-          >
-            <svg
-              v-if="!audioPlaying"
-              class="w-8 h-8"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              viewBox="0 0 24 24"
-            >
-              <polygon points="8,5 21,12 8,19" fill="currentColor" />
-            </svg>
-            <svg
-              v-else
-              class="w-8 h-8"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              viewBox="0 0 24 24"
-            >
-              <rect x="6" y="5" width="4" height="14" fill="currentColor" />
-              <rect x="14" y="5" width="4" height="14" fill="currentColor" />
-            </svg>
-          </button>
-          <button
-            @click="toggleMute"
-            class="text-p-medium/80 hover:text-p-dark"
-          >
-            <svg
-              v-if="audioMuted"
-              class="w-8 h-8"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-            >
-              <path d="M1 1l22 22" />
-              <path d="M9 9v6h4l5 5V4l-5 5H9z" />
-            </svg>
-            <svg
-              v-else
-              class="w-8 h-8"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-            >
-              <path d="M9 9v6h4l5 5V4l-5 5H9z" />
-            </svg>
-          </button>
-          <label class="flex items-center gap-2 font-sans text-p-medium ml-4">
-            Volume
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.01"
-              v-model.number="audioVolume"
-              class="w-24 accent-p-medium"
-            />
-          </label>
-          <label class="flex items-center gap-2 font-sans text-p-medium ml-4">
-            Velocità
-            <select
-              v-model.number="audioRate"
-              class="border px-2 rounded text-base bg-p-soft/20"
-            >
-              <option :value="0.7">0.7x</option>
-              <option :value="1">1x</option>
-              <option :value="1.3">1.3x</option>
-              <option :value="1.5">1.5x</option>
-              <option :value="2">2x</option>
-            </select>
-          </label>
-        </div>
-        <!-- Questions -->
-        <div>
-          <div class="font-semibold mb-2 text-base text-p-dark/70 font-sans">
-            Domande
-          </div>
-          <div class="flex flex-wrap gap-3">
+        <div class="no-swipe">
+          <div class="flex items-center gap-4 mb-6">
             <button
-              v-for="q in 3"
-              :key="q"
-              class="shared-button-fit-secondary font-sans px-4"
+              @click="togglePlay"
+              class="w-14 h-14 rounded-full shadow bg-p-dark text-white hover:bg-p-dark/80 flex items-center justify-center"
             >
-              Domanda {{ q }}
+              <svg
+                v-if="!audioPlaying"
+                class="w-8 h-8"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <polygon points="8,5 21,12 8,19" fill="currentColor" />
+              </svg>
+              <svg
+                v-else
+                class="w-8 h-8"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <rect x="6" y="5" width="4" height="14" fill="currentColor" />
+                <rect x="14" y="5" width="4" height="14" fill="currentColor" />
+              </svg>
             </button>
+            <button
+              @click="toggleMute"
+              class="text-p-medium/80 hover:text-p-dark"
+            >
+              <svg
+                v-if="audioMuted"
+                class="w-8 h-8"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
+                <path d="M1 1l22 22" />
+                <path d="M9 9v6h4l5 5V4l-5 5H9z" />
+              </svg>
+              <svg
+                v-else
+                class="w-8 h-8"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
+                <path d="M9 9v6h4l5 5V4l-5 5H9z" />
+              </svg>
+            </button>
+            <label class="flex items-center gap-2 font-sans text-p-medium ml-4">
+              Volume
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                v-model.number="audioVolume"
+                class="w-24 accent-p-medium"
+              />
+            </label>
+            <label class="flex items-center gap-2 font-sans text-p-medium ml-4">
+              Velocità
+              <select
+                v-model.number="audioRate"
+                class="border px-2 rounded text-base bg-p-soft/20"
+              >
+                <option :value="0.7">0.7x</option>
+                <option :value="1">1x</option>
+                <option :value="1.3">1.3x</option>
+                <option :value="1.5">1.5x</option>
+                <option :value="2">2x</option>
+              </select>
+            </label>
           </div>
+
+          <!-- Questions -->
+          <div>
+            <div class="font-semibold mb-2 text-base text-p-dark/70 font-sans">
+              Domande
+            </div>
+            <div class="flex flex-wrap gap-3">
+              <button
+                v-for="q in 3"
+                :key="q"
+                class="shared-button-fit-secondary font-sans px-4"
+              >
+                Domanda {{ q }}
+              </button>
+            </div>
+          </div>
+          <audio
+            ref="audioEl"
+            v-if="currentItem && currentItem.audio"
+            :src="`/api/assets/${currentItem.audio}`"
+            @ended="audioPlaying = false"
+          />
         </div>
-      </div>
-    </transition>
-    <!-- Handle swipe gesture to open/close overlay (mobile first) -->
-    <button
-      v-if="!bottomOverlay"
-      @click="bottomOverlay = true"
-      aria-label="Apri pannello media"
-      class="fixed left-1/2 -translate-x-1/2 bottom-2 z-40 bg-white/90 rounded-full border border-p-soft shadow px-5 py-2"
-    >
-      <svg
-        class="w-8 h-8 text-p-dark"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          d="M19 15l-7-7-7 7"
-        />
-      </svg>
-    </button>
-    <audio
-      ref="audioEl"
-      v-if="currentItem && currentItem.audio"
-      :src="`/api/assets/${currentItem.audio}`"
-      @ended="audioPlaying = false"
-    />
+      </template>
+    </swipeOverlay>
   </div>
 </template>
 
 <script>
+import { ref } from 'vue'
+import swipeOverlay from './swipeOverlay.vue' // make sure the component file is
 export default {
+  components: {
+    swipeOverlay,
+  },
+
   name: 'TourNavigationMobile',
   data() {
     return {
@@ -349,7 +331,9 @@ export default {
       audioRate: 1,
       // for touch gesture
       touch0: null,
+      openTouch0: null,
       loadedItemsMap: {}, // _id : item obj
+      overlayVisible: ref(false),
     }
   },
   computed: {
@@ -560,21 +544,6 @@ export default {
           audioEl.playbackRate = this.audioRate
         }
       })
-    },
-    // === SWIPE UP PANEL GESTURE (easy mobile) ===
-    onOverlayTouchStart(e) {
-      if (e.touches && e.touches.length === 1) {
-        this.touch0 = { y: e.touches[0].clientY }
-      }
-    },
-    onOverlayTouchEnd(e) {
-      if (!this.touch0 || !e.changedTouches) return
-      const dy = e.changedTouches[0].clientY - this.touch0.y
-      if (dy > 50) {
-        // swipe down
-        this.bottomOverlay = false
-      }
-      this.touch0 = null
     },
   },
 }
