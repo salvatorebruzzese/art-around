@@ -9,7 +9,7 @@ window.addEventListener('popstate', () => {
 document.addEventListener('alpine:init', () => {
   Alpine.data('marketplace', () => ({
     cardDecorator:
-      'w-full h-80 rounded-3xl flex flex-col overflow-hidden shadow-lg border border-p-soft bg-white group hover:-translate-y-1 hover:shadow-xl transition-all duration-300',
+      'w-full h-80 rounded-3xl flex flex-col overflow-hidden shadow-p-soft shadow-sm  bg-white group hover:-translate-y-1 hover:shadow-xl transition-all duration-300',
     museums: [],
     filters: {
       museum: null,
