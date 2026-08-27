@@ -18,7 +18,9 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify({ username, password }),
       })
       if (res.ok) {
-        if (window.history.length > 1) {
+        if (document.referrer) {
+          window.location.replace(document.referrer)
+        } else if (window.history.length > 1) {
           window.history.back()
         } else {
           window.location.href = '/marketplace/'
