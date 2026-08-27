@@ -12,9 +12,11 @@ router.get('/', (req, res) => {
     res.sendFile(join(rootDir, 'marketplace/marketplace.html'))
   } else if (req.baseUrl === '/profile') {
     res.sendFile(join(rootDir, 'marketplace/profile.html'))
-  } else if (req.baseUrl === '/checkout') {
-    res.sendFile(join(rootDir, 'marketplace/checkout.html'))
   }
+})
+
+router.get('/checkout/', (req, res) => {
+  res.sendFile(join(rootDir, 'marketplace/checkout.html'))
 })
 
 router.get('/preview/:id', (req, res) => {

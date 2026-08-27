@@ -7,10 +7,6 @@
 
     <link href="../styles.css" rel="stylesheet" type="text/css" />
     <script type="module" src="./checkout.js" defer></script>
-    <script
-      defer
-      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
-    ></script>
   </head>
   <body
     class="p-6 md:p-10 min-h-screen font-sans text-p-dark"
@@ -22,25 +18,17 @@
     >
       <!-- Order Summary Card -->
       <section
-        class="flex flex-col text-p-medium gap-5 bg-white p-8 rounded-3xl shadow-sm border border-p-soft"
+        class="flex flex-col text-p-medium gap-4 bg-white p-8 rounded-3xl shadow-sm border border-p-soft"
       >
-        <div class="border-b border-p-soft pb-4">
-          <h1 class="text-2xl text-p-medium font-bold">Carrello</h1>
-        </div>
+        <h1
+          class="text-2xl text-p-medium font-bold border-b border-p-soft pb-4"
+        >
+          Carrello
+        </h1>
 
         <div
           class="flex flex-col sm:flex-row justify-center items-center gap-4 border border-p-soft bg-p-soft/20 rounded-2xl p-5 overflow-auto"
         >
-          <figure
-            class="aspect-square w-full sm:w-40 h-40 flex-shrink-0 rounded-2xl overflow-hidden border border-p-soft"
-          >
-            <img
-              src="https://dummyimage.com/800x800/efefef/a3a3a3.jpg&text=Tour+Preview"
-              alt="Tour Preview"
-              class="object-cover w-full h-full"
-            />
-          </figure>
-
           <fieldset
             class="flex flex-col gap-3 w-full p-5 rounded-2xl bg-p-light mt-2"
             id="visits-container"
@@ -48,12 +36,21 @@
             <div id="visits-list" class="flex flex-col gap-3 w-full">
               <template x-for="tour in tours" :key="tour.id">
                 <div
-                  class="flex justify-between items-center text-md text-p-dark gap-2"
+                  class="flex justify-between items-center text-md text-p-dark gap-2 max-w-3xl"
                 >
-                  <span class="truncate" x-text="tour.name"></span>
+                  <figure
+                    class="aspect-square w-16 flex-shrink-0 rounded-2xl overflow-hidden"
+                  >
+                    <img
+                      :src="'/api/assets/' + tour.thumbnail"
+                      :alt="tour.name"
+                      class="object-cover w-full h-full"
+                    />
+                  </figure>
+                  <span x-text="tour.name"></span>
                   <span
                     class="shrink-0"
-                    x-text="`€ ${Number(tour.price).toFixed(2)}`"
+                    x-text="'€ ' + Number(tour.price).toFixed(2)"
                   ></span>
                 </div>
               </template>
@@ -64,7 +61,7 @@
               class="flex justify-between items-center text-md font-bold text-p-dark border-t border-p-soft pt-2"
             >
               <span>Totale</span>
-              <span x-text="'€ ${Number(total).toFixed(2)}'"></span>
+              <span x-text="'€ ' + Number(total).toFixed(2)"></span>
             </div>
           </fieldset>
         </div>

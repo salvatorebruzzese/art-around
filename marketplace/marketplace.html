@@ -484,9 +484,12 @@
 
         <!-- Cart Action Button -->
         <div class="flex items-center gap-3">
-          <button class="shared-button-flex-primary px-4 shadow-md">
+          <a
+            :href="'/marketplace/checkout/?tours=' + cartTours.join(',')"
+            class="shared-button-flex-primary px-4 shadow-md"
+          >
             Carrello
-          </button>
+          </a>
         </div>
       </div>
     </main>
