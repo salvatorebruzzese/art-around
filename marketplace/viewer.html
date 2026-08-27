@@ -16,9 +16,39 @@
     <div x-data="viewer" class="h-screen flex flex-col p-4 gap-4">
       <template x-if="nav?.item">
         <div class="contents">
+          <div
+            x-data="{ museum: 'Caricamento...' }"
+            x-init="museum = (await (await fetch('/api/museums/' + nav.tour.museum)).json())"
+            class="flex min-h-0 mx-auto w-full max-w-[500px] rounded-3xl shadow-lg p-6 bg-p-light"
+          >
+            <figure
+              class="h-full min-h-0 max-h-[100px] aspect-square rounded-2xl overflow-hidden justify-self-center self-center"
+            >
+              <img
+                :src="'/api/assets/' + nav.tour.thumbnail"
+                :alt="nav.tour.name"
+                class="object-cover w-full h-full"
+              />
+            </figure>
+
+            <div class="flex flex-col px-6 overflow-x-auto overflow-y-auto">
+              <span
+                x-text="museum.name"
+                class="text-p-medium text-2xl font-serif font-bold mb-2"
+              ></span>
+              <span
+                x-text="museum.description"
+                class="text-p-dark font-sans truncate hidden min-[300px]:inline"
+              ></span>
+              <span
+                x-text="museum.address"
+                class="text-p-dark font-sans truncate hidden min-[300px]:inline"
+              ></span>
+            </div>
+          </div>
           <!-- Main Detail View Card -->
           <div
-            class="flex-[2] min-h-0 mx-auto grid w-full max-w-4xl grid-cols-1 md:grid-cols-2 gap-6 bg-white rounded-3xl shadow-lg border border-p-soft p-6"
+            class="flex-[2] min-h-0 mx-auto grid w-full max-w-4xl grid-cols-1 md:grid-cols-2 gap-6 bg-white rounded-3xl shadow-lg p-6"
           >
             <!-- Image Container -->
             <figure
@@ -113,7 +143,7 @@
             <div class="flex items-center justify-center mr-4 w-16">
               <a
                 href="/marketplace/"
-                class="shared-button-flex-secondary w-12 h-12 shadow-md border border-p-soft hover:border-transparent flex items-center justify-center group"
+                class="shared-button-flex-secondary w-12 h-12 shadow-md shadow-p-soft hover:border-transparent flex items-center justify-center group"
               >
                 <svg
                   width="36"
@@ -140,7 +170,7 @@
               <!-- Previous Button -->
               <button
                 @click="nav.prev()"
-                class="shared-button-flex-secondary rounded-md w-16 h-16 shadow-lg border border-p-soft hover:border-transparent flex items-center justify-center"
+                class="shared-button-flex-secondary rounded-md w-16 h-16 shadow-lg hover:border-transparent flex items-center justify-center shadow-p-soft"
               >
                 <svg
                   width="24"
@@ -159,7 +189,7 @@
               <!-- Next Button -->
               <button
                 @click="nav.next()"
-                class="shared-button-flex-secondary rounded-md w-16 h-16 shadow-lg border border-p-soft hover:border-transparent flex items-center justify-center"
+                class="shared-button-flex-secondary rounded-md w-16 h-16 shadow-lg hover:border-transparent flex items-center justify-center shadow-p-soft"
               >
                 <svg
                   width="24"
