@@ -1,9 +1,11 @@
 import Alpine from 'alpinejs'
+import './userManager'
 
 document.addEventListener('alpine:init', () => {
   Alpine.data('checkout', () => ({
     tours: [],
     total: 0,
+    user: null,
 
     async init() {
       const url = new URL(window.location.href)
@@ -28,6 +30,7 @@ document.addEventListener('alpine:init', () => {
       const results = await Promise.all(fetchPromises)
       this.tours = results.filter((tour) => tour !== null)
       this.total = this.tours.reduce((sum, tour) => sum + (tour.price || 0), 0)
+      this.user = await Alpine.store('userManager').getUser()
     },
   }))
 })

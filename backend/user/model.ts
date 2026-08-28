@@ -3,54 +3,6 @@ import { Role } from '../accessControl.js'
 import { makeZodValidator, objectIdZod } from '../shared/validation.js'
 import z from 'zod'
 
-export interface IUserCard {
-  brand: string
-  last4: string
-  expMonth: number
-  expYear: number
-  cardholderName: string
-}
-export const userCardSchema = new Schema<IUserCard>(
-  {
-    brand: { type: String, required: true },
-    last4: { type: String, required: true },
-    expMonth: { type: Number, required: true },
-    expYear: { type: Number, required: true },
-    cardholderName: { type: String, required: true },
-  },
-  { _id: false },
-)
-
-export interface IUserAddress {
-  street: string
-  city: string
-  state: string
-  zip: string
-  country: string
-}
-export const userAddressSchema = new Schema<IUserAddress>(
-  {
-    street: { type: String, required: true },
-    city: { type: String, required: true },
-    state: { type: String, required: true },
-    zip: { type: String, required: true },
-    country: { type: String, required: true },
-  },
-  { _id: false },
-)
-
-export interface IUserBillingData {
-  cards: IUserCard[]
-  addresses: IUserAddress[]
-}
-export const userBillingDataSchema = new Schema<IUserBillingData>(
-  {
-    cards: [userCardSchema],
-    addresses: [userAddressSchema],
-  },
-  { _id: false },
-)
-
 interface _User {
   username: string
   password: string
@@ -59,7 +11,6 @@ interface _User {
   profilePicture?: Types.ObjectId
   authoredTours: Types.ObjectId[]
   purchasedTours: Types.ObjectId[]
-  billingData: IUserBillingData
 }
 export interface IUser extends Document, _User {}
 
@@ -85,7 +36,6 @@ export const userSchema = new Schema<IUser>(
     profilePicture: { type: Schema.Types.ObjectId, ref: 'Asset' },
     authoredTours: [{ type: Schema.Types.ObjectId, ref: 'Tour' }],
     purchasedTours: [{ type: Schema.Types.ObjectId, ref: 'Tour' }],
-    billingData: userBillingDataSchema,
   },
   { timestamps: true },
 )
@@ -129,38 +79,13 @@ export const privateUserFields: (keyof _User)[] = [
   ...publicUserFields,
   'role',
   'purchasedTours',
-  'billingData',
 ]
-
-export const UserCardSchema = z.object({
-  // TODO: refine
-  brand: z.string(),
-  last4: z.string(),
-  expMonth: z.number(),
-  expYear: z.number(),
-  cardholderName: z.string(),
-})
-
-export const UserAddressSchema = z.object({
-  // TODO: refine with lib?
-  street: z.string(),
-  city: z.string(),
-  state: z.string(),
-  zip: z.string(),
-  country: z.string(),
-})
-
-export const UserBillingDataSchema = z.object({
-  cards: z.array(UserCardSchema),
-  addresses: z.array(UserAddressSchema),
-})
 
 export const SignupInputSchema = z.object({
   username: z.string(),
   email: z.string(),
   password: z.string(),
   profilePicture: z.any().optional(),
-  billingData: UserBillingDataSchema.optional(),
 })
 
 export type SignupInput = z.infer<typeof SignupInputSchema>

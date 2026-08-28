@@ -69,7 +69,6 @@
 
       <!-- Payment Form -->
       <form
-        @submit.prevent="processPayment"
         class="flex flex-col text-p-medium gap-5 bg-white p-8 rounded-3xl shadow-sm border border-p-soft"
       >
         <div class="border-b border-p-soft pb-4 mb-2">
@@ -141,7 +140,11 @@
           </div>
         </fieldset>
 
-        <button type="submit" class="shared-button-full-primary mt-2">
+        <button
+          type="submit"
+          class="shared-button-full-primary mt-2"
+          @click="user.purchasedTours.push(tours)"
+        >
           Conferma e Paga
         </button>
       </form>
