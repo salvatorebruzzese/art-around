@@ -6,6 +6,7 @@
     <title>Editor</title>
     <link href="../styles.css" rel="stylesheet" type="text/css" />
     <script type="module" src="./editor.js" defer></script>
+    <script type="module" src="./shared.js" defer></script>
   </head>
 
   <body
@@ -34,7 +35,7 @@
           @keydown.escape.window="open = false"
           x-show="asideOpen || window.innerWidth >= 768"
           x-transition
-          x-data="{custom: []}"
+          x-data="{counter: 1}"
           style="overflow: auto"
         >
           <div class="flex justify-end">
@@ -67,10 +68,27 @@
               >
                 <div class="w-max flex gap-6">
                   <button
-                    class="shared-button-full-primary w-7"
+                    class="shared-button-full-primary w-max pl-2 pr-2"
                     @click="()=>{ openSelect = true}"
                   >
-                    +
+                    Add
+                  </button>
+                  <button
+                    class="shared-button-full-primary w-max pl-2 pr-2"
+                    @click="()=>{
+                               items[counter] = {
+                                   _id: counter,
+                                   name: `New item ${counter}`,
+                                   itemAuthor: user._id,
+                                   tour: tour._id,
+                                   explanations: [{level: 'simple', text: '', durationSeconds: 0}, ]
+                               }
+                               list.arr.push(counter)
+                               selectedId=counter
+                               counter++;
+                           }"
+                  >
+                    New
                   </button>
                   <h1
                     class="text-2xl text-p-medium font-bold"
@@ -120,39 +138,19 @@
                 <template x-for="id in list.arr">
                   <li
                     class="flex justify-start shared-button-flex-secondary p-2"
+                    @click="selectedId = id"
                   >
                     <div class="flex flex-col items-center mr-3">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        class="mb-2 shared-button-flex-secondary"
+                      <icon-up-arrow
                         @click="() => {
                            const idx = itemNav.findIndex((i) => i === id);
                             if (idx >= 0) {
                                 const [item] = itemNav.splice(idx, 1);
                                 itemNav.splice(idx - 1, 0, item);
-                                console.log(itemNav)
                             }
                            }"
-                      >
-                        <path d="M12 5v14M5 12l7-7 7 7" />
-                      </svg>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        class="shared-button-flex-secondary"
+                      ></icon-up-arrow>
+                      <icon-down-arrow
                         @click="() => {
                            const idx = itemNav.findIndex((i) => i === id);
                             if (idx >= 0) {
@@ -161,10 +159,39 @@
                             }
                            }"
                       >
-                        <path d="M12 19V5M19 12l-7 7-7-7" />
-                      </svg>
+                      </icon-down-arrow>
                     </div>
                     <span class="text-left" x-text="items[id].name"></span>
+
+                    <div style="margin-left: auto">
+                      <div x-data="{dopen:false}" class="dropdown dropdown-end">
+                        <button
+                          @click.stop="dopen = !dopen"
+                          class="btn btn-sm btn-circle bg-white/80 hover:bg-white text-p-dark border-none shadow-md backdrop-blur-sm focus:outline-none list-none"
+                        >
+                          <icon-three-dots></icon-three-dots>
+                        </button>
+                        <div
+                          x-show="dopen"
+                          x-transition
+                          @click.outside="dopen = false"
+                        >
+                          <ul class="nav-dropdown-menu dropdown-end p-2">
+                            <li>
+                              <a
+                                class="shared-button-flex-secondary shadow-none"
+                                >Unlink</a
+                              >
+                            </li>
+                            <li>
+                              <a class="shared-button-flex-warning shadow-none"
+                                >Elimina</a
+                              >
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
                   </li>
                 </template>
               </ul>
@@ -218,8 +245,8 @@
                 <h1 class="text-2xl text-p-medium font-bold">Modifica Item</h1>
               </div>
               <form
-                x-data="{formData: items[selectedId]}"
-                @submit.prevent="saveItem(items[selectedId])"
+                x-data="{get formData(){return items[selectedId]}}"
+                @submit.prevent="saveItem(formData)"
                 class="grid grid-cols-1 md:grid-cols-2 text-p-medium md:p-8 gap-6"
               >
                 <div class="flex flex-col row-span-6">
@@ -248,34 +275,130 @@
                   />
                 </div>
                 <fieldset
-                  class="border border-p-soft p-5 rounded-2xl bg-p-soft/20 mt-2"
+                  x-data="
+                            {
+                                activeTab: null,
+                          init(){
+                            this.activeTab = formData.explanations[0]
+                          console.log(formData.explanations, this.activeTab)
+                          }
+                            }
+                            "
                 >
-                  <legend class="font-semibold bg-p-light rounded-lg">
-                    Spiegazione
-                  </legend>
-                  <div class="flex flex-col gap-4 mt-2">
-                    <div class="flex flex-col gap-1 w-full md:w-1/2">
-                      <label class="text-sm font-medium">Livello</label>
-                      <select
-                        x-model="formData.explanations[0].level"
-                        required
-                        class="w-full px-4 py-2 rounded-xl border border-p-soft bg-white text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium"
+                  <header
+                    class="flex gap-2"
+                    x-data="{newExpOverlay: false, newExpInput: ''}"
+                  >
+                    <template x-for="exp in formData.explanations">
+                      <div>
+                        <label
+                          class="flex-1"
+                          :class="activeTab === exp ? 'bg-blue-100' : ''"
+                          x-text="exp.level"
+                          @click="activeTab = exp"
+                        >
+                        </label>
+                        <span x-data="{overlay:false}" @click="overlay=true">
+                          &times;
+
+                          <template x-if="overlay">
+                            <div
+                              class="fixed inset-0 flex items-center justify-center z-50"
+                              style="background-color: rgba(0, 0, 0, 0.8)"
+                            >
+                              <div
+                                class="bg-white rounded-lg p-6 w-screen max-w-full md:w-[50vw] lg:w-[30vw] shadow-xl flex flex-col items-center"
+                              >
+                                <p>Sei sicuro?</p>
+                                <div
+                                  class="flex space-x-4 w-full justify-center"
+                                >
+                                  <button
+                                    type="button"
+                                    class="shared-button-flex-primary"
+                                    @click.stop="overlay = false;
+                                            formData.explanations = formData.explanations.filter(item => item.level !== exp.level);"
+                                  >
+                                    Ok
+                                  </button>
+                                  <button
+                                    type="button"
+                                    class="shared-button-flex-secondary"
+                                    @click.stop="overlay = false"
+                                  >
+                                    Cancel
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </template>
+                        </span>
+                      </div>
+                    </template>
+                    <button
+                      type="button"
+                      class="w-6"
+                      @click.stop="newExpOverlay = true"
+                    >
+                      +
+                    </button>
+                    <!-- Overlay for new explanation -->
+                    <template x-if="newExpOverlay">
+                      <div
+                        class="fixed inset-0 flex items-center justify-center z-50"
+                        style="background-color: rgba(0, 0, 0, 0.8)"
                       >
-                        <option value="simple">Semplice</option>
-                        <option value="normal">Normale</option>
-                        <option value="advanced">Avanzato</option>
-                      </select>
-                    </div>
-                    <div class="flex flex-col gap-1 w-full">
+                        <div
+                          class="bg-white rounded-lg p-6 w-screen max-w-full md:w-[50vw] lg:w-[30vw] shadow-xl flex flex-col items-center"
+                        >
+                          <input
+                            type="text"
+                            x-model="newExpInput"
+                            class="mb-4 w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Enter text..."
+                          />
+                          <div class="flex space-x-4 w-full justify-center">
+                            <button
+                              type="button"
+                              class="shared-button-flex-primary"
+                              @click="newExpOverlay = false; formData.explanations.push({level: newExpInput, text: ''})"
+                            >
+                              Ok
+                            </button>
+                            <button
+                              type="button"
+                              class="shared-button-flex-secondary"
+                              @click="newExpOverlay = false"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </template>
+                  </header>
+                  <template x-for="exp in formData.explanations">
+                    <div
+                      x-show="exp === activeTab"
+                      class="flex flex-col gap-1 w-full"
+                    >
                       <label class="text-sm font-medium">Testo</label>
                       <textarea
-                        x-model="formData.explanations[0].text"
+                        x-model="exp.text"
                         required
                         rows="4"
                         class="w-full px-4 py-2 rounded-xl border border-p-soft bg-white text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium resize-none"
                       ></textarea>
+                      <label> Durata(s) </label>
+                      <input
+                        x-model.number="exp.durationSeconds"
+                        type="number"
+                        min="0"
+                        max="3600"
+                        step="1"
+                      />
                     </div>
-                  </div>
+                  </template>
                 </fieldset>
                 <button
                   type="submit"
@@ -286,8 +409,74 @@
             </div>
           </template>
         </section>
-        <section x-show="activeTab == 'edit_tour'">edit item</section>
+        <section x-show="activeTab == 'edit_tour'">
+          <button
+            class="shared-button-full-primary"
+            @click="saveItemsAndTour()"
+          >
+            Salva tour
+          </button>
+        </section>
       </main>
     </div>
   </body>
+  <script>
+    customElements.define(
+      'icon-three-dots',
+      class extends HTMLElement {
+        connectedCallback() {
+          this.innerHTML = `
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M10 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4z"/>
+        </svg>
+      `
+        }
+      },
+    )
+
+    customElements.define(
+      'icon-up-arrow',
+      class extends HTMLElement {
+        connectedCallback() {
+          this.innerHTML = `
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="mb-2 shared-button-flex-secondary"
+                      >
+                        <path d="M12 5v14M5 12l7-7 7 7" />
+                      </svg>
+`
+        }
+      },
+    )
+    customElements.define(
+      'icon-down-arrow',
+      class extends HTMLElement {
+        connectedCallback() {
+          this.innerHTML = `
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="shared-button-flex-secondary"
+                      >
+                        <path d="M12 19V5M19 12l-7 7-7-7" />
+                      </svg>
+`
+        }
+      },
+    )
+  </script>
 </html>

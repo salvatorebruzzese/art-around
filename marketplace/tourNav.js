@@ -1,6 +1,6 @@
 import Alpine from 'alpinejs'
-import { getTour, saveTour } from '../marketplace/api/tours'
-import { saveItem, getItemsByTour } from '../marketplace/api/items'
+import { getTour } from '../marketplace/api/tours'
+import { getItemsByTour } from '../marketplace/api/items'
 
 export class TourNavigation {
   tour = null
@@ -20,16 +20,6 @@ export class TourNavigation {
     res.forEach((i) => (this.items[i._id] = i))
     this.itemNav = this.tour.itemNav
     this.selectedId = startingItemId
-  }
-
-  saveTour() {
-    this.items.map(saveItem)
-    saveTour({
-      _id: this.tour._id,
-      itemNav: this.itemNav,
-      items: this.items.map((i) => i._id), // arr of ids
-      // will be extended
-    })
   }
 
   async initByURL() {

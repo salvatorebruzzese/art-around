@@ -97,12 +97,8 @@ export const Item = mongoose.model<IItem>('Item', itemSchema)
 // DESCRIPTION VALIDATOR
 // ---------------------
 
-const levels = ['simple', 'normal', 'advanced']
-
 const DescriptionSchemaZod = z.object({
-  level: z.string().refine((str) => levels.includes(str), {
-    error: 'Level must be either normal, simple or advanced',
-  }),
+  level: z.string(),
   text: z.string(),
   durationSeconds: z.number().min(0),
 })
@@ -122,7 +118,7 @@ const ItemInputSchemaZod = z.object({
   license: z.string(),
   tags: z.array(z.string()).optional(),
   refs: objectIdZod.array().optional(),
-  image: z.array(objectIdZod).optional(),
+  image: objectIdZod.optional(),
 })
 
 const ItemQuerySchemaZod = z.object({
@@ -133,7 +129,7 @@ const ItemQuerySchemaZod = z.object({
   license: z.string().optional(),
   refs: objectIdZod.array().optional(),
   tags: z.array(z.string()).optional(),
-  image: z.array(objectIdZod).optional(),
+  image: objectIdZod.optional(),
 })
 
 const ItemPatchSchemaZod = ItemInputSchemaZod.partial()

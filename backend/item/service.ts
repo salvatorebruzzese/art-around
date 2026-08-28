@@ -137,7 +137,6 @@ async function patchItem(
   if (itemResult.isLeft()) return itemResult
   const item = itemResult.unsafeCoerce()
 
-  console.log('qui')
   // Only admin or author can edit
   if (user.role !== Role['Admin']) {
     if (!item.itemAuthor.equals(userId)) {

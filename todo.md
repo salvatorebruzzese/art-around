@@ -14,15 +14,14 @@
 
 ## Editor
 - [x] Bottoni per gestione dell'ordine 
-    - [ ] Load items (@click set selectedId )
-- [ ] New item (@click append new item in items + ref in stash)
-- [ ] Save tour (@click saveTour call)
-  - [?] API call 
-  - [ ] UI 
+    - [X] Load items (@click set selectedId )
+- [X] New item (@click append new item in items + ref in list)
+- [X] Save tour (@click saveTour call)
+  - [X] Explanations
 - [ ] Refs
-  - UI (easy)
+    - UI (easy)
 - [ ] Eliminazione item
-    - [ ] ui (dropdown -> del -> overlay confirmation)
+    - [X] ui (dropdown -> del -> overlay confirmation)
     - [ ] backend (remove from references? or client-side?)
 - [ ] Upload immagini 
     - [ ] fix backend (potrebbe non essere sufficiente quello attuale)

@@ -10,14 +10,17 @@ export async function getItem(itemId) {
   return await res.json()
 }
 
-export async function saveItem(data) {
+export async function saveItemPromise(data) {
   const method = data._id ? 'PATCH' : 'POST'
   const url = data._id ? `/api/items/${data._id}` : '/api/items'
-  const res = await fetch(url, {
+  return fetch(url, {
     method,
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   })
+}
+export async function saveItem(data) {
+  let res = await saveItemPromise(data)
   if (!res.ok) throw res
   return await res.json()
 }
