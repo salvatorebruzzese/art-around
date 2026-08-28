@@ -57,7 +57,9 @@ const UserInputSchemaZod = UserBaseSchemaZod.extend({
   password: z.string(),
 })
 
-const UserPatchSchemaZod = UserInputSchemaZod.partial()
+const UserPatchSchemaZod = UserInputSchemaZod.extend({
+  purchasedTours: z.array(objectIdZod),
+}).partial()
 
 export type UserQuery = z.infer<typeof UserQuerySchemaZod>
 export const UserQuery = { validate: makeZodValidator(UserQuerySchemaZod) }

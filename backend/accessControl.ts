@@ -67,14 +67,20 @@ const Teacher: Permission[] = [
 const Admin: Permission[] = [...Teacher, 'edit:all']
 
 export const ACMatrix: Record<Role, Permission[]> = {
-  [Role['Guest']]: Guest,
-  [Role['User']]: User,
-  [Role['Teacher']]: Teacher,
-  [Role['Admin']]: Admin,
+  [Role.Guest]: Guest,
+  [Role.User]: User,
+  [Role.Teacher]: Teacher,
+  [Role.Admin]: Admin,
 }
 
 export function checkRole(role: Role, permission: Permission): boolean {
-  return ACMatrix[role] && ACMatrix[role].includes(permission)
+  const permissions = ACMatrix[role]
+  if (!permissions) return false
+
+  // Se il ruolo possiede 'edit:all', ha accesso a qualsiasi permesso
+  if (permissions.includes('edit:all')) return true
+
+  return permissions.includes(permission)
 }
 
 export function ensureAuth(req: Request, res: Response, next: NextFunction) {

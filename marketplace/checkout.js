@@ -3,6 +3,7 @@ import './userManager'
 
 document.addEventListener('alpine:init', () => {
   Alpine.data('checkout', () => ({
+    tourIds: [],
     tours: [],
     total: 0,
     user: null,
@@ -13,16 +14,18 @@ document.addEventListener('alpine:init', () => {
 
       if (!toursParam) return
 
-      const tourIds = toursParam.split(',')
+      this.tourIds = toursParam
+        .split(',')
+        .map((id) => id.trim())
+        .filter(Boolean)
 
-      const fetchPromises = tourIds.map(async (id) => {
+      this.cloneIds = this.tourIds
+      const fetchPromises = this.tourIds.map(async (id) => {
         try {
-          const response = await fetch('/api/tours/' + id.trim())
-          if (response.ok) {
-            return await response.json()
-          }
-        } catch (error) {
-          console.error('Errore durante il recupero del tour:', error)
+          const res = await fetch(`/api/tours/${id}`)
+          if (res.ok) return await res.json()
+        } catch (err) {
+          console.error('Errore durante il recupero del tour:', err)
         }
         return null
       })
@@ -31,6 +34,29 @@ document.addEventListener('alpine:init', () => {
       this.tours = results.filter((tour) => tour !== null)
       this.total = this.tours.reduce((sum, tour) => sum + (tour.price || 0), 0)
       this.user = await Alpine.store('userManager').getUser()
+    },
+    async updateUser() {
+      if (!this.user?._id) {
+        console.error('Utente non valido o ID mancante.')
+        return
+      }
+
+      try {
+        const response = await fetch('/api/users/' + this.user._id, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ tours: this.cloneIds }),
+        })
+        if (!response.ok)
+          throw new Error(`HTTP error! status: ${response.status}`)
+
+        const data = await response.json()
+        console.log('Updated:', data)
+      } catch (error) {
+        console.error('Fetch error:', error)
+      }
     },
   }))
 })
