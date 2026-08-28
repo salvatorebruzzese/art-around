@@ -5,7 +5,6 @@ import {
   ItemInput,
   safeItemFields,
   ItemPatch,
-  metaItemFields,
 } from './model.js'
 import { Either, Left, Right } from 'purify-ts/Either'
 import { Types } from 'mongoose'
@@ -59,7 +58,7 @@ async function listItems(
   try {
     const items = await Item.find(query).lean().exec()
     return items
-      ? Right(items.map((item) => project(metaItemFields, item)))
+      ? Right(items.map((item) => project(safeItemFields, item)))
       : Left(notFound())
   } catch (e) {
     return Left(dbError(undefined, () => String(e)))

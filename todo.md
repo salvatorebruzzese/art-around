@@ -13,18 +13,22 @@
       Auto new tour from scratch?
 
 ## Editor
-
-- [ ] Bottoni per gestione dell'ordine
+- [x] Bottoni per gestione dell'ordine 
+    - [ ] Load items (@click set selectedId )
+- [ ] New item (@click append new item in items + ref in stash)
+- [ ] Save tour (@click saveTour call)
+  - [?] API call 
+  - [ ] UI 
+- [ ] Refs
+  - UI (easy)
 - [ ] Eliminazione item
-  - [ ] ui
-  - [ ] backend
-- [ ] Upload immagini
-  - [ ] fix backend (potrebbe non essere sufficiente quello attuale)
-  - [ ] Implmentazione ui editor
+    - [ ] ui (dropdown -> del -> overlay confirmation)
+    - [ ] backend (remove from references? or client-side?)
+- [ ] Upload immagini 
+    - [ ] fix backend (potrebbe non essere sufficiente quello attuale)
+    - [ ] Implmentazione ui (3dots)
 - [ ] reload on history change (update user quicknav)
-- [ ] ripensare la cache img
-- [ ] responsivness
-
+- [~] responsivness
 ### Bugs
 
 - [ ] auto set default level
