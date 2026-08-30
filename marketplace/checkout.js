@@ -19,7 +19,6 @@ document.addEventListener('alpine:init', () => {
         .map((id) => id.trim())
         .filter(Boolean)
 
-      this.cloneIds = this.tourIds
       const fetchPromises = this.tourIds.map(async (id) => {
         try {
           const res = await fetch(`/api/tours/${id}`)
@@ -41,13 +40,16 @@ document.addEventListener('alpine:init', () => {
         return
       }
 
+      this.user.purchasedTours = [
+        ...new Set([...this.user.purchasedTours, ...this.tourIds]),
+      ] // Update user with new elements only
       try {
         const response = await fetch('/api/users/' + this.user._id, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ tours: this.cloneIds }),
+          body: JSON.stringify(this.user), // Updated user
         })
         if (!response.ok)
           throw new Error(`HTTP error! status: ${response.status}`)
