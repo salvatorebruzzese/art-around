@@ -24,6 +24,7 @@
 - [ ] Eliminazione item
     - [X] ui (dropdown -> del -> overlay confirmation)
     - [ ] backend (remove from references? or client-side?)
+    - [X] UNLINK
 - [ ] Upload immagini 
     - [ ] fix backend (potrebbe non essere sufficiente quello attuale)
     - [ ] Implmentazione ui (3dots)
