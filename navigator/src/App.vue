@@ -216,13 +216,16 @@ function selectMuseum(museum) {
   </div>
 
   <!-- Main Container -->
-  <div v-else class="flex flex-col gap-4 h-screen items-center justify-center">
+  <div
+    v-else
+    class="flex flex-col mx-4 gap-4 h-screen items-center justify-center"
+  >
     <!-- View 1: OTP Code -->
     <div
       v-if="activeTab === 'otp'"
-      class="flex flex-col items-center rounded-xl border border-p-soft shadow-xl p-8 gap-4 text-center overflow-visible"
+      class="flex flex-col items-center rounded-xl border border-p-soft shadow-xl p-4 gap-4 text-center overflow-visible"
     >
-      <h1 class="text-4xl text-p-medium mb-4">Hai ricevuto un codice?</h1>
+      <h1 class="text-3xl text-p-medium mb-4">Hai ricevuto un codice?</h1>
       <label class="otp">
         <span></span>
         <span></span>
@@ -251,9 +254,9 @@ function selectMuseum(museum) {
     <!-- View 2: Search Visit -->
     <div
       v-else
-      class="flex flex-col items-center rounded-xl border border-p-soft shadow-xl p-8 gap-4 text-center overflow-visible"
+      class="flex flex-col items-center rounded-xl border border-p-soft shadow-xl p-4 gap-4 text-center overflow-visible"
     >
-      <h1 class="text-4xl text-p-medium mb-4">Scegli una visita</h1>
+      <h1 class="text-3xl text-p-medium mb-4">Scegli una visita</h1>
 
       <div class="relative flex-1 max-w-lg min-w-[250px]">
         <input

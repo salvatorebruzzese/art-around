@@ -134,21 +134,29 @@
       class="fixed z-40 bottom-0 left-0 right-0 bg-white/80 backdrop-blur border-t border-p-soft/60 flex items-center justify-between px-4 py-3 shadow-lg"
       style="min-height: 56px"
     >
-      <button @click="showMenu = true" aria-label="Menu" class="nav-icon-link">
-        <svg
-          class="w-6 h-6 text-p-dark"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          viewBox="0 0 24 24"
+      <a
+        href="/home"
+        class="nav-icon-link group !p-0 !border-none shadow-sm rounded-xl hover:!bg-transparent"
+        ><svg
+          width="48"
+          height="48"
+          viewBox="0 0 48 48"
+          xmlns="http://www.w3.org/2000/svg"
         >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M4 6h16M4 12h16M4 18h16"
+          <rect
+            width="48"
+            height="48"
+            rx="12"
+            fill="white"
+            stroke="none"
+            class="group-hover:fill-[var(--color-p-medium)] transition-colors"
           />
-        </svg>
-      </button>
+          <path
+            d="M24 12 L10 24 H14 V36 H22 V28 H26 V36 H34 V24 H38 Z"
+            fill="var(--color-p-medium)"
+            class="group-hover:fill-[var(--color-p-light)] transition-colors"
+          /></svg
+      ></a>
       <button
         @click="showSearch = true"
         aria-label="Search"
@@ -174,79 +182,7 @@
           <span class="text-p-medium/60 text-sm">Cerca tour, musei…</span>
         </div>
       </button>
-      <button
-        @click="openProfile"
-        aria-label="Profile"
-        class="nav-avatar-trigger"
-      >
-        <img
-          v-if="user.avatar"
-          :src="user.avatar"
-          class="rounded-full w-14 h-14 object-cover border-2 border-p-soft"
-          alt="profile"
-        />
-        <div
-          v-else
-          class="bg-p-medium text-white rounded-full w-14 h-14 flex items-center justify-center font-bold text-lg"
-        >
-          {{ user.initials }}
-        </div>
-      </button>
     </nav>
-
-    <!-- Menu Overlay -->
-    <transition name="fade">
-      <div
-        v-if="showMenu"
-        class="fixed inset-0 z-50 bg-p-dark/50 backdrop-blur-sm flex items-end"
-        @click.self="showMenu = false"
-      >
-        <div
-          class="w-full bg-white rounded-t-2xl border border-p-soft shadow-2xl p-8"
-        >
-          <div class="flex items-center justify-between mb-6">
-            <div class="font-bold text-2xl text-p-dark font-serif">Menu</div>
-            <button @click="showMenu = false" class="nav-icon-link">
-              <svg
-                class="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-          </div>
-          <ul class="space-y-4">
-            <li>
-              <button class="shared-button-full-secondary w-full font-sans">
-                Home
-              </button>
-            </li>
-            <li>
-              <button class="shared-button-full-secondary w-full font-sans">
-                Esplora
-              </button>
-            </li>
-            <li>
-              <button class="shared-button-full-secondary w-full font-sans">
-                I miei ticket
-              </button>
-            </li>
-            <li>
-              <button class="shared-button-full-secondary w-full font-sans">
-                Assistenza
-              </button>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </transition>
 
     <!-- Search Overlay -->
     <transition name="fade">
