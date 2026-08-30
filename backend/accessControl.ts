@@ -50,6 +50,7 @@ const User: Permission[] = [
   'purchase:tour',
   'create:tour',
   'create:item',
+  'create:asset',
   'edit:tour',
   'edit:item',
   'edit:asset',

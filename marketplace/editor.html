@@ -213,11 +213,44 @@
               </div>
               <form
                 x-data="{get formData(){return items[selectedId]}}"
-                @submit.prevent="saveItem(formData)"
                 class="grid grid-cols-1 md:grid-cols-2 text-p-medium md:p-8 gap-6"
               >
                 <div class="flex flex-col row-span-6 gap-4">
                   <figure>
+                    <div x-data="{dopen: false}" class="dropdown dropdown-end">
+                      <button
+                        type="button"
+                        @click.stop="dopen = !dopen"
+                        class="btn btn-sm btn-circle bg-white/80 hover:bg-white text-p-dark border-none shadow-md backdrop-blur-sm focus:outline-none list-none"
+                      >
+                        <icon-three-dots></icon-three-dots>
+                      </button>
+                      <div
+                        x-show="dopen"
+                        x-transition
+                        @click.outside="dopen = false"
+                      >
+                        <ul class="nav-dropdown-menu dropdown-end p-2">
+                          <li>
+                            <button
+                              type="button"
+                              x-data="OverlayDispatcher('assetUpload')"
+                              class="shared-button-flex-secondary shadow-none"
+                              @click.stop="const res = await mkOverlayRequest({ filetype: 'image/png, image/jpeg' });
+                                    dopen = false;
+                                    if(res.status){
+                                        const id = selectedId // might change
+                                        const res2 = await loadAsset(res.file, true, user, tour)
+                                        const obj = await res2.json()
+                                        items[id].image = obj._id
+                                    }"
+                            >
+                              Carica
+                            </button>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
                     <img
                       :src="formData.image ? '/api/assets/'+formData.image : ''"
                       :alt="formData.imageAlt ? formData.imageAlt : 'Item image'"
@@ -312,6 +345,7 @@
                 <button
                   type="submit"
                   class="shared-button-full-primary"
+                  @click="saveItem(formData)"
                   x-text="typeof formData._id !== 'number'? 'Salva Modifiche':'Crea'"
                 ></button>
               </form>
@@ -442,6 +476,49 @@
             >
               Ok
             </button>
+          </div>
+        </div>
+      </template>
+    </div>
+
+    <!-- assetUpload -->
+    <!-- Input: {message: string, filetype: string} -->
+    <!-- Output: {status: boolean, file: selected file} -->
+    <div x-data="OverlayListener('assetUpload')" x-cloak>
+      <template x-if="body && open">
+        <div
+          class="fixed inset-0 flex items-center justify-center z-50"
+          style="background-color: rgba(0, 0, 0, 0.8)"
+        >
+          <div
+            class="bg-white rounded-lg p-6 w-screen max-w-full md:w-[50vw] lg:w-[30vw] shadow-xl flex flex-col items-center"
+          >
+            <div
+              x-data="{set: false}"
+              class="w-full flex flex-col items-center space-y-4"
+            >
+              <input
+                type="file"
+                class="file-input border rounded px-4 py-2 w-full"
+                :accept="body.filetype"
+                @change="body.file = $event.target.files[0]; set = true"
+              />
+              <div class="flex space-x-4 w-full justify-center">
+                <button
+                  @click.stop="close(set)"
+                  class="shared-button-flex-primary"
+                >
+                  Ok
+                </button>
+                <button
+                  type="button"
+                  class="shared-button-flex-secondary"
+                  @click="close(false)"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </template>

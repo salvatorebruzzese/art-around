@@ -25,9 +25,11 @@
     - [X] ui (dropdown -> del -> overlay confirmation)
     - [ ] backend (remove from references? or client-side?)
     - [X] UNLINK
-- [ ] Upload immagini 
-    - [ ] fix backend (potrebbe non essere sufficiente quello attuale)
-    - [ ] Implmentazione ui (3dots)
+- [~] Upload immagini 
+    - [X] fix backend (potrebbe non essere sufficiente quello attuale)
+    - [~] Implmentazione ui (3dots)
+        - [X] nuova
+        - [ ] selezionare vecchia
 - [ ] reload on history change (update user quicknav)
 - [ ] Error handling 
   - [ ] see saveItem (wrapper)
@@ -56,3 +58,6 @@
 # Routing
 
 - [~] No-login solo per market e access
+
+# Deploy
+- [ ] settare file a 755 e? 644

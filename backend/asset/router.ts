@@ -4,6 +4,7 @@ import AssetService from './service.js'
 import mongoose, { Types } from 'mongoose'
 import { ensureAuth } from '../accessControl.js'
 import { handleLeft } from '../shared/router.js'
+import multer from 'multer'
 
 const router = express.Router()
 
@@ -46,27 +47,35 @@ router.get('/:id', async (req, res) => {
   })
 })
 
-router.post('/', ensureAuth, async (req: Request, res: Response) => {
-  // Explicit validation
-  const validation = AssetInput.validate(req.body)
-  if (validation.isLeft())
-    return res.status(400).json({ error: validation.extract() })
-  const input = validation.unsafeCoerce()
-  const result = await AssetService.createAsset(input, req.user!._id)
-  result.caseOf({
-    Right: (asset) => res.status(201).json(asset),
-    Left: (error) => {
-      switch (error.type) {
-        case 'DBError':
-          return res.status(500).json({ error })
-        case 'AccessDenied':
-          return res.status(403).json({ error })
-        case 'ValidationError':
-          return res.status(400).json({ error })
-      }
-    },
-  })
-})
+router.post(
+  '/',
+  ensureAuth,
+  multer().single('data'),
+  async (req: Request, res: Response) => {
+    // Explicit validation
+    const validation = AssetInput.validate(req.body)
+    if (validation.isLeft())
+      return res.status(400).json({ error: validation.extract() })
+    const input = validation.unsafeCoerce()
+    if (req.file) {
+      input.data = req.file.buffer
+    }
+    const result = await AssetService.createAsset(input, req.user!._id)
+    result.caseOf({
+      Right: (asset) => res.status(201).json(asset),
+      Left: (error) => {
+        switch (error.type) {
+          case 'DBError':
+            return res.status(500).json({ error })
+          case 'AccessDenied':
+            return res.status(403).json({ error })
+          case 'ValidationError':
+            return res.status(400).json({ error })
+        }
+      },
+    })
+  },
+)
 
 router.patch('/:id', ensureAuth, async (req: Request, res: Response) => {
   const assetID = Array.isArray(req.params.id)

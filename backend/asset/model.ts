@@ -39,7 +39,7 @@ const AssetInputSchemaZod = z.object({
   tour: objectIdZod,
   data: z.any(), // or z.instanceof(Buffer)
   datatype: z.string(),
-  public: z.boolean().optional(),
+  public: z.preprocess((v) => v === 'true', z.boolean().optional()),
 })
 
 const AssetQuerySchemaZod = z.object({
