@@ -296,10 +296,7 @@
                             }
                             "
                 >
-                  <header
-                    class="flex gap-2"
-                    x-data="{newExpOverlay: false, newExpInput: ''}"
-                  >
+                  <header class="flex gap-2">
                     <template x-for="exp in formData.explanations">
                       <div>
                         <label
@@ -309,84 +306,29 @@
                           @click="activeTab = exp"
                         >
                         </label>
-                        <span x-data="{overlay:false}" @click="overlay=true">
+                        <span
+                          x-data="OverlayDispatcher('confirmation')"
+                          @click="const res = await mkOverlayRequest({message: 'Sei sicuro?'});
+                                  if(res.status){
+                                    formData.explanations = formData.explanations.filter(item => item.level !== exp.level);
+                                  }"
+                        >
                           &times;
-
-                          <template x-if="overlay">
-                            <div
-                              class="fixed inset-0 flex items-center justify-center z-50"
-                              style="background-color: rgba(0, 0, 0, 0.8)"
-                            >
-                              <div
-                                class="bg-white rounded-lg p-6 w-screen max-w-full md:w-[50vw] lg:w-[30vw] shadow-xl flex flex-col items-center"
-                              >
-                                <p>Sei sicuro?</p>
-                                <div
-                                  class="flex space-x-4 w-full justify-center"
-                                >
-                                  <button
-                                    type="button"
-                                    class="shared-button-flex-primary"
-                                    @click.stop="overlay = false;
-                                            formData.explanations = formData.explanations.filter(item => item.level !== exp.level);"
-                                  >
-                                    Ok
-                                  </button>
-                                  <button
-                                    type="button"
-                                    class="shared-button-flex-secondary"
-                                    @click.stop="overlay = false"
-                                  >
-                                    Cancel
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          </template>
                         </span>
                       </div>
                     </template>
+                    <!-- newexpoverlay btn -->
                     <button
+                      x-data="OverlayDispatcher('textinput')"
                       type="button"
                       class="w-6"
-                      @click.stop="newExpOverlay = true"
+                      @click.stop="const res = await mkOverlayRequest({input: '', status: null});
+                                if(res.status){
+                                    formData.explanations.push({level: res.input, text: ''})
+                                }"
                     >
                       +
                     </button>
-                    <!-- Overlay for new explanation -->
-                    <template x-if="newExpOverlay">
-                      <div
-                        class="fixed inset-0 flex items-center justify-center z-50"
-                        style="background-color: rgba(0, 0, 0, 0.8)"
-                      >
-                        <div
-                          class="bg-white rounded-lg p-6 w-screen max-w-full md:w-[50vw] lg:w-[30vw] shadow-xl flex flex-col items-center"
-                        >
-                          <input
-                            type="text"
-                            x-model="newExpInput"
-                            class="mb-4 w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="Enter text..."
-                          />
-                          <div class="flex space-x-4 w-full justify-center">
-                            <button
-                              type="button"
-                              class="shared-button-flex-primary"
-                              @click="newExpOverlay = false; formData.explanations.push({level: newExpInput, text: ''})"
-                            >
-                              Ok
-                            </button>
-                            <button
-                              type="button"
-                              class="shared-button-flex-secondary"
-                              @click="newExpOverlay = false"
-                            >
-                              Cancel
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </template>
                   </header>
                   <template x-for="exp in formData.explanations">
                     <div
@@ -431,25 +373,9 @@
       </main>
     </div>
 
-    <div x-data="OverlayDispatcher">
-      <button
-        type="button"
-        @click="mkOverlayRequest('confirmation', {message: 'Pressare?'})"
-      >
-        PRESSAMI
-      </button>
-    </div>
     <!-- Overlays -->
     <!-- Confirmation -->
-    <div
-      x-data="{
-                open: false,
-                reqId: null,
-                body: null,
-                }"
-      @confirmation:request.window="open = true; reqId = $event.detail.id; body = $event.detail.body"
-      x-cloak
-    >
+    <div x-data="OverlayListener('confirmation')" x-cloak>
       <template x-if="body">
         <div
           x-show="open"
@@ -461,17 +387,51 @@
           >
             <p x-text="body.message"></p>
             <div class="flex justify-between w-full">
-              <button
-                class="shared-button-full-primary"
-                @click="open=false; $dispatch('confirmation:response', {id: reqId, confirmed: true})"
-              >
+              <button class="shared-button-full-primary" @click="close(true)">
                 Ok
               </button>
               <button
                 class="shared-button-full-secondary"
-                @click="open=false; $dispatch('confirmation:response', {id: reqId, confirmed: false})"
+                @click="close(false)"
               >
-                cancel
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      </template>
+    </div>
+
+    <!-- Textinput -->
+    <div x-data="OverlayListener('textinput')" x-cloak>
+      <template x-if="body && open">
+        <div
+          class="fixed inset-0 flex items-center justify-center z-50"
+          style="background-color: rgba(0, 0, 0, 0.8)"
+        >
+          <div
+            class="bg-white rounded-lg p-6 w-screen max-w-full md:w-[50vw] lg:w-[30vw] shadow-xl flex flex-col items-center"
+          >
+            <input
+              type="text"
+              x-model="body.input"
+              class="mb-4 w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter text..."
+            />
+            <div class="flex space-x-4 w-full justify-center">
+              <button
+                type="button"
+                class="shared-button-flex-primary"
+                @click="close(true)"
+              >
+                Ok
+              </button>
+              <button
+                type="button"
+                class="shared-button-flex-secondary"
+                @click="close(false)"
+              >
+                Cancel
               </button>
             </div>
           </div>

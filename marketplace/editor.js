@@ -5,6 +5,7 @@ import { saveTour } from '../marketplace/api/tours'
 
 import './userManager.js'
 import './quick-nav.js'
+import './Overlay.js'
 
 document.addEventListener('alpine:init', () => {
   Alpine.data(
@@ -60,23 +61,6 @@ document.addEventListener('alpine:init', () => {
       })(),
   )
 })
-
-Alpine.data('OverlayDispatcher', () => ({
-  mkOverlayRequest(eventName, body) {
-    return new Promise((res) => {
-      const reqId = String(Date.now())
-      const handler = (e) => {
-        if (e.detail.id === reqId) {
-          res(e.detail.body)
-          console.log('ok')
-          document.removeEventListener(eventName + ':response', handler)
-        }
-      }
-      document.addEventListener(eventName + ':response', handler)
-      this.$dispatch(eventName + ':request', { id: reqId, body: body })
-    })
-  },
-}))
 
 window.Alpine = Alpine
 Alpine.start()
