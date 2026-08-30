@@ -27,6 +27,8 @@
     - [ ] fix backend (potrebbe non essere sufficiente quello attuale)
     - [ ] Implmentazione ui (3dots)
 - [ ] reload on history change (update user quicknav)
+- [ ] Error handling 
+  - [ ] see saveItem (wrapper)
 - [~] responsivness
 ### Bugs
 

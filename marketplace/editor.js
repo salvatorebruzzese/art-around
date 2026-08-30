@@ -25,7 +25,10 @@ document.addEventListener('alpine:init', () => {
             await saveItem(data)
             alert('Modifiche salvete con successo!')
           } catch (e) {
-            console.log(e)
+            // TODO: handle error types
+            // default/db:
+            alert('An error occurred.')
+            console.log('Error', await e.json())
           }
         }
 
