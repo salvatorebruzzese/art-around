@@ -18,8 +18,9 @@
 - [X] New item (@click append new item in items + ref in list)
 - [X] Save tour (@click saveTour call)
   - [X] Explanations
-- [ ] Refs
-    - UI (easy)
+- [X] Refs
+    - [X] Add
+    - [X] Remove
 - [ ] Eliminazione item
     - [X] ui (dropdown -> del -> overlay confirmation)
     - [ ] backend (remove from references? or client-side?)
