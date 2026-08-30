@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import selectionView from './selection.vue'
 
 const activeTab = ref<'otp' | 'search'>('otp')
 const searchQuery = ref('')
@@ -252,52 +253,9 @@ function selectMuseum(museum) {
     </div>
 
     <!-- View 2: Search Visit -->
-    <div
-      v-else
-      class="flex flex-col items-center rounded-xl border border-p-soft shadow-xl p-4 gap-4 text-center overflow-visible"
-    >
-      <h1 class="text-3xl text-p-medium mb-4">Scegli una visita</h1>
-
-      <div class="relative flex-1 max-w-lg min-w-[250px]">
-        <input
-          v-model="searchQuery"
-          @focus="isDropdownOpen = searchResults.length > 0"
-          type="text"
-          placeholder="Cerca museo..."
-          class="input input-bordered rounded-full w-full pr-12 border-p-soft bg-white text-p-dark placeholder-p-medium focus:border-p-medium focus:ring-2 focus:ring-p-soft focus:outline-none transition-all shadow-sm"
-        />
-
-        <!-- Dropdown Result List -->
-        <ul
-          v-if="isDropdownOpen"
-          class="absolute left-0 right-0 mt-2 bg-white border border-p-soft rounded-2xl shadow-xl max-h-60 overflow-y-auto z-50 p-2 space-y-1 text-left"
-        >
-          <li
-            v-for="museum in searchResults"
-            :key="museum._id"
-            @click="selectMuseum(museum)"
-            class="p-3 hover:bg-p-soft/20 rounded-xl cursor-pointer transition-colors"
-          >
-            <p class="font-bold text-p-medium">{{ museum.name }}</p>
-            <p v-if="museum.address" class="text-xs text-p-dark/70">
-              {{ museum.address }}
-            </p>
-            <p
-              v-if="museum.description"
-              class="text-sm text-p-dark line-clamp-2 mt-1"
-            >
-              {{ museum.description }}
-            </p>
-          </li>
-        </ul>
-      </div>
-
-      <button
-        @click="activeTab = 'otp'"
-        class="mt-4 text-sm text-p-medium hover:underline cursor-pointer focus:outline-none"
-      >
-        Hai ricevuto un codice?
-      </button>
+    <div v-else>
+      <!-- Renderizza il componente importato -->
+      <selectionView />
     </div>
   </div>
 </template>
