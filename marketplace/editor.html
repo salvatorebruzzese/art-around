@@ -71,12 +71,12 @@
             <div>
               <div
                 class="w-full flex justify-between items-center border-b border-p-soft p-4 mb-2"
-                x-data="{openSelect:false}"
               >
                 <div class="w-max flex gap-6">
                   <button
+                    x-data="OverlayDispatcher('selection')"
                     class="shared-button-full-primary w-max pl-2 pr-2"
-                    @click="()=>{ openSelect = true}"
+                    @click="mkOverlayRequest({selection: list.selection, arr: list.arr, message: 'Seleziona un item'})"
                   >
                     Add
                   </button>
@@ -101,44 +101,6 @@
                     class="text-2xl text-p-medium font-bold"
                     x-text="list.name"
                   ></h1>
-                  <!-- Overlay for '+' item selection -->
-                  <template x-if="openSelect">
-                    <div
-                      x-show="openSelect"
-                      class="flex flex-col fixed top-0 left-0 h-full w-full bg-white bg-opacity-80 z-60"
-                      x-data="{addList: []}"
-                    >
-                      <header class="flex justify-between">
-                        <h1 class="text-2xl text-p-medium font-bold">
-                          Seleziona un item
-                        </h1>
-                        <button
-                          class="float-right w-[15vw] h-[15vw] md:w-10 md:h-10 rounded-full bg-[var(--color-p-light)] text-[var(--color-p-dark)] text-2xl"
-                          @click="openSelect = false"
-                        >
-                          &times;
-                        </button>
-                      </header>
-                      <ul>
-                        <template x-for="id in list.selection">
-                          <li>
-                            <input type="checkbox" @click="addList.push(id)" />
-                            <span
-                              class="text-left"
-                              x-text="items[id].name"
-                            ></span>
-                          </li>
-                        </template>
-                      </ul>
-                      <button
-                        class="shared-button-primary"
-                        @click="list.arr = list.arr.concat(addList); openSelect = false"
-                      >
-                        Ok
-                      </button>
-                    </div>
-                  </template>
-                  <!-- End of overlay selection -->
                 </div>
               </div>
               <ul class="flex flex-col gap-6">
@@ -373,8 +335,10 @@
       </main>
     </div>
 
-    <!-- Overlays -->
+    <!-- === Overlays === -->
     <!-- Confirmation -->
+    <!-- Input: {message: string} -->
+    <!-- Output: {status: boolean} -->
     <div x-data="OverlayListener('confirmation')" x-cloak>
       <template x-if="body">
         <div
@@ -403,6 +367,8 @@
     </div>
 
     <!-- Textinput -->
+    <!-- Input: {message: string} -->
+    <!-- Output: {status: boolean, input: string} -->
     <div x-data="OverlayListener('textinput')" x-cloak>
       <template x-if="body && open">
         <div
@@ -434,6 +400,54 @@
                 Cancel
               </button>
             </div>
+          </div>
+        </div>
+      </template>
+    </div>
+
+    <!-- Item Selection overlay -->
+    <!-- Input: {
+         message: string,
+         selection: list of IDs,
+         arr: array of IDs, // (to be manipulated)
+         } -->
+    <!-- Ouput: Side Effects + status (boolean ? added : closed) -->
+    <div x-data="OverlayListener('selection')" x-cloak>
+      <template x-if="open && body">
+        <div
+          class="fixed inset-0 items-center justify-center z-60"
+          style="background-color: rgba(0, 0, 0, 0.8)"
+        >
+          <div
+            class="bg-white rounded-lg p-6 w-screen max-w-full md:w-[50vw] lg:w-[30vw] shadow-xl flex flex-col items-center"
+            x-data="{addList: []}"
+          >
+            <header class="flex justify-between">
+              <h1
+                class="text-2xl text-p-medium font-bold"
+                x-text="body.message"
+              ></h1>
+              <button
+                class="float-right w-[15vw] h-[15vw] md:w-10 md:h-10 rounded-full bg-[var(--color-p-light)] text-[var(--color-p-dark)] text-2xl"
+                @click="close(false)"
+              >
+                &times;
+              </button>
+            </header>
+            <ul>
+              <template x-for="id in body.selection">
+                <li>
+                  <input type="checkbox" @click="addList.push(id)" />
+                  <span class="text-left" x-text="items[id].name"></span>
+                </li>
+              </template>
+            </ul>
+            <button
+              class="shared-button-primary"
+              @click="body.arr = body.arr.concat(addList); close(true)"
+            >
+              Ok
+            </button>
           </div>
         </div>
       </template>
