@@ -185,15 +185,19 @@
                         >
                           <ul class="nav-dropdown-menu dropdown-end p-2">
                             <li>
-                              <a
+                              <button
                                 class="shared-button-flex-secondary shadow-none"
-                                >Unlink</a
+                                @click=""
                               >
+                                Unlink
+                              </button>
                             </li>
                             <li>
-                              <a class="shared-button-flex-warning shadow-none"
-                                >Elimina</a
+                              <button
+                                class="shared-button-flex-warning shadow-none"
                               >
+                                Elimina
+                              </button>
                             </li>
                           </ul>
                         </div>
@@ -425,6 +429,54 @@
           </button>
         </section>
       </main>
+    </div>
+
+    <div x-data="OverlayDispatcher">
+      <button
+        type="button"
+        @click="mkOverlayRequest('confirmation', {message: 'Pressare?'})"
+      >
+        PRESSAMI
+      </button>
+    </div>
+    <!-- Overlays -->
+    <!-- Confirmation -->
+    <div
+      x-data="{
+                open: false,
+                reqId: null,
+                body: null,
+                }"
+      @confirmation:request.window="open = true; reqId = $event.detail.id; body = $event.detail.body"
+      x-cloak
+    >
+      <template x-if="body">
+        <div
+          x-show="open"
+          class="fixed inset-0 flex items-center justify-center z-50"
+          style="background-color: rgba(0, 0, 0, 0.8)"
+        >
+          <div
+            class="bg-white rounded-lg p-6 w-screen max-w-full md:w-[50vw] lg:w-[30vw] shadow-xl flex flex-col items-center"
+          >
+            <p x-text="body.message"></p>
+            <div class="flex justify-between w-full">
+              <button
+                class="shared-button-full-primary"
+                @click="open=false; $dispatch('confirmation:response', {id: reqId, confirmed: true})"
+              >
+                Ok
+              </button>
+              <button
+                class="shared-button-full-secondary"
+                @click="open=false; $dispatch('confirmation:response', {id: reqId, confirmed: false})"
+              >
+                cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      </template>
     </div>
   </body>
   <script>
