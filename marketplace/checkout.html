@@ -141,13 +141,18 @@
           </div>
         </fieldset>
 
-        <button
-          type="submit"
-          class="shared-button-full-primary mt-2"
-          @click.prevent="updateUser()"
-        >
-          Conferma e Paga
-        </button>
+        <div class="mt-2">
+          <a class="shared-button-full-secondary" href="/marketplace"
+            >Torna indietro</a
+          >
+          <button
+            type="submit"
+            class="shared-button-full-primary mt-4"
+            @click.prevent="updateUser()"
+          >
+            Conferma e Paga
+          </button>
+        </div>
       </form>
     </main>
   </body>
