@@ -5,6 +5,7 @@ import {
   AssetQuery,
   safeAssetFields,
   AssetPatch,
+  metaAssetFields,
 } from './model.js'
 import { Either, Left, Right } from 'purify-ts/Either'
 import { Types } from 'mongoose'
@@ -49,7 +50,7 @@ async function listAssets(
   try {
     const assets = await Asset.find(query).lean().exec()
     return assets
-      ? Right(assets.map((asset) => project(safeAssetFields, asset)))
+      ? Right(assets.map((asset) => project(metaAssetFields, asset)))
       : Left(notFound())
   } catch (e) {
     return Left(dbError(undefined, () => String(e)))

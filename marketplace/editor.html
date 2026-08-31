@@ -249,13 +249,47 @@
                               Carica
                             </button>
                           </li>
+                          <li>
+                            <button
+                              type="button"
+                              x-data="OverlayDispatcher('assetSelection')"
+                              class="shared-button-flex-secondary shadow-none"
+                              @click.stop="const res = await mkOverlayRequest({ tourID: tour._id });
+                                    dopen = false;
+                                    if(res.status){
+                                        const id = selectedId // might change
+                                        items[id].image = res.IDs[0]
+                                    }"
+                            >
+                              Seleziona
+                            </button>
+                          </li>
                         </ul>
                       </div>
                     </div>
-                    <img
-                      :src="formData.image ? '/api/assets/'+formData.image : ''"
-                      :alt="formData.imageAlt ? formData.imageAlt : 'Item image'"
-                    />
+                    <div
+                      x-data="{
+    imageSrc: '',
+    isLoading: false,
+    setImage(id) {
+        this.isLoading = true;
+        this.imageSrc = '/api/assets/' + id;
+    }
+}"
+                      x-init="setImage(formData.image)"
+                      x-effect="setImage(formData.image)"
+                    >
+                      <img
+                        :src="isLoading ? 'https://dummyimage.com/300x300/aaa/111&text=Loading' : imageSrc"
+                        @load="isLoading = false"
+                        :alt="formData.imageAlt ? formData.imageAlt : 'Image'"
+                      />
+                    </div>
+
+                    <!-- <img
+                                          :src="formData.image ? '/api/assets/'+formData.image : ''"
+                                          :alt="formData.imageAlt ? formData.imageAlt : 'Item image'"
+                                        /> -->
                   </figure>
                 </div>
                 <div class="flex flex-col gap-1 w-full">
@@ -520,6 +554,67 @@
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      </template>
+    </div>
+    <!-- Asset Selection overlay -->
+    <!-- Input: {
+            tourID
+         } -->
+    <!-- Ouput: {
+            IDs: [Asset IDs],
+            status: boolean
+         } -->
+    <div x-data="OverlayListener('assetSelection')" x-cloak>
+      <template x-if="open && body">
+        <div
+          class="fixed inset-0 items-center justify-center z-60"
+          style="background-color: rgba(0, 0, 0, 0.8)"
+        >
+          <div
+            class="bg-white rounded-lg p-6 w-screen max-w-full md:w-[50vw] lg:w-[30vw] shadow-xl flex flex-col items-center"
+          >
+            <header class="flex justify-between">
+              <!-- <h1
+                            class="text-2xl text-p-medium font-bold"
+                            x-text="body.message"
+                          ></h1> -->
+
+              <button
+                class="float-right w-[15vw] h-[15vw] md:w-10 md:h-10 rounded-full bg-[var(--color-p-light)] text-[var(--color-p-dark)] text-2xl"
+                @click="close(false)"
+              >
+                &times;
+              </button>
+            </header>
+            <ul
+              x-data="{
+                        metaAssets: null,
+                        async init(){
+                            const res = await fetch('/api/assets?tour='+body.tourID)
+                        if (res.ok){
+                            this.metaAssets = await res.json()
+                        }
+                        }
+                       }"
+            >
+              <template x-for="meta in metaAssets">
+                <template x-if="meta.miniature">
+                  <li>
+                    <img :src="'/api/assets/'+meta.miniature" />
+                    <input
+                      type="checkbox"
+                      @click="if(!body.IDs) {body.IDs = []}
+                            body.IDs.push(meta._id)"
+                    />
+                  </li>
+                </template>
+              </template>
+            </ul>
+            <button class="shared-button-primary" @click="close(true)">
+              Ok
+            </button>
           </div>
         </div>
       </template>

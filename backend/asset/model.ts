@@ -32,7 +32,12 @@ export const safeAssetFields: (keyof IAsset)[] = [
   'data',
   'miniature',
 ]
-
+export const metaAssetFields: (keyof IAsset)[] = [
+  'author',
+  'tour',
+  'datatype',
+  'miniature',
+]
 // -----------
 // ASSET VALIDATOR
 // -----------
