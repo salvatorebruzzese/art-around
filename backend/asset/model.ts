@@ -8,6 +8,7 @@ export interface IAsset extends Document {
   data: Buffer
   datatype: string
   public?: boolean
+  miniature?: Types.ObjectId
 }
 
 export const assetSchema = new Schema<IAsset>(
@@ -17,6 +18,7 @@ export const assetSchema = new Schema<IAsset>(
     data: { type: Buffer, required: true },
     datatype: { type: String, required: true },
     public: { type: Boolean },
+    miniature: { type: Schema.ObjectId, ref: 'Asset' },
   },
   { timestamps: true },
 )
@@ -28,6 +30,7 @@ export const safeAssetFields: (keyof IAsset)[] = [
   'tour',
   'datatype',
   'data',
+  'miniature',
 ]
 
 // -----------
@@ -40,6 +43,7 @@ const AssetInputSchemaZod = z.object({
   data: z.any(), // or z.instanceof(Buffer)
   datatype: z.string(),
   public: z.preprocess((v) => v === 'true', z.boolean().optional()),
+  miniature: objectIdZod.optional(),
 })
 
 const AssetQuerySchemaZod = z.object({
@@ -47,6 +51,7 @@ const AssetQuerySchemaZod = z.object({
   tour: objectIdZod.optional(),
   datatype: z.string().optional(),
   public: z.boolean().optional(),
+  miniature: objectIdZod.optional(),
 })
 
 const AssetPatchSchemaZod = AssetInputSchemaZod.partial()

@@ -240,8 +240,9 @@
                                     dopen = false;
                                     if(res.status){
                                         const id = selectedId // might change
-                                        const res2 = await loadAsset(res.file, true, user, tour)
+                                        const res2 = await loadImage(res.file, true, user, tour)
                                         const obj = await res2.json()
+                                    console.log('image upload', obj)
                                         items[id].image = obj._id
                                     }"
                             >

@@ -2,7 +2,7 @@ import { TourNavigation } from './tourNav'
 import Alpine from 'alpinejs'
 import { saveItem, saveItemPromise } from '../marketplace/api/items'
 import { saveTour } from '../marketplace/api/tours'
-import { loadAsset } from './api/asset.js'
+import { loadAsset, loadImage } from './api/asset.js'
 
 import './userManager.js'
 import './quick-nav.js'
@@ -64,6 +64,15 @@ document.addEventListener('alpine:init', () => {
           try {
             const res = await loadAsset(file, publicity, user, tour, id)
             console.log('asset upload: ', res)
+            return res
+          } catch (e) {
+            console.log(e, e.message)
+          }
+        }
+
+        async loadImage(file, publicity, user, tour, id = null) {
+          try {
+            const res = await loadImage(file, publicity, user, tour, id)
             return res
           } catch (e) {
             console.log(e, e.message)

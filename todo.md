@@ -61,3 +61,6 @@
 
 # Deploy
 - [ ] settare file a 755 e? 644
+
+# Backend
+- [ ] Delete miniature on file delete
