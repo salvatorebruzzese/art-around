@@ -31,30 +31,6 @@
                 alt="tour"
                 class="absolute inset-0 w-full h-full object-cover mix-blend-multiply"
               />
-              <div
-                x-show="tour.reviews && tour.reviews.length > 0"
-                class="absolute flex flex-row bottom-4 left-1 right-2 roundef-full bg-gradient-to-t from-p-dark/70 to-transparent px-4 py-2 rounded-b-2xl"
-              >
-                <div
-                  class="text-xs text-p-light/90 truncate font-serif"
-                  :title="tour.review"
-                >
-                  <span class="text-5xl font-serif"> &ldquo; </span>
-                  <span
-                    style="
-                      white-space: nowrap;
-                      overflow: hidden;
-                      text-overflow: ellipsis;
-                    "
-                  >
-                    {{
-                      tour.reviews && tour.reviews.length > 0
-                        ? tour.reviews[0]
-                        : ''
-                    }}
-                  </span>
-                </div>
-              </div>
             </div>
             <!-- Info Area -->
             <div
@@ -479,7 +455,7 @@ const closeTourConfirm = () => {
 
 const confirmStartTour = () => {
   if (selectedTour.value && selectedTour.value._id) {
-    window.location.href = `/navigator/tour?tour=${selectedTour.value._id}`
+    window.location.href = `/navigator/${selectedTour.value._id}`
   }
 }
 

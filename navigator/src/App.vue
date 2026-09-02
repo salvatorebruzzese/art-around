@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import selectionView from './selection.vue'
+import selectionView from './selectionView.vue'
 
 const activeTab = ref<'otp' | 'search'>('otp')
 const searchQuery = ref('')

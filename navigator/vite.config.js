@@ -10,8 +10,8 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: 'index.html',
-        selection: 'src/selection.html',
-        selectionVue: 'src/selection.vue',
+        selection: './src/selection.html',
+        selectionVue: './src/selectionView.vue',
 
         tour: 'src/tour.html',
         tourVue: 'src/tour.vue',
