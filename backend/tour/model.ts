@@ -2,13 +2,6 @@ import mongoose, { Schema, Document, Types } from 'mongoose'
 import { makeZodValidator, objectIdZod } from '../shared/validation.js'
 import z from 'zod'
 
-export interface IReview {
-  user: Types.ObjectId
-  rating: number
-  comment?: string
-  createdAt?: Date
-}
-
 interface _Tour {
   name: string
   author: Types.ObjectId
@@ -17,21 +10,10 @@ interface _Tour {
   items: Types.ObjectId[]
   itemNav: Types.ObjectId[]
   description?: string
-  reviews?: IReview[]
   price: number
 }
 
 export interface ITour extends Document, _Tour {}
-
-export const reviewSchema = new Schema<IReview>(
-  {
-    user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    rating: { type: Number, required: true, min: 1, max: 5 },
-    comment: { type: String },
-    createdAt: { type: Date, default: Date.now },
-  },
-  { _id: false },
-)
 
 export const tourSchema = new Schema<ITour>(
   {
@@ -42,34 +24,12 @@ export const tourSchema = new Schema<ITour>(
     items: [{ type: Schema.Types.ObjectId, ref: 'Item' }],
     itemNav: [{ type: Schema.Types.ObjectId, ref: 'Item' }],
     description: { type: String },
-    reviews: [reviewSchema],
     price: { type: Number },
   },
   { timestamps: true },
 )
 
 export const Tour = mongoose.model<ITour>('Tour', tourSchema)
-
-// ----------------
-// REVIEW VALIDATOR
-// ----------------
-
-const ReviewInputSchemaZod = z.object({
-  user: objectIdZod,
-  rating: z.number().min(1).max(5),
-  comment: z.string().optional(),
-})
-
-const ReviewQuerySchemaZod = z.object({
-  user: objectIdZod.optional(),
-  rating: z.number().min(1).max(5).optional(),
-  comment: z.string().optional().optional(),
-})
-export type ReviewInput = z.infer<typeof ReviewInputSchemaZod>
-export const ReviewInput = { validate: makeZodValidator(ReviewInputSchemaZod) }
-
-export type ReviewQuery = ReviewInput
-export const ReviewQuery = ReviewInput
 
 // --------------
 // TOUR VALIDATOR
@@ -94,8 +54,6 @@ const TourQuerySchemaZod = z.object({
   items: z.array(objectIdZod).optional(),
   thumbnail: objectIdZod.optional(),
   description: z.string().optional(),
-  // REVIEW: check whether this is the correct way to validate reviews
-  reviews: z.array(ReviewQuerySchemaZod).optional(),
 })
 
 const TourPatchSchemaZod = TourInputSchemaZod.partial()
@@ -118,6 +76,5 @@ export const safeTourFields: (keyof _Tour)[] = [
   'museum',
   'description',
   'thumbnail',
-  'reviews',
   // fill as needed
 ]
