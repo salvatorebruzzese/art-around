@@ -48,7 +48,11 @@ document.addEventListener('alpine:init', () => {
             user?.purchasedTours.includes(i.tour) ||
             user?.authoredTours.includes(i.tour),
         )
-        .filter((i) => (fmus ? i.museum === fmus : true))
+        .filter((i) =>
+          fmus
+            ? this.allTours.find((tour) => tour._id === i.tour).museum === fmus
+            : true,
+        )
         .filter((i) => fuzzysearch(this.filters.search, i.name))
     },
 
