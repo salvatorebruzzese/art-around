@@ -29,23 +29,22 @@
     - [X] fix backend (potrebbe non essere sufficiente quello attuale)
     - [~] Implmentazione ui (3dots)
         - [X] nuova
-        - [ ] selezionare vecchia
+        - [~] selezionare vecchia (to be refined)
 - [ ] reload on history change (update user quicknav)
 - [ ] Error handling 
   - [ ] see saveItem (wrapper)
-- [~] responsivness
-### Bugs
+  - [ ] on img upload
+  - [ ] on tour save
 
+- [~] responsivness
+
+### Bugs
 - [ ] auto set default level
 
-#### Drag n Drop
-
-- [ ] insert sopra un elemento
-
 # Navigator
-
 - [ ] Integrazione API TTS per convertire le descrizioni degli item in audio.
 - [ ] Integrazione comandi vocali mappati da API LLM.
+- [x] navigator - branch -> GUIDED or FREE
 
 ## Guided
 
@@ -56,11 +55,14 @@
 - [ ] Integrazione sistema di sincronizzazione.
 
 # Routing
-
 - [~] No-login solo per market e access
 
 # Deploy
 - [ ] settare file a 755 e? 644
 
 # Backend
+- [ ] Session system (synchro)
+  - [ ] mk/generate new session with 4 mnemonic words
+  - [ ] develop "message" system
+  - [ ] send messages on trigger
 - [ ] Delete miniature on file delete
