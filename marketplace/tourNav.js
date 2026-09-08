@@ -10,10 +10,10 @@ export class TourNavigation {
   selectedId = null
   constructor() {}
   async initialize(tourId, startingItemId) {
-    // Auth/user state (assuming your user module already inits correctly)
-    Alpine.store('userManager')
-      .getUser()
-      .then((u) => (this.user = u))
+    const userManager = Alpine.store('userManager')
+    if (userManager && typeof userManager.getUser === 'function') {
+      userManager.getUser().then((u) => (this.user = u))
+    }
 
     this.tour = await getTour(tourId)
     const res = await getItemsByTour(this.tour._id)

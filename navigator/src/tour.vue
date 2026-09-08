@@ -20,7 +20,7 @@
       />
       <!-- Prev/Next Nav -->
       <button
-        v-if="canGoPrev"
+        v-if="!isGuided && canGoPrev"
         @click="goPrev"
         aria-label="Item precedente"
         class="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-p-dark/70 hover:bg-p-dark/90 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg"
@@ -40,7 +40,7 @@
         </svg>
       </button>
       <button
-        v-if="canGoNext"
+        v-if="!isGuided && canGoNext"
         @click="goNext"
         aria-label="Item successivo"
         class="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-p-dark/70 hover:bg-p-dark/90 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg"
@@ -64,7 +64,7 @@
     <div class="px-5 pt-6 pb-28 max-w-lg mx-auto">
       <div class="flex items-center gap-5">
         <button
-          v-if="detachedStack.length > 0"
+          v-if="!isGuided && detachedStack.length > 0"
           @click="returnToNav"
           aria-label="Torna tour"
           class="bg-p-soft hover:bg-p-soft/60 rounded-full p-2 text-p-medium mr-2"
@@ -289,6 +289,138 @@
 <script>
 import { ref } from 'vue'
 import swipeOverlay from './swipeOverlay.vue'
+import { TourNavigation } from '../../marketplace/tourNav.js'
+
+class TourController {
+  constructor({ itemNav = [], onChange = null } = {}) {
+    this.itemNav = Array.isArray(itemNav) ? itemNav.slice() : []
+    this.curItemIdx = 0
+    this.detachedStack = []
+    this.onChange = onChange
+  }
+
+  setItemNav(itemNav) {
+    this.itemNav = Array.isArray(itemNav) ? itemNav.slice() : []
+    this.curItemIdx = 0
+    this.detachedStack = []
+    this.emit()
+  }
+
+  getCurrentItemId() {
+    if (this.detachedStack.length > 0) {
+      return this.detachedStack[this.detachedStack.length - 1]
+    }
+    return this.itemNav[this.curItemIdx] || null
+  }
+
+  emit() {
+    if (typeof this.onChange === 'function') {
+      this.onChange({
+        curItemIdx: this.curItemIdx,
+        detachedStack: this.detachedStack.slice(),
+      })
+    }
+  }
+
+  goPrev() {
+    if (this.curItemIdx > 0) {
+      this.curItemIdx--
+      this.emit()
+    }
+  }
+
+  goNext() {
+    if (this.curItemIdx < this.itemNav.length - 1) {
+      this.curItemIdx++
+      this.emit()
+    }
+  }
+
+  openRefItem(itemId) {
+    if (!itemId) return
+    const navIdx = this.itemNav.findIndex((x) => x === itemId)
+    if (navIdx !== -1) {
+      this.curItemIdx = navIdx
+      this.detachedStack = []
+    } else {
+      this.detachedStack.push(itemId)
+    }
+    this.emit()
+  }
+
+  returnToNav() {
+    if (!this.detachedStack.length) return
+    this.detachedStack.pop()
+    this.emit()
+  }
+
+  teardown() {}
+}
+
+class LibreTourController extends TourController {
+  constructor({ onShowItem, ...opts } = {}) {
+    super(opts)
+    this.onShowItem = onShowItem
+  }
+
+  emit() {
+    super.emit()
+    const currentItemId = this.getCurrentItemId()
+    if (currentItemId && typeof this.onShowItem === 'function') {
+      this.onShowItem(currentItemId)
+    }
+  }
+}
+
+class GuidedTourController extends TourController {
+  constructor({ sessionId, username, ...opts } = {}) {
+    super(opts)
+    this.sessionId = sessionId
+    this.username = username
+    this.eventSource = null
+  }
+
+  connect() {
+    if (!this.sessionId || typeof window === 'undefined') return
+    const username =
+      this.username || `guided-${Math.random().toString(36).slice(2, 8)}`
+    const joinUrl = `/api/sessions/${encodeURIComponent(this.sessionId)}/join?username=${encodeURIComponent(username)}`
+    this.eventSource = new EventSource(joinUrl)
+    this.eventSource.addEventListener('showItem', (event) => {
+      try {
+        const payload = JSON.parse(event.data || '{}')
+        this.showItem(payload.itemId)
+      } catch (_err) {
+        // ignore malformed events
+      }
+    })
+  }
+
+  showItem(itemId) {
+    if (!itemId) return
+    const navIdx = this.itemNav.findIndex((x) => x === itemId)
+    if (navIdx !== -1) {
+      this.curItemIdx = navIdx
+      this.detachedStack = []
+    } else {
+      this.detachedStack = [itemId]
+    }
+    this.emit()
+  }
+
+  goPrev() {}
+  goNext() {}
+  openRefItem() {}
+  returnToNav() {}
+
+  teardown() {
+    if (this.eventSource) {
+      this.eventSource.close()
+      this.eventSource = null
+    }
+  }
+}
+
 export default {
   components: {
     swipeOverlay,
@@ -315,9 +447,17 @@ export default {
       audioVolume: 1,
       selectedExplanationIdx: 0,
       userSelectedLevel: null,
+      controller: null,
+      controllerMode: 'libre',
+      sessionId: '',
+      sessionUsername: '',
+      lastBroadcastItemId: null,
     }
   },
   computed: {
+    isGuided() {
+      return this.controllerMode === 'guided'
+    },
     currentItem() {
       const idxObj = this.getCurrentIdxObj()
       if (!idxObj) return null
@@ -403,31 +543,101 @@ export default {
     }
   },
   methods: {
-    async initTour() {
+    resolveTourSettings() {
       let tourId = ''
+      let mode = 'libre'
+      let sessionId = ''
+      let username = ''
       if (typeof window !== 'undefined') {
         const urlParams = new URLSearchParams(window.location.search)
         if (urlParams.has('tour')) {
-          tourId = urlParams.get('tour')
+          tourId = urlParams.get('tour') || ''
         }
+        mode = urlParams.get('mode') === 'guided' ? 'guided' : 'libre'
+        sessionId = urlParams.get('session') || urlParams.get('sessionId') || ''
+        username = urlParams.get('username') || ''
       }
       if (!tourId) {
         tourId =
           this.$route?.params?.id || this.$route?.query?.tour || 'demo-tour'
       }
-      this.tourId = tourId
+      return { tourId, mode, sessionId, username }
+    },
+    applyControllerState(state) {
+      this.curItemIdx = state.curItemIdx
+      this.detachedStack = state.detachedStack
+    },
+    setupController() {
+      if (this.controller) {
+        this.controller.teardown()
+      }
+      const common = {
+        itemNav: this.itemNav,
+        onChange: this.applyControllerState,
+      }
+      if (this.controllerMode === 'guided' && this.sessionId) {
+        this.controller = new GuidedTourController({
+          ...common,
+          sessionId: this.sessionId,
+          username: this.sessionUsername,
+        })
+        this.controller.connect()
+      } else {
+        this.controllerMode = 'libre'
+        this.controller = new LibreTourController({
+          ...common,
+          onShowItem: (itemId) => this.broadcastShowItem(itemId),
+        })
+      }
+      this.controller.setItemNav(this.itemNav)
+    },
+    async broadcastShowItem(itemId) {
+      if (
+        !itemId ||
+        !this.sessionId ||
+        this.controllerMode !== 'libre' ||
+        this.lastBroadcastItemId === itemId
+      ) {
+        return
+      }
+      this.lastBroadcastItemId = itemId
       try {
-        const tourRes = await fetch(`/api/tours/${this.tourId}`)
-        if (!tourRes.ok) throw new Error('Not found')
-        this.tour = await tourRes.json()
+        await fetch(`/api/sessions/${encodeURIComponent(this.sessionId)}/showItem`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ itemId }),
+        })
+      } catch (_e) {
+        // best effort sync for guided listeners
+      }
+    },
+    async initTour() {
+      const settings = this.resolveTourSettings()
+      this.tourId = settings.tourId
+      this.controllerMode = settings.mode
+      this.sessionId = settings.sessionId
+      this.sessionUsername = settings.username
+      this.lastBroadcastItemId = null
+      try {
+        const nav = new TourNavigation()
+        await nav.initialize(this.tourId, null)
+        this.tour = nav.tour
         this.itemNav = Array.isArray(this.tour.itemNav)
           ? this.tour.itemNav.slice()
           : []
         let allItemIds = new Set()
-        if (Array.isArray(this.tour.itemNav)) {
-          this.tour.itemNav.forEach(
-            (id) => typeof id === 'string' && allItemIds.add(id),
-          )
+        this.loadedItemsMap = {}
+        const fetchedItems = nav.items && typeof nav.items === 'object' ? nav.items : {}
+        Object.entries(fetchedItems).forEach(([id, item]) => {
+          if (id && item) {
+            allItemIds.add(id)
+            this.loadedItemsMap[id] = item
+          }
+        })
+        if (Array.isArray(this.itemNav)) {
+          this.itemNav.forEach((id) => typeof id === 'string' && allItemIds.add(id))
         }
         if (Array.isArray(this.tour.items)) {
           this.tour.items.forEach(
@@ -441,10 +651,14 @@ export default {
         this.items = itemsArr
         this.curItemIdx = 0
         this.detachedStack = []
+        this.setupController()
       } catch (e) {
+        if (this.controller) this.controller.teardown()
+        this.controller = null
         this.tour = null
         this.items = []
         this.itemNav = []
+        this.loadedItemsMap = {}
       }
     },
     async fetchItemIdsRecursive(ids) {
@@ -486,27 +700,16 @@ export default {
       return null
     },
     goPrev() {
-      if (this.curItemIdx > 0) {
-        this.curItemIdx--
-      }
+      if (this.controller) this.controller.goPrev()
     },
     goNext() {
-      if (this.curItemIdx < this.itemNav.length - 1) {
-        this.curItemIdx++
-      }
+      if (this.controller) this.controller.goNext()
     },
     openRefItem(itemId) {
-      if (!itemId) return
-      const navIdx = this.itemNav.findIndex((x) => x === itemId)
-      if (navIdx !== -1) {
-        this.curItemIdx = navIdx
-        this.detachedStack = []
-      } else {
-        this.detachedStack.push(itemId)
-      }
+      if (this.controller) this.controller.openRefItem(itemId)
     },
     returnToNav() {
-      this.detachedStack.pop()
+      if (this.controller) this.controller.returnToNav()
     },
     togglePlay() {
       if (!this.currentItem || !this.currentItem.audio) return
@@ -634,6 +837,13 @@ export default {
       // No cached level, default to 0
       this.selectedExplanationIdx = 0
     },
+  },
+  beforeUnmount() {
+    if (this.controller) {
+      this.controller.teardown()
+      this.controller = null
+    }
+    this.stopAudio()
   },
 }
 </script>
