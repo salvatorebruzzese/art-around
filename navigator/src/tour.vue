@@ -389,7 +389,9 @@ class GuidedTourController extends TourController {
       }
       const bytes = new Uint8Array(4)
       cryptoObj.getRandomValues(bytes)
-      return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('')
+      return Array.from(bytes, (byte) =>
+        byte.toString(16).padStart(2, '0'),
+      ).join('')
     })()
     const username = this.username || `guided-${randomSuffix}`
     const joinUrl = `/api/sessions/${encodeURIComponent(this.sessionId)}/join?username=${encodeURIComponent(username)}`
@@ -557,10 +559,10 @@ export default {
       let sessionId = ''
       let username = ''
       if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href)
+        tourId = url.pathname.split('/').filter(Boolean).at(1)
+
         const urlParams = new URLSearchParams(window.location.search)
-        if (urlParams.has('tour')) {
-          tourId = urlParams.get('tour') || ''
-        }
         mode = urlParams.get('mode') === 'guided' ? 'guided' : 'libre'
         sessionId = urlParams.get('session') || urlParams.get('sessionId') || ''
         username = urlParams.get('username') || ''
@@ -610,13 +612,16 @@ export default {
       }
       this.lastBroadcastItemId = itemId
       try {
-        await fetch(`/api/sessions/${encodeURIComponent(this.sessionId)}/showItem`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
+        await fetch(
+          `/api/sessions/${encodeURIComponent(this.sessionId)}/showItem`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ itemId }),
           },
-          body: JSON.stringify({ itemId }),
-        })
+        )
       } catch (_e) {
         // best effort sync for guided listeners
       }
@@ -637,7 +642,8 @@ export default {
           : []
         let allItemIds = new Set()
         this.loadedItemsMap = {}
-        const fetchedItems = nav.items && typeof nav.items === 'object' ? nav.items : {}
+        const fetchedItems =
+          nav.items && typeof nav.items === 'object' ? nav.items : {}
         Object.entries(fetchedItems).forEach(([id, item]) => {
           if (id && item) {
             allItemIds.add(id)
@@ -645,7 +651,9 @@ export default {
           }
         })
         if (Array.isArray(this.itemNav)) {
-          this.itemNav.forEach((id) => typeof id === 'string' && allItemIds.add(id))
+          this.itemNav.forEach(
+            (id) => typeof id === 'string' && allItemIds.add(id),
+          )
         }
         if (Array.isArray(this.tour.items)) {
           this.tour.items.forEach(
