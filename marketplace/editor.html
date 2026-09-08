@@ -285,11 +285,6 @@
                         :alt="formData.imageAlt ? formData.imageAlt : 'Image'"
                       />
                     </div>
-
-                    <!-- <img
-                                          :src="formData.image ? '/api/assets/'+formData.image : ''"
-                                          :alt="formData.imageAlt ? formData.imageAlt : 'Item image'"
-                                        /> -->
                   </figure>
                 </div>
                 <div class="flex flex-col gap-1 w-full">
@@ -388,12 +383,168 @@
           </template>
         </section>
         <section x-show="activeTab == 'edit_tour'">
-          <button
-            class="shared-button-full-primary"
-            @click="saveItemsAndTour()"
-          >
-            Salva tour
-          </button>
+          <template x-if="tour">
+            <div class="flex flex-col gap-6 p-4">
+              <button
+                class="shared-button-full-primary"
+                @click="saveItemsAndTour()"
+              >
+                Salva tour
+              </button>
+
+              <fieldset
+                x-data="{
+        questions: tour.quiz?.questions || [],
+        newQ: { text: '', options: ['', ''], correct: 0, time: 30 },
+        addQuestion() {
+          this.questions.push(JSON.parse(JSON.stringify(this.newQ)))
+          this.newQ = { text: '', options: ['', ''], correct: 0, time: 30 }
+        },
+        removeQuestion(idx) { this.questions.splice(idx,1) }
+      }"
+              >
+                <legend class="text-xl font-semibold">
+                  Domande (Multiple Choice)
+                </legend>
+                <template x-for="(q, idx) in questions">
+                  <div class="mb-6 border-b pb-4">
+                    <div class="flex gap-2 items-center">
+                      <label class="font-bold">Domanda:</label>
+                      <input
+                        x-model="q.text"
+                        type="text"
+                        class="border rounded px-2 py-1 flex-1"
+                        required
+                      />
+                      <button
+                        type="button"
+                        class="shared-button-flex-warning ml-2"
+                        @click="removeQuestion(idx)"
+                      >
+                        &times;
+                      </button>
+                    </div>
+                    <div class="ml-4 mt-2">
+                      <label class="block font-semibold">Opzioni:</label>
+                      <template x-for="(opt, oidx) in q.options">
+                        <div class="flex items-center gap-2 my-1">
+                          <input
+                            type="radio"
+                            :name="'correct-'+idx"
+                            :value="oidx"
+                            x-model="q.correct"
+                          />
+                          <input
+                            x-model="q.options[oidx]"
+                            type="text"
+                            class="border rounded px-2 py-1 flex-1"
+                            required
+                          />
+                          <button
+                            type="button"
+                            class="shared-button-flex-warning"
+                            @click="q.options.splice(oidx,1)"
+                            x-show="q.options.length > 2"
+                          >
+                            &minus;
+                          </button>
+                        </div>
+                      </template>
+                      <button
+                        type="button"
+                        class="shared-button-flex-primary mt-1"
+                        @click="q.options.push('')"
+                      >
+                        + Opzione
+                      </button>
+                    </div>
+                    <div class="ml-4 mt-2">
+                      <label class="font-semibold"
+                        >Tempo per rispondere (s):</label
+                      >
+                      <input
+                        x-model.number="q.time"
+                        type="number"
+                        min="5"
+                        max="300"
+                        class="border rounded px-2 py-1 w-20"
+                      />
+                    </div>
+                  </div>
+                </template>
+
+                <!-- Add New Question -->
+                <div class="border border-p-soft rounded-lg p-4 mt-4">
+                  <label class="font-bold">Nuova domanda:</label>
+                  <input
+                    x-model="newQ.text"
+                    type="text"
+                    class="border rounded px-2 py-1 w-full mt-1 mb-2"
+                    placeholder="Testo domanda"
+                  />
+                  <div class="ml-2">
+                    <label class="block font-semibold">Opzioni:</label>
+                    <template x-for="(opt, oidx) in newQ.options">
+                      <div class="flex items-center gap-2 my-1">
+                        <input
+                          type="radio"
+                          :name="'new-correct'"
+                          :value="oidx"
+                          x-model="newQ.correct"
+                        />
+                        <input
+                          x-model="newQ.options[oidx]"
+                          type="text"
+                          class="border rounded px-2 py-1 flex-1"
+                          required
+                        />
+                        <button
+                          type="button"
+                          class="shared-button-flex-warning"
+                          @click="newQ.options.splice(oidx,1)"
+                          x-show="newQ.options.length > 2"
+                        >
+                          &minus;
+                        </button>
+                      </div>
+                    </template>
+                    <button
+                      type="button"
+                      class="shared-button-flex-primary mt-1"
+                      @click="newQ.options.push('')"
+                    >
+                      + Opzione
+                    </button>
+                  </div>
+                  <div class="ml-2 mt-2 flex items-center">
+                    <label>Tempo (s):</label>
+                    <input
+                      x-model.number="newQ.time"
+                      type="number"
+                      min="5"
+                      max="300"
+                      class="ml-2 border rounded px-2 py-1 w-20"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    class="shared-button-full-primary mt-2"
+                    @click="addQuestion()"
+                    :disabled="!newQ.text || newQ.options.some(o => !o)"
+                  >
+                    Aggiungi domanda
+                  </button>
+                </div>
+                <!-- Save the questions to tour -->
+                <button
+                  class="shared-button-full-primary mt-6"
+                  @click="if(!tour.quiz?.questions) {tour.quiz = { questions: []}} tour.quiz.questions = questions"
+                >
+                  Salva le domande
+                </button>
+              </fieldset>
+            </div>
+          </template>
         </section>
       </main>
     </div>

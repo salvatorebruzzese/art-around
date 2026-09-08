@@ -1,5 +1,4 @@
 # Marketplace
-
 - [x] Schermata per la visione della visita.
       Manca un piccolo container sopra con i metadati della visita
 - [~] Schermata di acquisto della visita.
@@ -8,7 +7,6 @@
   - [ ] Fork (backend)
 
 ## Quicknav
-
 - [ ] editor btn
       Auto new tour from scratch?
 
@@ -47,12 +45,10 @@
 - [x] navigator - branch -> GUIDED or FREE
 
 ## Guided
-
 - [ ] Schermata navigator per studenti con test a crocette.
-- [ ] Sistema di sincronizzazione della visita.
-  - [ ] Utente insegnante server.
-  - [ ] Utente studente client.
-- [ ] Integrazione sistema di sincronizzazione.
+- [x] Sistema di sincronizzazione della visita.
+  - [x] Utente insegnante server.
+  - [x] Utente studente client.
 
 # Routing
 - [~] No-login solo per market e access
@@ -62,7 +58,7 @@
 
 # Backend
 - [ ] Session system (synchro)
-  - [ ] message passing
+  - [x] message passing
   - [ ] collect and elaborate results
   - [ ] session lifecycle 
     - [ ] cleanup of completed

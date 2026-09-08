@@ -2,6 +2,22 @@ import mongoose, { Schema, Document, Types } from 'mongoose'
 import { makeZodValidator, objectIdZod } from '../shared/validation.js'
 import z from 'zod'
 
+export interface QuizQuestion {
+  prompt: string
+  options: string[]
+  correct: number
+  timeLimit: number
+}
+
+export interface Quiz {
+  questions: QuizQuestion[]
+}
+
+export interface QuizAnswer {
+  answers: number[]
+  submittedAt: Date
+}
+
 interface _Tour {
   name: string
   author: Types.ObjectId
@@ -11,6 +27,7 @@ interface _Tour {
   itemNav: Types.ObjectId[]
   description?: string
   price: number
+  quiz: Quiz
 }
 
 export interface ITour extends Document, _Tour {}
@@ -25,6 +42,16 @@ export const tourSchema = new Schema<ITour>(
     itemNav: [{ type: Schema.Types.ObjectId, ref: 'Item' }],
     description: { type: String },
     price: { type: Number },
+    quiz: {
+      questions: [
+        {
+          prompt: { type: String, required: true },
+          options: [{ type: String, required: true }],
+          correct: { type: Number, required: true },
+          timeLimit: { type: Number, required: true },
+        },
+      ],
+    },
   },
   { timestamps: true },
 )
@@ -44,6 +71,16 @@ const TourInputSchemaZod = z.object({
   itemNav: z.array(objectIdZod),
   thumbnail: objectIdZod.optional(),
   description: z.string().optional(),
+  quiz: z.object({
+    questions: z.array(
+      z.object({
+        prompt: z.string(),
+        options: z.array(z.string()),
+        correct: z.number(),
+        timeLimit: z.number(),
+      }),
+    ),
+  }),
 })
 
 const TourQuerySchemaZod = z.object({
