@@ -382,8 +382,16 @@ class GuidedTourController extends TourController {
 
   connect() {
     if (!this.sessionId || typeof window === 'undefined') return
-    const username =
-      this.username || `guided-${Math.random().toString(36).slice(2, 8)}`
+    const randomSuffix = (() => {
+      const cryptoObj = globalThis.crypto
+      if (!cryptoObj || typeof cryptoObj.getRandomValues !== 'function') {
+        return Date.now().toString(36)
+      }
+      const bytes = new Uint8Array(4)
+      cryptoObj.getRandomValues(bytes)
+      return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('')
+    })()
+    const username = this.username || `guided-${randomSuffix}`
     const joinUrl = `/api/sessions/${encodeURIComponent(this.sessionId)}/join?username=${encodeURIComponent(username)}`
     this.eventSource = new EventSource(joinUrl)
     this.eventSource.addEventListener('showItem', (event) => {
