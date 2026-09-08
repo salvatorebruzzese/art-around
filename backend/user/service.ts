@@ -7,6 +7,7 @@ import {
   UserPatch,
   publicUserFields,
   privateUserFields,
+  UserInput,
 } from './model.js'
 import { Either, Left, Right } from 'purify-ts/Either'
 import { Types } from 'mongoose'
@@ -97,23 +98,23 @@ async function listUsers(
 }
 
 // Create User (not signup, admin-invoked, no duplicate username check)
-// async function createUser(
-//   input: UserInput,
-//   currentUserId: Types.ObjectId,
-// ): Promise<Either<DBError | AccessDenied, Partial<IUser>>> {
-//   const userResult = await _getById(currentUserId, User)
-//   if (userResult.isLeft()) return Left(accessDenied())
-//   const currentUser = userResult.unsafeCoerce()
-//   if (!checkRole(currentUser.role, 'create:user')) return Left(accessDenied())
+async function createUser(
+  input: UserInput,
+  // currentUserId: Types.ObjectId,
+): Promise<Either<DBError | AccessDenied, Partial<IUser>>> {
+  // const userResult = await _getById(currentUserId, User)
+  // if (userResult.isLeft()) return Left(accessDenied())
+  // const currentUser = userResult.unsafeCoerce()
+  // if (!checkRole(currentUser.role, 'create:user')) return Left(accessDenied())
 
-//   try {
-//     const hashedPassword = await bcrypt.hash(input.password, 10)
-//     const newUser = await User.create({ ...input, password: hashedPassword })
-//     return Right(project(publicUserFields, newUser))
-//   } catch (e) {
-//     return Left(dbError(undefined, () => String(e)))
-//   }
-// }
+  try {
+    const hashedPassword = await bcrypt.hash(input.password, 10)
+    const newUser = await User.create({ ...input, password: hashedPassword })
+    return Right(project(publicUserFields, newUser))
+  } catch (e) {
+    return Left(dbError(undefined, () => String(e)))
+  }
+}
 
 // Patch User
 async function patchUser(
@@ -177,7 +178,7 @@ export default {
   signup,
   getUser,
   listUsers,
-  // createUser,
+  createUser,
   patchUser,
   deleteUser,
 }

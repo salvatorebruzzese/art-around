@@ -24,11 +24,14 @@ export interface SSEClient {
 }
 
 export interface Session {
-  _id: Types.ObjectId
+  id: string
   tour: Types.ObjectId
   owner: Types.ObjectId
   clients: Types.ObjectId[]
-  currentStep: { type: 'item'; item: Types.ObjectId } | { type: 'quiz' }
+  currentStep:
+    | { type: 'item'; item: Types.ObjectId }
+    | { type: 'quiz' }
+    | { type: 'gathering' }
   quizStartedAt?: Date
   quizAnswers?: Record<string, QuizAnswer>
   quizResults?: Record<string, { score: number }>

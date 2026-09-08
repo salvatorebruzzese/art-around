@@ -6,13 +6,13 @@ import { NotFound, notFound } from '../shared/errors.js'
 const sessions: Map<string, Session> = new Map()
 
 export function createSession(
+  id: string,
   owner: Types.ObjectId,
   tour: Types.ObjectId,
   quiz: Quiz,
 ): Either<NotFound, Session> {
-  const id = new Types.ObjectId()
   const session: Session = {
-    _id: id,
+    id: id,
     tour,
     owner,
     clients: [],
@@ -22,7 +22,7 @@ export function createSession(
     quiz,
     sseClients: [],
   }
-  sessions.set(id.toHexString(), session)
+  sessions.set(id, session)
   return Right(session)
 }
 
@@ -41,12 +41,14 @@ export function joinSessionWithSSE(
   return Right(session)
 }
 
-// TODO: remove any
-// export function removeSSEClient(sessionId: string, resToRemove: any): void {
-//   const session = sessions.get(sessionId)
-//   if (!session || !session.sseClients) return
-//   session.sseClients = session.sseClients.filter((c) => c.res !== resToRemove)
-// }
+export function removeSSEClient(
+  sessionId: string,
+  userId: Types.ObjectId,
+): void {
+  const session = sessions.get(sessionId)
+  if (!session || !session.sseClients) return
+  session.sseClients = session.sseClients.filter((c) => c.userId !== userId)
+}
 
 export function showItem(
   sessionId: string,

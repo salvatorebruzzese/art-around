@@ -62,7 +62,13 @@
 
 # Backend
 - [ ] Session system (synchro)
-  - [ ] mk/generate new session with 4 mnemonic words
-  - [ ] develop "message" system
-  - [ ] send messages on trigger
-- [ ] Delete miniature on file delete
+  - [ ] message passing
+  - [ ] collect and elaborate results
+  - [ ] session lifecycle 
+    - [ ] cleanup of completed
+        - [ ] close session msg
+    - [ ] cleanup abandonend
+  - [X] generate temporary user 
+  - [ ] OPT sse recovery/reconnect
+- [ ] delete miniature on file delete
+- [ ] User priviledge escalation

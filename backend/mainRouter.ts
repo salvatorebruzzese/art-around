@@ -4,6 +4,7 @@ import tourRouter from './tour/router.js'
 import museumRouter from './museum/router.js'
 import assetRouter from './asset/router.js'
 import userRouter from './user/router.js'
+import sessionRouter from './session/router.js'
 import passport from 'passport'
 import { signup } from './user/router.js'
 import { IUser, toPrivateUser } from './user/model.js'
@@ -20,6 +21,7 @@ router.use('/tours', tourRouter)
 router.use('/museums', museumRouter)
 router.use('/assets', assetRouter)
 router.use('/users', userRouter)
+router.use('/sessions', sessionRouter)
 
 router.post('/login', (req, res, next) => {
   passport.authenticate(
