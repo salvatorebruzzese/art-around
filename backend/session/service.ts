@@ -1,7 +1,11 @@
 import { Either, Left, Right } from 'purify-ts/Either'
+import { Response } from 'express'
+import crypto from 'crypto'
 import { Types } from 'mongoose'
 import { Session, Quiz, SSEClient } from './model.js'
-import { NotFound, notFound } from '../shared/errors.js'
+import { AccessDenied, DBError, NotFound, notFound } from '../shared/errors.js'
+import UserService from '../user/service.js'
+import { IUser } from '../user/model.js'
 
 const sessions: Map<string, Session> = new Map()
 
@@ -24,6 +28,32 @@ export function createSession(
   }
   sessions.set(id, session)
   return Right(session)
+}
+export async function joinSessionWithSSENoAcc(
+  sessionId: string,
+  res: Response,
+  username: string,
+): Promise<
+  Either<DBError | AccessDenied | NotFound, [Partial<IUser>, string, Session]>
+> {
+  const password = crypto.randomBytes(16).toString('hex')
+  const result = await UserService.createUser({
+    username: username,
+    email: 'nomail@mail.com',
+    password: password, // 16 bytes = 32 hex chars
+  })
+
+  if (result.isLeft()) return result
+  const user = result.unsafeCoerce()
+  const userId = user._id
+
+  const session = sessions.get(sessionId)
+  if (!session) return Left(notFound())
+  user.purchasedTours = [session.tour]
+  await (user as IUser).save()
+
+  const sessionResult = joinSessionWithSSE(sessionId, { res, userId })
+  return sessionResult.map((session) => [user, password, session])
 }
 
 export function joinSessionWithSSE(
@@ -53,6 +83,7 @@ export function removeSSEClient(
 export function showItem(
   sessionId: string,
   itemId: Types.ObjectId,
+  userId: Types.ObjectId,
 ): Either<NotFound, Session> {
   const session = sessions.get(sessionId)
   if (!session) return Left(notFound())

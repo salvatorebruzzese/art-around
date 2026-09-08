@@ -1,5 +1,4 @@
 import express from 'express'
-import crypto from 'crypto'
 import z from 'zod'
 import { Types } from 'mongoose'
 import { ensureAuth } from '../accessControl.js'
@@ -42,6 +41,7 @@ router.post('/', ensureAuth, async (req, res) => {
     new Types.ObjectId(tour),
     quiz,
   )
+
   result.caseOf({
     Right: (session) => res.status(201).json(session),
     Left: handleLeft(res),
@@ -50,23 +50,16 @@ router.post('/', ensureAuth, async (req, res) => {
 
 router.get('/:id/join', async (req, res) => {
   const username = ('tmp-' + req.query.username) as string
-  const result = await UserService.createUser({
-    username: username,
-    email: 'nomail@mail.com',
-    password: crypto.randomBytes(16).toString('hex'), // 16 bytes = 32 hex chars
-  })
-
-  if (result.isLeft()) {
-    return handleLeft(res)(result.extract())
-  }
-  const userId = result.unsafeCoerce()._id
-
   const sessionId = req.params.id as string
-  const addResult = SessionService.joinSessionWithSSE(sessionId, {
+  const addResult = await SessionService.joinSessionWithSSENoAcc(
+    sessionId,
     res,
-    userId,
-  })
+    username,
+  )
+
   if (addResult.isLeft()) return res.status(404)
+  const [user, password, _session] = addResult.unsafeCoerce()
+  const userId = user._id
 
   res.set({
     'Cache-Control': 'no-cache',
@@ -75,6 +68,8 @@ router.get('/:id/join', async (req, res) => {
   })
   res.flushHeaders()
   res.write('\n')
+  const joinPayload = `event: hasJoined\ndata: ${JSON.stringify({ username: user.username, password })}\n\n`
+  res.write(joinPayload)
 
   req.on('close', () => {
     console.log('Closed connection: ', sessionId, userId)
@@ -84,17 +79,18 @@ router.get('/:id/join', async (req, res) => {
 })
 
 router.post('/:id/showItem', ensureAuth, async (req, res) => {
-  const Validate = z.object({ item: z.string() })
+  const Validate = z.object({ itemId: z.string() })
   const parse = Validate.safeParse(req.body)
   if (!parse.success) return res.status(400).json({ error: parse.error })
-  const { item } = parse.data
+  const { itemId } = parse.data
   const result = SessionService.showItem(
     req.params.id as string,
-    new Types.ObjectId(item),
+    new Types.ObjectId(itemId),
+    req.user!._id, // REVIEW: should new Types.ObjectId?
   )
   result.caseOf({
     Right: (session) => {
-      sendSessionEvent(session, 'showItem', { item })
+      sendSessionEvent(session, 'showItem', { itemId })
       return res.json(session)
     },
     Left: handleLeft(res),
