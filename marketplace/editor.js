@@ -15,14 +15,65 @@ document.addEventListener('alpine:init', () => {
       new (class extends TourNavigation {
         async init() {
           try {
-            await super.initByURL()
+            const url = new URL(window.location.href)
+            // /marketplace/editor/<tourId>?museum=<museumId>?item=<itemId>
+            let tourId = url.pathname.split('/').filter(Boolean).at(2)
+            let itemId = url.searchParams.get('item')
+            const museumId = url.searchParams.get('museum')
+            if (tourId == 'new') {
+              const user = await Alpine.store('userManager').getUser()
+              // we want a new tour (i.e. valid _id)
+              // so we quickly create one
+              const newTour = await (async () => {
+                const res = await fetch(`/api/tours/`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    name: 'Nuovo tour',
+                    author: user._id,
+                    items: [],
+                    itemNav: [],
+                    museum: museumId,
+                    price: 0,
+                    description: '',
+                    quiz: { questions: [] },
+                  }),
+                })
+                if (!res.ok) throw new Error('Tour save failed')
+                return await res.json()
+              })()
+
+              const newItem = {
+                _id: null,
+                name: 'Nuovo item',
+                itemAuthor: user._id || null,
+                tour: newTour._id,
+                explanations: [
+                  {
+                    level: 'simple',
+                    text: 'Inserire una spiegazione.',
+                    durationSeconds: 0,
+                  },
+                ],
+                license: '',
+                refs: [],
+              }
+
+              const item = await saveItem(newItem)
+              tourId = newTour._id
+              itemId = item._id
+              window.location.href = `/marketplace/editor/${tourId}?item=${itemId}`
+            } else {
+              await this.initialize(tourId, itemId)
+            }
           } catch (e) {
-            console.log('Err by URL', e)
+            console.log(e)
+            // alert(e)
+            // history.back()
           }
         }
 
         async saveItem(data) {
-          console.log(data)
           try {
             await saveItem(data)
             alert('Modifiche salvete con successo!')

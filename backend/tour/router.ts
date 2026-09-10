@@ -48,7 +48,7 @@ router.post('/', ensureAuth, async (req: Request, res: Response) => {
 
   const input = validation.unsafeCoerce()
 
-  if (new Types.ObjectId(input.author) != req.user!._id)
+  if (!new Types.ObjectId(input.author).equals(req.user!._id))
     return res.status(403).json({ error: accessDenied('Not the author') })
 
   const result = await TourService.createTour(input, req.user!._id)

@@ -19,7 +19,7 @@ export class TourNavigation {
     const res = await getItemsByTour(this.tour._id)
     res.forEach((i) => (this.items[i._id] = i))
     this.itemNav = this.tour.itemNav
-    this.selectedId = startingItemId
+    this.selectedId = startingItemId ? startingItemId : res.at(0)._id
   }
 
   async initByURL() {

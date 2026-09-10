@@ -103,9 +103,13 @@ class QuickNav extends HTMLElement {
       </div>
     </div>
     <!-- Editor -->
-    <a
+    <button
       class="nav-icon-link group !p-0 !border-none shadow-sm rounded-xl hover:!bg-transparent"
-      href="/editor/"
+    @click="async () => {
+    // 'Random' museum, can be later changed
+    let museumId = (await fetch('/api/museums').then(o => o.json())).at(0)._id
+    window.location.href='/marketplace/editor/new?museum='+String(museumId)
+    }"
     >
       <svg
         width="48"
@@ -128,7 +132,7 @@ class QuickNav extends HTMLElement {
           class="group-hover:fill-[var(--color-p-light)] transition-colors"
         />
       </svg>
-    </a>
+    </button>
     <!-- Navigator -->
     <a
       class="nav-icon-link group !p-0 !border-none shadow-sm rounded-xl hover:!bg-transparent"
