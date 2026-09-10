@@ -34,12 +34,11 @@ router.post('/', ensureAuth, async (req, res) => {
   })
   const parse = Validate.safeParse(req.body)
   if (!parse.success) return res.status(400).json({ error: parse.error })
-  const { id, tour, quiz } = parse.data
+  const { id, tour } = parse.data
   const result = SessionService.createSession(
     id,
     req.user!._id,
     new Types.ObjectId(tour),
-    quiz,
   )
 
   result.caseOf({
