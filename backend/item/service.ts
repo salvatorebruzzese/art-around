@@ -197,8 +197,8 @@ async function deleteItem(
     const tourId = item.tour
     await item.deleteOne()
     const promise = (await _getById(tourId, Tour)).chain((tour) => {
-      tour.items = tour.items.filter((item) => item._id !== id)
-      tour.itemNav = tour.itemNav.filter((item) => item._id !== id)
+      tour.items = tour.items.filter((itemId) => !itemId.equals(id))
+      tour.itemNav = tour.itemNav.filter((itemId) => !itemId.equals(id))
       return Right(tour.save())
     })
     if (promise.isRight()) {

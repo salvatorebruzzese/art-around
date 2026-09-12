@@ -1,6 +1,10 @@
 import { TourNavigation } from './tourNav'
 import Alpine from 'alpinejs'
-import { saveItem, saveItemPromise } from '../marketplace/api/items'
+import {
+  saveItem,
+  saveItemPromise,
+  deleteItem as apiDeleteItem,
+} from '../marketplace/api/items'
 import { saveTour } from '../marketplace/api/tours'
 import { loadAsset, loadImage } from './api/asset.js'
 
@@ -75,6 +79,9 @@ document.addEventListener('alpine:init', () => {
 
         async saveItem(data) {
           try {
+            if (typeof data._id === 'number') {
+              data._id = null
+            }
             await saveItem(data)
             alert('Modifiche salvete con successo!')
           } catch (e) {
@@ -127,6 +134,50 @@ document.addEventListener('alpine:init', () => {
             return res
           } catch (e) {
             console.log(e, e.message)
+          }
+        }
+
+        async deleteItem(id, contextArr = null, idx = null) {
+          try {
+            // REVIEW: dead code?
+            // Remove from sidebar/list
+            if (contextArr && typeof idx === 'number') {
+              contextArr.splice(idx, 1)
+            }
+
+            // Remove from this.items
+            if (this.items[id]) {
+              // If backend id, call API
+              if (this.items[id]._id) {
+                await apiDeleteItem(this.items[id]._id)
+              }
+              // NOTE: before we need to remove from other lists
+              // Remove from all lists that may reference it
+              if (Array.isArray(this.itemNav)) {
+                console.log(this.itemNav)
+                this.itemNav = this.itemNav.filter((eid) => eid != id)
+                console.log(this.itemNav)
+              }
+
+              // Remove from refs in all items (handle gracefully)
+              Object.values(this.items).forEach((it) => {
+                if (Array.isArray(it.refs)) {
+                  it.refs = it.refs.filter((refId) => refId != id)
+                }
+              })
+
+              // Update selection if needed
+              if (this.selectedId === id) {
+                const itemIds = Object.keys(this.items)
+                this.selectedId = itemIds.length ? itemIds[0] : null
+              }
+              delete this.items[id]
+            }
+          } catch (e) {
+            alert(
+              "Errore durante l'eliminazione: " +
+                (e && e.message ? e.message : e),
+            )
           }
         }
       })(),

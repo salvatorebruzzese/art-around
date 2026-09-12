@@ -5,7 +5,7 @@ import { getItemsByTour } from '../marketplace/api/items'
 export class TourNavigation {
   tour = null
   itemNav = []
-  items = []
+  items = {}
   user = null
   selectedId = null
   constructor() {}

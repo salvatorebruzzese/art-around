@@ -153,7 +153,15 @@
                             </li>
                             <li>
                               <button
+                                x-data="OverlayDispatcher('confirmation')"
                                 class="shared-button-flex-warning shadow-none"
+                                @click.stop="async () => {
+                                        const confirmed = await mkOverlayRequest({
+                                            message: 'Sei sicuro di voler eliminare questo item?',
+                                            confirm: true,
+                                        })
+                                        if (confirmed.status && confirmed.status === true) deleteItem(id, list.arr)
+                                    }"
                               >
                                 Elimina
                               </button>
