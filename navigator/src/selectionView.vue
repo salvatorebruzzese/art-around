@@ -1,12 +1,12 @@
 <template>
   <div
-    class="min-h-screen pb-32 bg-p-light font-serif text-p-dark selection:bg-p-soft"
+    class="min-h-screen max-w-screen pb-32 bg-p-light font-serif text-p-dark selection:bg-p-soft"
   >
     <div
-      class="flex flex-col items-center rounded-xl border border-p-soft shadow-xl p-4 my-4 gap-4 text-center overflow-visible"
+      class="flex flex-col items-center rounded-xl shadow-md shadow-p-soft p-4 m-4 mb-8 gap-4 text-center max-w-9/10"
     >
       <h1 class="text-3xl text-p-medium">Hai ricevuto un codice?</h1>
-      <label class="shadow-md border border-p-soft">
+      <label class="border border-p-soft">
         <input
           type="text"
           autocomplete="one-time-code"
@@ -17,10 +17,8 @@
     </div>
 
     <!-- Museums List -->
-    <div v-for="museum in museums" :key="museum._id" class="mb-14">
-      <h2
-        class="text-2xl font-bold underline mb-3 px-4 font-sans text-p-medium"
-      >
+    <div v-for="museum in museums" :key="museum._id" class="mb-8">
+      <h2 class="text-2xl font-semibold mb-3 px-4 font-sans text-p-medium">
         {{ museum.name }}
       </h2>
       <!-- Horizontally swipeable tours -->
@@ -29,7 +27,7 @@
           <div
             v-for="tour in museum.tours"
             :key="tour._id"
-            class="w-full h-3/10 m-4 mb-10 bg-white rounded-2xl shadow-sm shadow-p-soft relative transition-all hover:shadow-md cursor-pointer"
+            class="w-full h-3/10 m-4 bg-white rounded-2xl shadow-sm shadow-p-soft relative transition-all hover:shadow-md cursor-pointer"
             @click="showTourConfirm(tour)"
           >
             <!-- Photo with overlay -->
@@ -112,7 +110,7 @@
 
     <!-- NavBar Fixed Bottom -->
     <nav
-      class="fixed z-40 bottom-0 left-0 right-0 bg-white/80 backdrop-blur border-t border-p-soft/60 flex items-center justify-between px-4 py-3 shadow-lg"
+      class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-11/12 max-w-9/10 max-w-[300px] bg-p-light/70 backdrop-blur-md border border-p-soft/60 rounded-2xl p-4 shadow-xl flex items-center justify-between gap-4"
       style="min-height: 56px"
     >
       <a
