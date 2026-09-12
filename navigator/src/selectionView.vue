@@ -1,7 +1,21 @@
 <template>
   <div
-    class="min-h-screen pb-32 bg-p-light font-serif text-p-dark selection:bg-p-soft overflow-x-hidden"
+    class="min-h-screen pb-32 bg-p-light font-serif text-p-dark selection:bg-p-soft"
   >
+    <div
+      class="flex flex-col items-center rounded-xl border border-p-soft shadow-xl p-4 my-4 gap-4 text-center overflow-visible"
+    >
+      <h1 class="text-3xl text-p-medium">Hai ricevuto un codice?</h1>
+      <label class="shadow-md border border-p-soft">
+        <input
+          type="text"
+          autocomplete="one-time-code"
+          inputmode="text"
+          required
+        />
+      </label>
+    </div>
+
     <!-- Museums List -->
     <div v-for="museum in museums" :key="museum._id" class="mb-14">
       <h2

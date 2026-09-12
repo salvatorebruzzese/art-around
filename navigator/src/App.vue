@@ -2,7 +2,6 @@
 import { ref, watch } from 'vue'
 import selectionView from './selectionView.vue'
 
-const activeTab = ref<'otp' | 'search'>('otp')
 const searchQuery = ref('')
 const searchResults = ref([])
 const selectedMuseum = ref(null)
@@ -83,10 +82,7 @@ function selectMuseum(museum) {
             Descrizione
           </h2>
           <p class="text-p-dark font-sans mt-1">
-            {{
-              selectedMuseum?.description ||
-              "La Notte stellata è uno dei capolavori più celebri di Vincent van Gogh. Dipinto nel giugno del 1889, rappresenta la vista dalla sua camera da letto nel manicomio di Saint-Rémy-de-Provence, arricchita dall'immaginazione dell'artista con vortici di colore e stelle luminose che illuminano il cielo notturno."
-            }}
+            {{ selectedMuseum?.description || 'Descrizione non disponibile' }}
           </p>
         </div>
       </div>
@@ -221,41 +217,6 @@ function selectMuseum(museum) {
     v-else
     class="flex flex-col mx-4 gap-4 h-screen items-center justify-center"
   >
-    <!-- View 1: OTP Code -->
-    <div
-      v-if="activeTab === 'otp'"
-      class="flex flex-col items-center rounded-xl border border-p-soft shadow-xl p-4 gap-4 text-center overflow-visible"
-    >
-      <h1 class="text-3xl text-p-medium mb-4">Hai ricevuto un codice?</h1>
-      <label class="otp">
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <input
-          type="text"
-          autocomplete="one-time-code"
-          inputmode="numeric"
-          maxlength="6"
-          pattern="[0-9]{6}"
-          required
-        />
-      </label>
-
-      <button
-        @click="activeTab = 'search'"
-        class="mt-4 text-sm text-p-medium hover:underline cursor-pointer focus:outline-none"
-      >
-        Vuoi scegliere una visita?
-      </button>
-    </div>
-
-    <!-- View 2: Search Visit -->
-    <div v-else>
-      <!-- Renderizza il componente importato -->
-      <selectionView />
-    </div>
+    <selectionView />
   </div>
 </template>
