@@ -19,17 +19,17 @@
     <!-- Museums List -->
     <div v-for="museum in museums" :key="museum._id" class="mb-14">
       <h2
-        class="text-2xl font-bold underline mb-3 px-4 font-serif text-p-dark/90"
+        class="text-2xl font-bold underline mb-3 px-4 font-sans text-p-medium"
       >
         {{ museum.name }}
       </h2>
       <!-- Horizontally swipeable tours -->
-      <div class="scrollbar-hide overflow-x-auto px-2 -mx-2">
+      <div class="scrollbar-hide overflow-x-auto px-2 mx-2">
         <div class="flex flex-nowrap gap-6">
           <div
             v-for="tour in museum.tours"
             :key="tour._id"
-            class="flex-none w-72 h-96 bg-white rounded-2xl shadow-md border border-p-soft/40 relative transition-all hover:shadow-xl cursor-pointer"
+            class="w-full h-3/10 m-4 mb-10 bg-white rounded-2xl shadow-sm shadow-p-soft relative transition-all hover:shadow-md cursor-pointer"
             @click="showTourConfirm(tour)"
           >
             <!-- Photo with overlay -->
@@ -107,15 +107,6 @@
             </div>
           </div>
         </div>
-      </div>
-      <!-- More Button -->
-      <div class="text-right px-4 mt-3">
-        <button
-          class="shared-button-fit-secondary px-5 font-sans"
-          @click="onMore(museum)"
-        >
-          Mostra altro &rarr;
-        </button>
       </div>
     </div>
 
