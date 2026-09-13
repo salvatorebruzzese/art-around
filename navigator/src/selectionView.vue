@@ -1,6 +1,6 @@
 <template>
   <div
-    class="min-h-screen max-w-screen pb-24 bg-p-light font-serif text-p-dark selection:bg-p-soft"
+    class="flex flex-col items-center min-h-screen max-w-screen pb-24 bg-p-light font-serif text-p-dark selection:bg-p-soft"
   >
     <div
       class="flex flex-col items-center rounded-xl shadow-md shadow-p-soft p-4 m-4 mb-8 gap-4 text-center max-w-9/10"
@@ -17,7 +17,7 @@
     </div>
 
     <!-- Museums List -->
-    <div v-for="museum in museums" :key="museum._id" class="mb-8">
+    <div v-for="museum in museums" :key="museum._id" class="mb-8 max-w-[360px]">
       <h2 class="text-2xl font-semibold mb-3 px-4 font-sans text-p-medium">
         {{ museum.name }}
       </h2>
@@ -27,7 +27,7 @@
           <div
             v-for="tour in museum.tours"
             :key="tour._id"
-            class="w-full h-3/10 m-4 bg-white rounded-2xl shadow-sm shadow-p-soft relative transition-all hover:shadow-md cursor-pointer"
+            class="w-[300px] h-3/10 m-4 bg-white rounded-2xl shadow-sm shadow-p-soft relative transition-all hover:shadow-md cursor-pointer"
             @click="showTourConfirm(tour)"
           >
             <!-- Photo with overlay -->
