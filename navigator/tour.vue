@@ -2,294 +2,183 @@
   <div
     class="min-h-screen pb-32 bg-p-light font-serif text-p-dark selection:bg-p-soft overflow-x-hidden relative"
   >
-    <!-- Top Large Image + Prev/Next controls -->
+    <!-- Top Half: Museum/Visit/Viewer (Detail View) -->
     <div
-      class="relative w-full aspect-[4/3] bg-p-soft/30 flex items-center justify-center overflow-hidden"
+      v-if="!isMapView"
+      class="flex-[2] min-h-0 mx-auto grid w-full max-w-4xl grid-cols-1 md:grid-cols-2 gap-6 bg-p-light rounded-3xl shadow-lg border border-p-soft p-6"
     >
-      <img
-        v-if="currentItem && currentItem.image"
-        :src="`/api/assets/${currentItem.image}`"
-        alt="Item image"
-        class="absolute inset-0 object-cover w-full h-full"
-      />
-      <img
-        v-else
-        src="https://dummyimage.com/900x675/efefef/a3a3a3.png&text=Item"
-        class="absolute inset-0 object-cover w-full h-full"
-        alt="Item placeholder"
-      />
-      <!-- Prev/Next Nav -->
-      <button
-        v-if="!isGuided && canGoPrev"
-        @click="goPrev"
-        aria-label="Item precedente"
-        class="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-p-dark/70 hover:bg-p-dark/90 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg"
+      <!-- Image Container -->
+      <figure
+        class="w-full max-h-full aspect-square rounded-2xl overflow-hidden justify-self-center self-center"
       >
-        <svg
-          class="w-6 h-6"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M15 19l-7-7 7-7"
-          />
-        </svg>
-      </button>
-      <button
-        v-if="!isGuided && canGoNext"
-        @click="goNext"
-        aria-label="Item successivo"
-        class="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-p-dark/70 hover:bg-p-dark/90 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg"
-      >
-        <svg
-          class="w-6 h-6"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M9 5l7 7-7 7"
-          />
-        </svg>
-      </button>
-    </div>
-    <!-- Main Content -->
-    <div class="px-5 pt-6 pb-28 max-w-lg mx-auto">
-      <div class="flex items-center gap-5">
-        <button
-          v-if="!isGuided && detachedStack.length > 0"
-          @click="returnToNav"
-          aria-label="Torna tour"
-          class="bg-p-soft hover:bg-p-soft/60 rounded-full p-2 text-p-medium mr-2"
-        >
-          <svg
-            class="inline w-7 h-7"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
-        </button>
-        <h1 class="flex-1 text-2xl font-bold font-serif text-p-dark truncate">
-          {{ currentItem ? currentItem.name : '...' }}
-        </h1>
-      </div>
-      <!-- Mini media player -->
-      <div
-        class="my-5 bg-p-light rounded-2xl shadow-md border border-p-soft/40 p-3 flex gap-3 items-center"
-      >
-        <button
-          @click="togglePlay"
-          class="inline-flex items-center justify-center w-12 h-12 rounded-full shadow bg-p-medium text-white hover:bg-p-medium/80"
-        >
-          <svg
-            v-if="!audioPlaying"
-            class="w-7 h-7"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-          >
-            <polygon points="8,5 21,12 8,19" fill="currentColor" />
-          </svg>
-          <svg
-            v-else
-            class="w-7 h-7"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-          >
-            <rect x="6" y="5" width="4" height="14" fill="currentColor" />
-            <rect x="14" y="5" width="4" height="14" fill="currentColor" />
-          </svg>
-        </button>
-        <button
-          @click="toggleMute"
-          class="ml-1 text-p-medium hover:text-p-dark"
-        >
-          <svg
-            v-if="audioMuted"
-            class="w-7 h-7"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-          >
-            <path d="M1 1l22 22" />
-            <path d="M9 9v6h4l5 5V4l-5 5H9z" />
-          </svg>
-          <svg
-            v-else
-            class="w-7 h-7"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-          >
-            <path d="M9 9v6h4l5 5V4l-5 5H9z" />
-          </svg>
-        </button>
-        <div class="flex-1 min-w-0 ml-3">
-          <div class="text-base text-p-dark font-sans truncate">
-            {{
-              currentItem && currentItem.audio
-                ? 'Audio descrizione'
-                : 'Nessun audio'
-            }}
-          </div>
-        </div>
-      </div>
-      <!-- Explanation (One At A Time) -->
-      <div v-if="explanations && explanations.length" class="mb-10 mt-3">
-        <div class="mb-5">
-          <div class="text-p-medium font-semibold font-sans mb-1 capitalize">
-            {{ getLevelLabel(selectedExplanation.level) }}
-            <span
-              v-if="selectedExplanation.durationSeconds"
-              class="text-p-dark/50 font-sans text-sm ml-2"
-            >
-              ({{ formatDuration(selectedExplanation.durationSeconds) }})
-            </span>
-          </div>
-          <div class="text-lg font-serif text-p-dark/90 leading-relaxed">
-            {{ selectedExplanation.text }}
-          </div>
-        </div>
-      </div>
-      <!-- Fallback description if no explanations -->
-      <div
-        v-else-if="currentItem && currentItem.description"
-        class="text-lg font-serif text-p-dark/90 leading-relaxed mb-10 mt-3"
-      >
-        {{
-          Array.isArray(currentItem.description)
-            ? currentItem.description[0]
-            : currentItem.description
-        }}
-      </div>
-      <div v-else class="text-p-medium/40 font-sans my-12">
-        Nessuna descrizione disponibile.
-      </div>
-      <!-- Reference items -->
-      <div v-if="refsItems.length" class="mt-6">
-        <h3 class="font-semibold text-p-medium/90 font-sans mb-2 text-lg">
-          Oggetti correlati
-        </h3>
-        <div class="flex gap-5 pb-2 overflow-x-auto">
-          <div
-            v-for="item in refsItems"
-            :key="item._id"
-            class="min-w-[10rem] flex-shrink-0 rounded-xl bg-p-light shadow border border-p-soft/40 p-3 flex flex-col items-center cursor-pointer hover:scale-105 active:scale-95 transition"
-            @click="openRefItem(item._id)"
-          >
-            <img
-              v-if="item.image"
-              :src="`/api/assets/${item.image}`"
-              alt="ref"
-              class="w-24 h-24 object-cover rounded-lg bg-p-soft mb-2"
-            />
-            <img
-              v-else
-              src="https://dummyimage.com/96x96/efefef/a3a3a3.png&text=Item"
-              class="w-24 h-24 object-cover rounded-lg bg-p-soft mb-2"
-            />
-            <div
-              class="font-semibold text-center text-p-medium text-base font-sans truncate max-w-[9rem]"
-            >
-              {{ item.name || 'Oggetto' }}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- Bottom swipe-up panel -->
-    <swipeOverlay>
-      <template #default>
-        <div class="no-swipe">
-          <div class="flex flex-col items-center font-sans ml-4 mr-4 gap-6">
-            <!-- velocity controls -->
-            <div class="flex w-full gap-4">
-              <label class="flex items-center text-p-medium">Velocità</label>
-              <div class="flex gap-2 flex-1">
-                <button
-                  v-for="rate in [0.75, 1, 1.25, 1.5, 2]"
-                  :key="rate"
-                  @click="onAudioRateChange(rate)"
-                  :class="[
-                    'shared-button-flex-secondary whitespace-nowrap',
-                    audioRate === rate ? 'ring-2 ring-p-medium font-bold' : '',
-                  ]"
-                >
-                  <span>&times {{ rate }}</span>
-                </button>
-              </div>
-            </div>
-            <!-- Explanation select -->
-            <div v-if="explanations && explanations.length > 1" class="w-full">
-              <label
-                class="font-semibold mb-2 text-base text-p-dark/70 font-sans block"
-                >Livello spiegazione</label
-              >
-              <select
-                v-model="selectedExplanationIdx"
-                @change="onExplanationIdxChange"
-                class="mt-1 block w-full rounded-lg border border-p-soft px-3 py-2 font-sans text-base focus:ring-2 focus:ring-p-medium"
-              >
-                <option
-                  v-for="(ex, idx) in explanations"
-                  :key="ex.level || idx"
-                  :value="idx"
-                >
-                  {{ getLevelLabel(ex.level) }}
-                </option>
-              </select>
-            </div>
-            <!-- Questions -->
-            <div>
-              <div
-                class="font-semibold mb-2 text-base text-p-dark/70 font-sans"
-              >
-                Domande
-              </div>
-              <div class="flex flex-wrap gap-3">
-                <button
-                  v-for="q in 3"
-                  :key="q"
-                  class="shared-button-fit-secondary font-sans px-4"
-                >
-                  Domanda {{ q }}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <audio
-          ref="audioEl"
-          v-if="currentItem && currentItem.audio"
-          :src="`/api/assets/${currentItem.audio}`"
-          @ended="audioPlaying = false"
+        <img
+          src="https://dummyimage.com/600x600/efefef/a3a3a3.jpg&text=Artwork"
+          alt="Artwork"
+          class="object-cover w-full h-full"
         />
-      </template>
-    </swipeOverlay>
+      </figure>
+
+      <!-- Item Info -->
+      <div
+        class="flex flex-col justify-start md:justify-center gap-4 h-full overflow-y-auto"
+      >
+        <h1 class="font-serif text-4xl text-p-medium font-bold">
+          La notte stellata
+        </h1>
+        <p class="text-lg text-p-dark">Vincent van Gogh</p>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div class="flex flex-col">
+            <h2 class="text-xs font-semibold text-p-medium uppercase">Museo</h2>
+            <p class="text-p-dark">
+              {{ selectedMuseum?.name || 'Museum of Modern Art' }}
+            </p>
+          </div>
+          <div class="flex flex-col">
+            <h2 class="text-xs font-semibold text-p-medium uppercase">Data</h2>
+            <p class="text-p-dark">1889</p>
+          </div>
+        </div>
+
+        <div class="flex flex-col">
+          <h2 class="text-xs font-semibold text-p-medium uppercase">
+            Descrizione
+          </h2>
+          <p class="text-p-dark font-sans mt-1">
+            {{ selectedMuseum?.description || 'Descrizione non disponibile' }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Map View -->
+    <div
+      v-else
+      class="flex-[2] min-h-0 mx-auto w-full max-w-4xl bg-p-light rounded-3xl shadow-lg border border-p-soft p-6 flex items-start justify-center"
+    >
+      <div class="text-center">
+        <h2 class="text-2xl font-bold text-p-medium">Mappa del Museo</h2>
+        <p class="text-p-dark mt-2">Visualizzazione del percorso</p>
+      </div>
+    </div>
+
+    <!-- Bottom Half: Navigation & Voice Buttons -->
+    <div
+      class="flex-none h-auto mx-auto w-full max-w-4xl flex flex-col gap-4 items-center px-4 pb-4"
+    >
+      <!-- Top Layer: Move Buttons -->
+      <div
+        v-if="!isMapView"
+        class="flex items-center justify-center gap-4 w-full"
+      >
+        <!-- Previous Button -->
+        <button
+          class="shared-button-flex-secondary rounded-md w-16 h-16 shadow-lg border border-p-soft hover:border-transparent flex items-center justify-center"
+        >
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+        </button>
+
+        <!-- Next Button -->
+        <button
+          class="shared-button-flex-secondary rounded-md w-16 h-16 shadow-lg border border-p-soft hover:border-transparent flex items-center justify-center"
+        >
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M9 18l6-6-6-6" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Bottom Layer: Home, Voice, Map Buttons -->
+      <div class="flex items-center justify-center gap-4">
+        <!-- Marketplace Button -->
+        <a
+          href="/marketplace"
+          class="shared-button-flex-secondary rounded-full w-12 h-12 shadow-md border border-p-soft hover:border-transparent flex items-center justify-center group"
+        >
+          <svg
+            width="36"
+            height="36"
+            viewBox="0 0 48 48"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <rect width="48" height="48" rx="12" fill="none" stroke="none" />
+            <path
+              d="M12 20 L15 12 H33 L36 20 V24 H34 V36 H14 V24 H12 V20 Z M18 24 V34 H30 V24 H18 Z M16 18 H32 L30 14 H18 L16 18 Z"
+              fill="var(--color-p-medium)"
+              class="group-hover:fill-[var(--color-p-light)] transition-colors"
+            />
+          </svg>
+        </a>
+
+        <!-- Voice Button -->
+        <button
+          class="shared-button-flex-primary rounded-full w-20 h-20 shadow-xl border border-p-soft hover:border-transparent flex items-center justify-center"
+        >
+          <svg
+            width="36"
+            height="32"
+            viewBox="0 0 32 32"
+            fill="currentColor"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M1 16c0-2 1-4 3-4s3 2 3 4v4c0 2-1 4-3 4s-3-2-3-4v-4z" />
+            <path d="M13 10c0-2 1-4 3-4s3 2 3 4v12c0 2-1 4-3 4s-3-2-3-4v-12z" />
+            <path d="M25 16c0-2 1-4 3-4s3 2 3 4v4c0 2-1 4-3 4s-3-2-3-4v-4z" />
+          </svg>
+        </button>
+
+        <!-- Map Button -->
+        <button
+          @click="isMapView = !isMapView"
+          class="shared-button-flex-secondary rounded-full w-12 h-12 shadow-md border border-p-soft hover:border-transparent flex items-center justify-center"
+          :class="{ 'bg-p-soft': isMapView }"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
+            <line x1="8" y1="2" x2="8" y2="18" />
+            <line x1="16" y1="6" x2="16" y2="22" />
+          </svg>
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 import { ref } from 'vue'
-import swipeOverlay from './swipeOverlay.vue'
-import { TourNavigation } from '../../marketplace/tourNav.js'
+import { TourNavigation } from '../marketplace/tourNav.js'
 
 class TourController {
   constructor({ itemNav = [], onChange = null } = {}) {
@@ -432,10 +321,6 @@ class GuidedTourController extends TourController {
 }
 
 export default {
-  components: {
-    swipeOverlay,
-  },
-
   name: 'TourNavigationMobile',
   data() {
     return {
@@ -453,6 +338,7 @@ export default {
       openTouch0: null,
       loadedItemsMap: {},
       overlayVisible: ref(false),
+      isMapView: ref(false),
       audioMuted: false,
       audioVolume: 1,
       selectedExplanationIdx: 0,

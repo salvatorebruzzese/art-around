@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex flex-col items-center min-h-screen max-w-screen pb-24 font-serif text-p-dark selection:bg-p-soft"
+    class="flex flex-col items-center w-full min-h-screen max-w-screen pb-24 font-serif text-p-dark selection:bg-p-soft"
   >
     <div
       class="flex flex-col items-center rounded-xl shadow-md shadow-p-soft p-4 m-4 mb-8 gap-4 text-center max-w-9/10"
@@ -300,11 +300,6 @@ const allMuseums = ref([])
 const searchResults = ref([])
 const itemsMeta = ref({})
 const itemsByTour = ref({})
-
-// Methods
-const onMore = (museum) => {
-  window.location.href = `/navigator/museum/${museum._id}`
-}
 
 const goToSearchResult = (item) => {
   if (item.type === 'Museo') {

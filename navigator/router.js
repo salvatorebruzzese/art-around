@@ -11,7 +11,7 @@ router.get('/', (req, res) => {
 })
 
 router.get('/:id', (req, res) => {
-  res.sendFile(join(rootDir, 'navigator/src/tour.html'))
+  res.sendFile(join(rootDir, 'navigator/tour.html'))
 })
 
 export default router
