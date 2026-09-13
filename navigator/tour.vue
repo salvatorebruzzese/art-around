@@ -33,21 +33,42 @@
           {{ currentItem ? currentItem.name : '--' }}
         </h1>
 
+        <div v-if="explanations && explanations.length > 1" class="w-full">
+          <label
+            class="font-semibold mb-2 text-base text-p-medium font-sans block"
+          >
+            Livello spiegazione
+          </label>
+          <div class="flex flex-row gap-4">
+            <button
+              v-for="(ex, idx) in explanations"
+              :key="ex.level || idx"
+              type="button"
+              @click="selectedExplanationIdx = idx"
+              class="shared-button-flex-secondary shadow-sm shadow-p-soft cursor-pointer transition-colors"
+              :class="{
+                '!bg-p-soft !shadow-none': selectedExplanationIdx === idx,
+              }"
+            >
+              {{ getLevelLabel(ex.level) }}
+            </button>
+          </div>
+        </div>
         <div class="flex flex-col">
           <div v-if="explanations && explanations.length" class="my-4">
-            <div class="mb-5">
+            <div>
               <div
                 class="text-p-medium font-semibold font-sans mb-1 capitalize"
               >
                 {{ getLevelLabel(selectedExplanation.level) }}
                 <span
                   v-if="selectedExplanation.durationSeconds"
-                  class="text-p-dark/50 font-sans text-sm ml-2"
+                  class="text-p-medium/50 font-sans text-sm ml-2"
                 >
                   ({{ formatDuration(selectedExplanation.durationSeconds) }})
                 </span>
               </div>
-              <div class="text-lg font-serif text-p-dark/90 leading-relaxed">
+              <div class="text-lg font-serif text-p-dark leading-relaxed">
                 {{ selectedExplanation.text }}
               </div>
             </div>
@@ -55,7 +76,7 @@
           <!-- Fallback description if no explanations -->
           <div
             v-else-if="currentItem && currentItem.description"
-            class="text-lg font-serif text-p-dark/90 leading-relaxed mb-10 mt-3"
+            class="text-lg font-serif text-p-dark leading-relaxed my-4"
           >
             {{
               Array.isArray(currentItem.description)
