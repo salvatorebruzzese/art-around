@@ -1,6 +1,6 @@
 <template>
   <div
-    class="min-h-screen max-w-screen pb-32 bg-p-light font-serif text-p-dark selection:bg-p-soft"
+    class="min-h-screen max-w-screen pb-24 bg-p-light font-serif text-p-dark selection:bg-p-soft"
   >
     <div
       class="flex flex-col items-center rounded-xl shadow-md shadow-p-soft p-4 m-4 mb-8 gap-4 text-center max-w-9/10"

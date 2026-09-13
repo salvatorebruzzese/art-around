@@ -213,10 +213,7 @@ function selectMuseum(museum) {
   </div>
 
   <!-- Main Container -->
-  <div
-    v-else
-    class="flex flex-col mx-4 gap-4 h-screen items-center justify-center"
-  >
+  <div v-else class="w-full min-h-screen">
     <selectionView />
   </div>
 </template>
