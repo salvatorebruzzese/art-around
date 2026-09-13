@@ -42,7 +42,7 @@ function selectMuseum(museum) {
     <!-- Top Half: Museum/Visit/Viewer (Detail View) -->
     <div
       v-if="!isMapView"
-      class="flex-[2] min-h-0 mx-auto grid w-full max-w-4xl grid-cols-1 md:grid-cols-2 gap-6 bg-white rounded-3xl shadow-lg border border-p-soft p-6"
+      class="flex-[2] min-h-0 mx-auto grid w-full max-w-4xl grid-cols-1 md:grid-cols-2 gap-6 bg-p-light rounded-3xl shadow-lg border border-p-soft p-6"
     >
       <!-- Image Container -->
       <figure
@@ -91,7 +91,7 @@ function selectMuseum(museum) {
     <!-- Map View -->
     <div
       v-else
-      class="flex-[2] min-h-0 mx-auto w-full max-w-4xl bg-white rounded-3xl shadow-lg border border-p-soft p-6 flex items-start justify-center"
+      class="flex-[2] min-h-0 mx-auto w-full max-w-4xl bg-p-light rounded-3xl shadow-lg border border-p-soft p-6 flex items-start justify-center"
     >
       <div class="text-center">
         <h2 class="text-2xl font-bold text-p-medium">Mappa del Museo</h2>

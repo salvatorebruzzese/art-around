@@ -11,7 +11,7 @@
 
   <body
     x-data="editorState"
-    class="flex flex-col items-center max-w-screen bg-white text-p-dark"
+    class="flex flex-col items-center max-w-screen bg-p-light text-p-dark"
   >
     <header class="w-full p-8">
       <quick-nav></quick-nav>
@@ -29,7 +29,7 @@
         </button>
 
         <aside
-          class="flex flex-col gap-6 fixed top-0 left-0 h-full min-w-[66vw] bg-white z-50 transform transition-transform duration-200 -translate-x-full md:translate-x-0 md:static md:sticky md:top-0 md:min-w-[20%] md:w-64 lg:w-max md:h-screen"
+          class="flex flex-col gap-6 fixed top-0 left-0 h-full min-w-[66vw] bg-p-light z-50 transform transition-transform duration-200 -translate-x-full md:translate-x-0 md:static md:sticky md:top-0 md:min-w-[20%] md:w-64 lg:w-max md:h-screen"
           :class="{ '-translate-x-full': !asideOpen, 'translate-x-0': asideOpen }"
           @keydown.escape.window="open = false"
           x-show="asideOpen || window.innerWidth >= 768"
@@ -133,7 +133,7 @@
                       <div x-data="{dopen:false}" class="dropdown dropdown-end">
                         <button
                           @click.stop="dopen = !dopen"
-                          class="btn btn-sm btn-circle bg-white/80 hover:bg-white text-p-dark border-none shadow-md backdrop-blur-sm focus:outline-none list-none"
+                          class="btn btn-sm btn-circle bg-p-light/80 hover:bg-p-light text-p-dark border-none shadow-md backdrop-blur-sm focus:outline-none list-none"
                         >
                           <icon-three-dots></icon-three-dots>
                         </button>
@@ -191,8 +191,8 @@
         class="flex-1 md:mr-6 md:ml-6"
         x-data="{
               tabs: [
-                {name: 'Edit Item', id:'edit_item', active: 'bg-blue-100  rounded-t-3xl border-t border-l border-p-soft', inactive: 'bg-white'},
-                {name: 'Edit Tour', id:'edit_tour', active: 'bg-blue-100 rounded-t-3xl border-t border-r border-p-soft', inactive:'bg-white'},
+                {name: 'Edit Item', id:'edit_item', active: 'bg-blue-100  rounded-t-3xl border-t border-l border-p-soft', inactive: 'bg-p-light'},
+                {name: 'Edit Tour', id:'edit_tour', active: 'bg-blue-100 rounded-t-3xl border-t border-r border-p-soft', inactive:'bg-p-light'},
               ],
               activeTab: 'edit_item',
               init() {
@@ -233,7 +233,7 @@
                       <button
                         type="button"
                         @click.stop="dopen = !dopen"
-                        class="btn btn-sm btn-circle bg-white/80 hover:bg-white text-p-dark border-none shadow-md backdrop-blur-sm focus:outline-none list-none"
+                        class="btn btn-sm btn-circle bg-p-light/80 hover:bg-p-light text-p-dark border-none shadow-md backdrop-blur-sm focus:outline-none list-none"
                       >
                         <icon-three-dots></icon-three-dots>
                       </button>
@@ -305,7 +305,7 @@
                     type="text"
                     x-model="formData.name"
                     required
-                    class="w-full px-4 py-2 rounded-xl border border-p-soft bg-white text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium transition-shadow"
+                    class="w-full px-4 py-2 rounded-xl border border-p-soft bg-p-light text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium transition-shadow"
                     required
                   />
                 </div>
@@ -314,7 +314,7 @@
                   <input
                     type="text"
                     x-model="formData.license"
-                    class="w-full px-4 py-2 rounded-xl border border-p-soft bg-white text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium"
+                    class="w-full px-4 py-2 rounded-xl border border-p-soft bg-p-light text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium"
                     required
                   />
                 </div>
@@ -373,7 +373,7 @@
                         x-model="exp.text"
                         required
                         rows="4"
-                        class="w-full px-4 py-2 rounded-xl border border-p-soft bg-white text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium resize-none"
+                        class="w-full px-4 py-2 rounded-xl border border-p-soft bg-p-light text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium resize-none"
                       ></textarea>
                       <label> Durata(s) </label>
                       <input
@@ -574,7 +574,7 @@
           style="background-color: rgba(0, 0, 0, 0.8)"
         >
           <div
-            class="bg-white rounded-lg p-6 w-screen max-w-full md:w-[50vw] lg:w-[30vw] shadow-xl flex flex-col items-center"
+            class="bg-p-light rounded-lg p-6 w-screen max-w-full md:w-[50vw] lg:w-[30vw] shadow-xl flex flex-col items-center"
           >
             <p x-text="body.message"></p>
             <div class="flex justify-between w-full">
@@ -603,7 +603,7 @@
           style="background-color: rgba(0, 0, 0, 0.8)"
         >
           <div
-            class="bg-white rounded-lg p-6 w-screen max-w-full md:w-[50vw] lg:w-[30vw] shadow-xl flex flex-col items-center"
+            class="bg-p-light rounded-lg p-6 w-screen max-w-full md:w-[50vw] lg:w-[30vw] shadow-xl flex flex-col items-center"
           >
             <input
               type="text"
@@ -646,7 +646,7 @@
           style="background-color: rgba(0, 0, 0, 0.8)"
         >
           <div
-            class="bg-white rounded-lg p-6 w-screen max-w-full md:w-[50vw] lg:w-[30vw] shadow-xl flex flex-col items-center"
+            class="bg-p-light rounded-lg p-6 w-screen max-w-full md:w-[50vw] lg:w-[30vw] shadow-xl flex flex-col items-center"
             x-data="{addList: []}"
           >
             <header class="flex justify-between">
@@ -690,7 +690,7 @@
           style="background-color: rgba(0, 0, 0, 0.8)"
         >
           <div
-            class="bg-white rounded-lg p-6 w-screen max-w-full md:w-[50vw] lg:w-[30vw] shadow-xl flex flex-col items-center"
+            class="bg-p-light rounded-lg p-6 w-screen max-w-full md:w-[50vw] lg:w-[30vw] shadow-xl flex flex-col items-center"
           >
             <div
               x-data="{set: false}"
@@ -737,7 +737,7 @@
           style="background-color: rgba(0, 0, 0, 0.8)"
         >
           <div
-            class="bg-white rounded-lg p-6 w-screen max-w-full md:w-[50vw] lg:w-[30vw] shadow-xl flex flex-col items-center"
+            class="bg-p-light rounded-lg p-6 w-screen max-w-full md:w-[50vw] lg:w-[30vw] shadow-xl flex flex-col items-center"
           >
             <header class="flex justify-between">
               <!-- <h1

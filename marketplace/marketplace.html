@@ -34,7 +34,7 @@
               x-model="filters.search"
               type="text"
               placeholder="Cerca..."
-              class="input input-bordered rounded-full w-full pr-12 border-p-soft bg-white text-p-dark placeholder-p-medium focus:border-p-medium focus:ring-2 focus:ring-p-soft focus:outline-none transition-all shadow-sm"
+              class="input input-bordered rounded-full w-full pr-12 border-p-soft bg-p-light text-p-dark placeholder-p-medium focus:border-p-medium focus:ring-2 focus:ring-p-soft focus:outline-none transition-all shadow-sm"
             />
             <button
               type="button"
@@ -64,7 +64,7 @@
           >
             <select
               x-model="filters.museum"
-              class="select select-bordered rounded-full w-full border-p-soft bg-white text-p-dark focus:border-p-medium focus:ring-2 focus:ring-p-soft focus:outline-none font-medium shadow-sm cursor-pointer transition-all"
+              class="select select-bordered rounded-full w-full border-p-soft bg-p-light text-p-dark focus:border-p-medium focus:ring-2 focus:ring-p-soft focus:outline-none font-medium shadow-sm cursor-pointer transition-all"
             >
               <option value="">Tutti i musei</option>
               <template x-for="museum in museums" :key="museum._id">
@@ -79,7 +79,7 @@
               id="toggle-switch"
               x-transition
               x-show="user"
-              class="flex items-center border border-p-soft rounded-full h-12 p-1 bg-white shadow-sm w-64"
+              class="flex items-center border border-p-soft rounded-full h-12 p-1 bg-p-light shadow-sm w-64"
             >
               <button
                 x-data
@@ -106,7 +106,7 @@
               id="toggle-purchased"
               x-show="user && view == 'tour'"
               x-transition
-              class="flex items-center border border-p-soft rounded-full h-12 p-1 bg-white shadow-sm w-64"
+              class="flex items-center border border-p-soft rounded-full h-12 p-1 bg-p-light shadow-sm w-64"
             >
               <button
                 @click="filters.purchased = false"
@@ -167,7 +167,7 @@
                       <div x-data="{open:false}" class="dropdown dropdown-end">
                         <button
                           @click="open = !open"
-                          class="btn btn-sm btn-circle bg-white/80 hover:bg-white text-p-dark border-none shadow-md backdrop-blur-sm focus:outline-none list-none"
+                          class="btn btn-sm btn-circle bg-p-light/80 hover:bg-p-light text-p-dark border-none shadow-md backdrop-blur-sm focus:outline-none list-none"
                         >
                           <svg
                             class="w-5 h-5"
@@ -273,7 +273,7 @@
                   >
                     <button
                       @click="open = !open"
-                      class="btn btn-sm btn-circle bg-white/80 hover:bg-white text-p-dark border-none shadow-md backdrop-blur-sm focus:outline-none list-none"
+                      class="btn btn-sm btn-circle bg-p-light/80 hover:bg-p-light text-p-dark border-none shadow-md backdrop-blur-sm focus:outline-none list-none"
                     >
                       <svg
                         class="w-5 h-5"
@@ -396,7 +396,7 @@
 
         <div
           @click.outside="window.history.pushState({}, '', '/marketplace/'); showPreview = false;"
-          class="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl border border-p-soft p-6 my-auto"
+          class="relative w-full max-w-4xl bg-p-light rounded-3xl shadow-2xl border border-p-soft p-6 my-auto"
         >
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- Image Container -->
@@ -457,7 +457,7 @@
         x-transition:leave="transition ease-in duration-200"
         x-transition:leave-start="opacity-100 translate-y-0"
         x-transition:leave-end="opacity-0 translate-y-8"
-        class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-11/12 max-w-2xl bg-white/70 backdrop-blur-md border border-p-soft/60 rounded-2xl p-4 shadow-xl flex items-center justify-between gap-4"
+        class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-11/12 max-w-2xl bg-p-light/70 backdrop-blur-md border border-p-soft/60 rounded-2xl p-4 shadow-xl flex items-center justify-between gap-4"
       >
         <!-- List of Cart Items -->
         <div class="flex items-center gap-2 overflow-x-auto py-1">

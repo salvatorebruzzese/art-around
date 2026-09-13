@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex flex-col items-center min-h-screen max-w-screen pb-24 bg-p-light font-serif text-p-dark selection:bg-p-soft"
+    class="flex flex-col items-center min-h-screen max-w-screen pb-24 font-serif text-p-dark selection:bg-p-soft"
   >
     <div
       class="flex flex-col items-center rounded-xl shadow-md shadow-p-soft p-4 m-4 mb-8 gap-4 text-center max-w-9/10"
@@ -27,7 +27,7 @@
           <div
             v-for="tour in museum.tours"
             :key="tour._id"
-            class="w-[300px] h-3/10 m-4 bg-white rounded-2xl shadow-sm shadow-p-soft relative transition-all hover:shadow-md cursor-pointer"
+            class="w-[300px] h-3/10 m-4 bg-p-light rounded-2xl shadow-sm shadow-p-soft relative transition-all hover:shadow-md cursor-pointer"
             @click="showTourConfirm(tour)"
           >
             <!-- Photo with overlay -->
@@ -110,7 +110,7 @@
 
     <!-- NavBar Fixed Bottom -->
     <nav
-      class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-11/12 max-w-9/10 max-w-[300px] bg-p-light/70 backdrop-blur-md border border-p-soft/60 rounded-2xl p-4 shadow-xl flex items-center justify-between gap-4"
+      class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-9/10 max-w-[300px] bg-p-light/70 backdrop-blur-md border border-p-soft/60 rounded-2xl p-4 shadow-xl flex items-center justify-between gap-4"
       style="min-height: 56px"
     >
       <a
@@ -167,11 +167,11 @@
     <transition name="fade">
       <div
         v-if="showSearch"
-        class="fixed inset-0 z-50 bg-p-dark/50 backdrop-blur-sm flex items-end"
+        class="fixed inset-0 z-50 bg-p-dark/50 backdrop-blur-sm flex items-end justify-center"
         @click.self="showSearch = false"
       >
         <div
-          class="w-full bg-white rounded-t-2xl border border-p-soft shadow-2xl p-8"
+          class="w-full max-w-[500px] bg-p-light rounded-t-2xl border border-p-soft shadow-2xl p-8"
         >
           <div class="flex items-center justify-between mb-6">
             <div class="font-bold text-2xl text-p-dark font-serif">Cerca</div>
@@ -194,7 +194,7 @@
           <input
             type="text"
             v-model="search"
-            class="input input-bordered rounded-full w-full border-p-soft bg-white text-p-dark placeholder-p-medium focus:border-p-medium focus:ring-2 focus:ring-p-soft focus:outline-none font-sans font-normal shadow-sm px-6 py-3 mb-3 text-lg"
+            class="input input-bordered rounded-full w-full border-p-soft bg-p-light text-p-dark placeholder-p-medium focus:border-p-medium focus:ring-2 focus:ring-p-soft focus:outline-none font-sans font-normal shadow-sm px-6 py-3 mb-3 text-lg"
             placeholder="Cerca tra tour e musei…"
             @input="onSearchInput"
           />
@@ -229,7 +229,7 @@
         @click.self="closeTourConfirm"
       >
         <div
-          class="w-full bg-white rounded-t-2xl border border-p-soft shadow-2xl p-8"
+          class="w-full bg-p-light rounded-t-2xl border border-p-soft shadow-2xl p-8"
         >
           <div class="flex items-center justify-between mb-6">
             <div class="font-bold text-2xl text-p-dark font-serif">

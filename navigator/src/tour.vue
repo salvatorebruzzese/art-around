@@ -89,7 +89,7 @@
       </div>
       <!-- Mini media player -->
       <div
-        class="my-5 bg-white rounded-2xl shadow-md border border-p-soft/40 p-3 flex gap-3 items-center"
+        class="my-5 bg-p-light rounded-2xl shadow-md border border-p-soft/40 p-3 flex gap-3 items-center"
       >
         <button
           @click="togglePlay"
@@ -191,7 +191,7 @@
           <div
             v-for="item in refsItems"
             :key="item._id"
-            class="min-w-[10rem] flex-shrink-0 rounded-xl bg-white shadow border border-p-soft/40 p-3 flex flex-col items-center cursor-pointer hover:scale-105 active:scale-95 transition"
+            class="min-w-[10rem] flex-shrink-0 rounded-xl bg-p-light shadow border border-p-soft/40 p-3 flex flex-col items-center cursor-pointer hover:scale-105 active:scale-95 transition"
             @click="openRefItem(item._id)"
           >
             <img
