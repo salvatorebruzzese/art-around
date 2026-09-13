@@ -1,20 +1,27 @@
 <template>
   <div
-    class="min-h-screen pb-32 bg-p-light font-serif text-p-dark selection:bg-p-soft overflow-x-hidden relative"
+    class="min-h-screen pb-44 bg-p-light font-serif text-p-dark selection:bg-p-soft overflow-x-hidden relative"
   >
     <!-- Top Half: Museum/Visit/Viewer (Detail View) -->
     <div
       v-if="!isMapView"
-      class="flex-[2] min-h-0 mx-auto grid w-full max-w-4xl grid-cols-1 md:grid-cols-2 gap-6 bg-p-light rounded-3xl shadow-lg border border-p-soft p-6"
+      class="flex-[2] min-h-0 mx-auto grid w-full max-w-4xl grid-cols-1 md:rounded-3xl md:grid-cols-2 gap-6 bg-p-light rounded-b-3xl shadow-lg shadow-p-soft p-6 mb-4"
     >
       <!-- Image Container -->
       <figure
         class="w-full max-h-full aspect-square rounded-2xl overflow-hidden justify-self-center self-center"
       >
         <img
-          src="https://dummyimage.com/600x600/efefef/a3a3a3.jpg&text=Artwork"
-          alt="Artwork"
+          v-if="currentItem && currentItem.image"
+          :src="`/api/assets/${currentItem.image}`"
+          alt="Item image"
           class="object-cover w-full h-full"
+        />
+        <img
+          v-else
+          src="https://dummyimage.com/900x675/efefef/a3a3a3.png&text=Item"
+          class="object-cover w-full h-full"
+          alt="Item placeholder"
         />
       </figure>
 
@@ -22,31 +29,43 @@
       <div
         class="flex flex-col justify-start md:justify-center gap-4 h-full overflow-y-auto"
       >
-        <h1 class="font-serif text-4xl text-p-medium font-bold">
-          La notte stellata
+        <h1 class="font-serif text-2xl text-p-medium font-bold">
+          {{ currentItem ? currentItem.name : '--' }}
         </h1>
-        <p class="text-lg text-p-dark">Vincent van Gogh</p>
-
-        <div class="grid grid-cols-2 gap-4">
-          <div class="flex flex-col">
-            <h2 class="text-xs font-semibold text-p-medium uppercase">Museo</h2>
-            <p class="text-p-dark">
-              {{ selectedMuseum?.name || 'Museum of Modern Art' }}
-            </p>
-          </div>
-          <div class="flex flex-col">
-            <h2 class="text-xs font-semibold text-p-medium uppercase">Data</h2>
-            <p class="text-p-dark">1889</p>
-          </div>
-        </div>
 
         <div class="flex flex-col">
-          <h2 class="text-xs font-semibold text-p-medium uppercase">
-            Descrizione
-          </h2>
-          <p class="text-p-dark font-sans mt-1">
-            {{ selectedMuseum?.description || 'Descrizione non disponibile' }}
-          </p>
+          <div v-if="explanations && explanations.length" class="my-4">
+            <div class="mb-5">
+              <div
+                class="text-p-medium font-semibold font-sans mb-1 capitalize"
+              >
+                {{ getLevelLabel(selectedExplanation.level) }}
+                <span
+                  v-if="selectedExplanation.durationSeconds"
+                  class="text-p-dark/50 font-sans text-sm ml-2"
+                >
+                  ({{ formatDuration(selectedExplanation.durationSeconds) }})
+                </span>
+              </div>
+              <div class="text-lg font-serif text-p-dark/90 leading-relaxed">
+                {{ selectedExplanation.text }}
+              </div>
+            </div>
+          </div>
+          <!-- Fallback description if no explanations -->
+          <div
+            v-else-if="currentItem && currentItem.description"
+            class="text-lg font-serif text-p-dark/90 leading-relaxed mb-10 mt-3"
+          >
+            {{
+              Array.isArray(currentItem.description)
+                ? currentItem.description[0]
+                : currentItem.description
+            }}
+          </div>
+          <div v-else class="text-p-medium/40 font-sans my-12">
+            Nessuna descrizione disponibile.
+          </div>
         </div>
       </div>
     </div>
@@ -54,7 +73,7 @@
     <!-- Map View -->
     <div
       v-else
-      class="flex-[2] min-h-0 mx-auto w-full max-w-4xl bg-p-light rounded-3xl shadow-lg border border-p-soft p-6 flex items-start justify-center"
+      class="flex-[2] min-h-0 mx-auto grid w-full max-w-4xl grid-cols-1 md:rounded-3xl md:grid-cols-2 gap-6 bg-p-light rounded-b-3xl shadow-lg shadow-p-soft p-6 mb-4"
     >
       <div class="text-center">
         <h2 class="text-2xl font-bold text-p-medium">Mappa del Museo</h2>
@@ -64,7 +83,7 @@
 
     <!-- Bottom Half: Navigation & Voice Buttons -->
     <div
-      class="flex-none h-auto mx-auto w-full max-w-4xl flex flex-col gap-4 items-center px-4 pb-4"
+      class="absolute bottom-0 h-auto mx-auto w-full max-w-4xl flex flex-col gap-4 items-center px-4 pb-4"
     >
       <!-- Top Layer: Move Buttons -->
       <div
@@ -73,6 +92,9 @@
       >
         <!-- Previous Button -->
         <button
+          v-if="!isGuided && canGoPrev"
+          @click="goPrev"
+          aria-label="Item precedente"
           class="shared-button-flex-secondary rounded-md w-16 h-16 shadow-lg border border-p-soft hover:border-transparent flex items-center justify-center"
         >
           <svg
@@ -91,6 +113,9 @@
 
         <!-- Next Button -->
         <button
+          v-if="!isGuided && canGoNext"
+          @click="goNext"
+          aria-label="Item successivo"
           class="shared-button-flex-secondary rounded-md w-16 h-16 shadow-lg border border-p-soft hover:border-transparent flex items-center justify-center"
         >
           <svg
