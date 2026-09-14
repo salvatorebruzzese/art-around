@@ -3,36 +3,53 @@
     class="h-dvh flex flex-col justify-between bg-p-light font-serif text-p-dark selection:bg-p-soft overflow-hidden"
   >
     <!-- Scrollable Main Viewport (Top Half: Detail / Map) -->
-    <main class="flex-1 min-h-0 overflow-y-auto w-full md:pt-6">
+    <main class="overflow-y-auto min-h-0 max-h-7/10 w-full md:pt-6">
       <!-- Detail View -->
       <div
         v-if="!isMapView"
-        class="mx-auto grid w-full max-w-4xl grid-cols-1 md:rounded-3xl md:grid-cols-2 gap-6 bg-p-light rounded-2xl shadow-lg shadow-p-soft p-6 mb-4"
+        class="mx-auto w-full max-w-4xl bg-p-light rounded-2xl md:rounded-3xl shadow-lg shadow-p-soft p-6 mb-4 flex overflow-x-auto snap-x snap-mandatory md:grid md:grid-cols-2 gap-6 scrollbar-hide"
       >
-        <!-- Image Container -->
-        <figure
-          class="w-full max-h-[250px] aspect-square rounded-2xl overflow-hidden justify-self-center self-center"
+        <!-- Slide 1 (Default): Image + Title on Mobile -->
+        <section
+          class="w-full shrink-0 snap-center flex flex-col items-center justify-center gap-4 md:w-auto md:shrink"
         >
-          <img
-            v-if="currentItem && currentItem.image"
-            :src="`/api/assets/${currentItem.image}`"
-            alt="Item image"
-            class="object-cover w-full h-full"
-          />
-          <img
-            v-else
-            src="https://dummyimage.com/900x675/efefef/a3a3a3.png&text=Item"
-            class="object-cover w-full h-full"
-            alt="Item placeholder"
-          />
-        </figure>
+          <figure
+            class="w-full h-full aspect-square rounded-2xl overflow-hidden justify-self-center self-center"
+          >
+            <img
+              v-if="currentItem && currentItem.image"
+              :src="`/api/assets/${currentItem.image}`"
+              alt="Item image"
+              class="object-cover w-full h-full"
+            />
+            <img
+              v-else
+              src="https://dummyimage.com/900x675/efefef/a3a3a3.png&text=Item"
+              class="object-cover w-full h-full"
+              alt="Item placeholder"
+            />
+          </figure>
 
-        <!-- Item Info -->
-        <div class="flex flex-col justify-start md:justify-center gap-4 h-full">
-          <h1 class="font-serif text-2xl text-p-medium font-bold">
+          <!-- Title visible under image on mobile, hidden on desktop -->
+          <h1
+            class="font-serif text-2xl text-p-medium font-bold text-center md:hidden"
+          >
+            {{ currentItem ? currentItem.name : '--' }}
+          </h1>
+        </section>
+
+        <!-- Slide 2: Spiegazione (Reached on swipe left) -->
+        <section
+          class="w-full shrink-0 snap-center flex flex-col justify-start md:justify-center gap-4 h-full md:w-auto md:shrink"
+        >
+          <!-- Title visible on desktop side column -->
+          <h1
+            class="hidden md:block font-serif text-2xl text-p-medium font-bold"
+          >
             {{ currentItem ? currentItem.name : '--' }}
           </h1>
 
+          <!-- Explanation Level Selector -->
           <div v-if="explanations && explanations.length > 1" class="w-full">
             <label
               class="font-semibold mb-2 text-base text-p-medium font-sans block"
@@ -54,6 +71,8 @@
               </button>
             </div>
           </div>
+
+          <!-- Explanation Content -->
           <div class="flex flex-col">
             <div v-if="explanations && explanations.length" class="my-4">
               <div>
@@ -88,7 +107,7 @@
               Nessuna descrizione disponibile.
             </div>
           </div>
-        </div>
+        </section>
       </div>
 
       <!-- Map View -->
@@ -796,14 +815,3 @@ export default {
   },
 }
 </script>
-
-<style>
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.24s;
-}
-.fade-enter,
-.fade-leave-to {
-  opacity: 0;
-}
-</style>
