@@ -10,7 +10,23 @@ router.get('/', (req, res) => {
   res.sendFile(join(rootDir, 'navigator/index.html'))
 })
 
-router.get('/:id', (req, res) => {
+router.get('/libre', (req, res) => {
+  res.sendFile(join(rootDir, 'navigator/app.html'))
+})
+
+router.get('/libre/:id', (req, res) => {
+  res.sendFile(join(rootDir, 'navigator/tour.html'))
+})
+
+router.get('/master', (req, res) => {
+  res.sendFile(join(rootDir, 'navigator/app.html'))
+})
+
+router.get('/guided', (req, res) => {
+  res.sendFile(join(rootDir, 'navigator/otp.html'))
+})
+
+router.get('/guided/:id', (req, res) => {
   res.sendFile(join(rootDir, 'navigator/tour.html'))
 })
 

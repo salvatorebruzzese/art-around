@@ -303,7 +303,7 @@ const itemsByTour = ref({})
 
 const goToSearchResult = (item) => {
   if (item.type === 'Museo') {
-    window.location.href = `/navigator/museum/${item._id}`
+    window.location.href = `/navigator/libre/museum/${item._id}`
   } else {
     showTourConfirm(item._tourObj || item)
   }
@@ -453,7 +453,7 @@ const closeTourConfirm = () => {
 
 const confirmStartTour = () => {
   if (selectedTour.value && selectedTour.value._id) {
-    window.location.href = `/navigator/${selectedTour.value._id}`
+    window.location.href = `/navigator/libre/${selectedTour.value._id}`
   }
 }
 
