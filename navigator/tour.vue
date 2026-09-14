@@ -170,8 +170,8 @@
       >
         <!-- Previous Button -->
         <button
-          v-if="!isGuided && canGoPrev"
-          @click="goPrev"
+          v-if="!isGuided && (canGoPrev || detachedStack.length > 0)"
+          @click="goPrevOrReturn"
           aria-label="Item precedente"
           class="shared-button-flex-secondary rounded-md w-16 h-16 shadow-lg border border-p-soft hover:border-transparent flex items-center justify-center"
         >
@@ -344,6 +344,11 @@ class TourController {
     if (!this.detachedStack.length) return
     this.detachedStack.pop()
     this.emit()
+  }
+
+  goPrevOrReturn() {
+    if (!this.guided && this.detachedStack.length) this.returnToNav()
+    else this.goPrev()
   }
 
   teardown() {}
@@ -709,6 +714,9 @@ export default {
     },
     goNext() {
       if (this.controller) this.controller.goNext()
+    },
+    goPrevOrReturn() {
+      if (this.controller) this.controller.goPrevOrReturn()
     },
     openRefItem(itemId) {
       if (this.controller) this.controller.openRefItem(itemId)
