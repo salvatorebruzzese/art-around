@@ -5,9 +5,10 @@
     <!-- Scrollable Main Viewport (Top Half: Detail / Map) -->
     <main class="overflow-y-auto min-h-0 max-h-7/10 w-full md:pt-6">
       <!-- Detail View -->
+      <!-- TODO: add the indicator dots of the carousel and THEN the scrollbar-hide -->
       <div
         v-if="!isMapView"
-        class="mx-auto w-full max-w-4xl bg-p-light rounded-2xl md:rounded-3xl shadow-lg shadow-p-soft p-6 mb-4 flex overflow-x-auto snap-x snap-mandatory md:grid md:grid-cols-2 gap-6 scrollbar-hide"
+        class="mx-auto w-full max-w-4xl bg-p-light rounded-2xl md:rounded-3xl shadow-lg shadow-p-soft p-6 mb-4 flex overflow-x-auto snap-x snap-mandatory md:grid md:grid-cols-2 gap-6"
       >
         <!-- Slide 1 (Default): Image + Title on Mobile -->
         <section
@@ -105,6 +106,42 @@
             </div>
             <div v-else class="text-p-medium/40 font-sans my-12">
               Nessuna descrizione disponibile.
+            </div>
+          </div>
+        </section>
+
+        <!-- Slide 3: Oggetti correlati -->
+        <section
+          class="w-full shrink-0 snap-center flex flex-col justify-start md:justify-center gap-4 h-full md:w-auto md:shrink"
+        >
+          <div v-if="refsItems.length" class="mt-6">
+            <h3 class="font-semibold text-p-medium/90 font-sans mb-2 text-lg">
+              Oggetti correlati
+            </h3>
+            <div class="flex gap-5 pb-2 overflow-x-auto">
+              <div
+                v-for="item in refsItems"
+                :key="item._id"
+                class="min-w-[10rem] flex-shrink-0 rounded-xl bg-p-light shadow border border-p-soft/40 p-3 flex flex-col items-center cursor-pointer hover:scale-105 active:scale-95 transition"
+                @click="openRefItem(item._id)"
+              >
+                <img
+                  v-if="item.image"
+                  :src="`/api/assets/${item.image}`"
+                  alt="ref"
+                  class="w-24 h-24 object-cover rounded-lg bg-p-soft mb-2"
+                />
+                <img
+                  v-else
+                  src="https://dummyimage.com/96x96/efefef/a3a3a3.png&text=Item"
+                  class="w-24 h-24 object-cover rounded-lg bg-p-soft mb-2"
+                />
+                <div
+                  class="font-semibold text-center text-p-medium text-base font-sans truncate max-w-[9rem]"
+                >
+                  {{ item.name || 'Oggetto' }}
+                </div>
+              </div>
             </div>
           </div>
         </section>
