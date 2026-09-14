@@ -1,110 +1,111 @@
 <template>
   <div
-    class="min-h-screen pb-44 bg-p-light font-serif text-p-dark selection:bg-p-soft overflow-x-hidden relative"
+    class="h-dvh flex flex-col justify-between bg-p-light font-serif text-p-dark selection:bg-p-soft overflow-hidden"
   >
-    <!-- Top Half: Museum/Visit/Viewer (Detail View) -->
-    <div
-      v-if="!isMapView"
-      class="flex-[2] min-h-0 mx-auto grid w-full max-w-4xl grid-cols-1 md:rounded-3xl md:grid-cols-2 gap-6 bg-p-light rounded-b-3xl shadow-lg shadow-p-soft p-6 mb-4"
-    >
-      <!-- Image Container -->
-      <figure
-        class="w-full max-h-full aspect-square rounded-2xl overflow-hidden justify-self-center self-center"
-      >
-        <img
-          v-if="currentItem && currentItem.image"
-          :src="`/api/assets/${currentItem.image}`"
-          alt="Item image"
-          class="object-cover w-full h-full"
-        />
-        <img
-          v-else
-          src="https://dummyimage.com/900x675/efefef/a3a3a3.png&text=Item"
-          class="object-cover w-full h-full"
-          alt="Item placeholder"
-        />
-      </figure>
-
-      <!-- Item Info -->
+    <!-- Scrollable Main Viewport (Top Half: Detail / Map) -->
+    <main class="flex-1 min-h-0 overflow-y-auto w-full md:pt-6">
+      <!-- Detail View -->
       <div
-        class="flex flex-col justify-start md:justify-center gap-4 h-full overflow-y-auto"
+        v-if="!isMapView"
+        class="mx-auto grid w-full max-w-4xl grid-cols-1 md:rounded-3xl md:grid-cols-2 gap-6 bg-p-light rounded-2xl shadow-lg shadow-p-soft p-6 mb-4"
       >
-        <h1 class="font-serif text-2xl text-p-medium font-bold">
-          {{ currentItem ? currentItem.name : '--' }}
-        </h1>
+        <!-- Image Container -->
+        <figure
+          class="w-full max-h-[250px] aspect-square rounded-2xl overflow-hidden justify-self-center self-center"
+        >
+          <img
+            v-if="currentItem && currentItem.image"
+            :src="`/api/assets/${currentItem.image}`"
+            alt="Item image"
+            class="object-cover w-full h-full"
+          />
+          <img
+            v-else
+            src="https://dummyimage.com/900x675/efefef/a3a3a3.png&text=Item"
+            class="object-cover w-full h-full"
+            alt="Item placeholder"
+          />
+        </figure>
 
-        <div v-if="explanations && explanations.length > 1" class="w-full">
-          <label
-            class="font-semibold mb-2 text-base text-p-medium font-sans block"
-          >
-            Livello spiegazione
-          </label>
-          <div class="flex flex-row gap-4">
-            <button
-              v-for="(ex, idx) in explanations"
-              :key="ex.level || idx"
-              type="button"
-              @click="selectedExplanationIdx = idx"
-              class="shared-button-flex-secondary shadow-sm shadow-p-soft cursor-pointer transition-colors"
-              :class="{
-                '!bg-p-soft !shadow-none': selectedExplanationIdx === idx,
-              }"
+        <!-- Item Info -->
+        <div class="flex flex-col justify-start md:justify-center gap-4 h-full">
+          <h1 class="font-serif text-2xl text-p-medium font-bold">
+            {{ currentItem ? currentItem.name : '--' }}
+          </h1>
+
+          <div v-if="explanations && explanations.length > 1" class="w-full">
+            <label
+              class="font-semibold mb-2 text-base text-p-medium font-sans block"
             >
-              {{ getLevelLabel(ex.level) }}
-            </button>
-          </div>
-        </div>
-        <div class="flex flex-col">
-          <div v-if="explanations && explanations.length" class="my-4">
-            <div>
-              <div
-                class="text-p-medium font-semibold font-sans mb-1 capitalize"
+              Livello spiegazione
+            </label>
+            <div class="flex flex-row gap-4">
+              <button
+                v-for="(ex, idx) in explanations"
+                :key="ex.level || idx"
+                type="button"
+                @click="selectedExplanationIdx = idx"
+                class="shared-button-flex-secondary shadow-sm shadow-p-soft cursor-pointer transition-colors"
+                :class="{
+                  '!bg-p-soft !shadow-none': selectedExplanationIdx === idx,
+                }"
               >
-                {{ getLevelLabel(selectedExplanation.level) }}
-                <span
-                  v-if="selectedExplanation.durationSeconds"
-                  class="text-p-medium/50 font-sans text-sm ml-2"
-                >
-                  ({{ formatDuration(selectedExplanation.durationSeconds) }})
-                </span>
-              </div>
-              <div class="text-lg font-serif text-p-dark leading-relaxed">
-                {{ selectedExplanation.text }}
-              </div>
+                {{ getLevelLabel(ex.level) }}
+              </button>
             </div>
           </div>
-          <!-- Fallback description if no explanations -->
-          <div
-            v-else-if="currentItem && currentItem.description"
-            class="text-lg font-serif text-p-dark leading-relaxed my-4"
-          >
-            {{
-              Array.isArray(currentItem.description)
-                ? currentItem.description[0]
-                : currentItem.description
-            }}
-          </div>
-          <div v-else class="text-p-medium/40 font-sans my-12">
-            Nessuna descrizione disponibile.
+          <div class="flex flex-col">
+            <div v-if="explanations && explanations.length" class="my-4">
+              <div>
+                <div
+                  class="text-p-medium font-semibold font-sans mb-1 capitalize"
+                >
+                  {{ getLevelLabel(selectedExplanation.level) }}
+                  <span
+                    v-if="selectedExplanation.durationSeconds"
+                    class="text-p-medium/50 font-sans text-sm ml-2"
+                  >
+                    ({{ formatDuration(selectedExplanation.durationSeconds) }})
+                  </span>
+                </div>
+                <div class="text-lg font-serif text-p-dark leading-relaxed">
+                  {{ selectedExplanation.text }}
+                </div>
+              </div>
+            </div>
+            <!-- Fallback description if no explanations -->
+            <div
+              v-else-if="currentItem && currentItem.description"
+              class="text-lg font-serif text-p-dark leading-relaxed my-4"
+            >
+              {{
+                Array.isArray(currentItem.description)
+                  ? currentItem.description[0]
+                  : currentItem.description
+              }}
+            </div>
+            <div v-else class="text-p-medium/40 font-sans my-12">
+              Nessuna descrizione disponibile.
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Map View -->
-    <div
-      v-else
-      class="flex-[2] min-h-0 mx-auto grid w-full max-w-4xl grid-cols-1 md:rounded-3xl md:grid-cols-2 gap-6 bg-p-light rounded-b-3xl shadow-lg shadow-p-soft p-6 mb-4"
-    >
-      <div class="text-center">
-        <h2 class="text-2xl font-bold text-p-medium">Mappa del Museo</h2>
-        <p class="text-p-dark mt-2">Visualizzazione del percorso</p>
+      <!-- Map View -->
+      <div
+        v-else
+        class="mx-auto grid w-full max-w-4xl grid-cols-1 md:rounded-3xl md:grid-cols-2 gap-6 bg-p-light rounded-2xl shadow-lg shadow-p-soft p-6 mb-4"
+      >
+        <div class="text-center">
+          <h2 class="text-2xl font-bold text-p-medium">Mappa del Museo</h2>
+          <p class="text-p-dark mt-2">Visualizzazione del percorso</p>
+        </div>
       </div>
-    </div>
+    </main>
 
-    <!-- Bottom Half: Navigation & Voice Buttons -->
-    <div
-      class="absolute bottom-0 h-auto mx-auto w-full max-w-4xl flex flex-col gap-4 items-center px-4 pb-4"
+    <!-- Bottom Dock: Navigation & Voice Buttons -->
+    <footer
+      class="flex-shrink-0 w-full max-w-4xl mx-auto flex flex-col gap-4 items-center px-4 pt-2 pb-[max(1rem,env(safe-area-inset-bottom))]"
     >
       <!-- Top Layer: Move Buttons -->
       <div
@@ -218,7 +219,7 @@
           </svg>
         </button>
       </div>
-    </div>
+    </footer>
   </div>
 </template>
 
