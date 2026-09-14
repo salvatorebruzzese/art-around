@@ -17,17 +17,17 @@
     </div>
 
     <!-- Museums List -->
-    <div v-for="museum in museums" :key="museum._id" class="mb-8 max-w-[360px]">
+    <div v-for="museum in museums" :key="museum._id" class="mb-8 max-w-screen">
       <h2 class="text-2xl font-semibold mb-3 px-4 font-sans text-p-medium">
         {{ museum.name }}
       </h2>
       <!-- Horizontally swipeable tours -->
       <div class="scrollbar-hide overflow-x-auto px-2 mx-2">
-        <div class="flex flex-nowrap gap-6">
+        <div class="flex flex-nowrap gap-2">
           <div
             v-for="tour in museum.tours"
             :key="tour._id"
-            class="w-[300px] h-3/10 m-4 bg-p-light rounded-2xl shadow-sm shadow-p-soft relative transition-all hover:shadow-md cursor-pointer"
+            class="min-w-[300px] w-[300px] h-3/10 m-4 bg-p-light rounded-2xl shadow-sm shadow-p-soft relative transition-all hover:shadow-md cursor-pointer"
             @click="showTourConfirm(tour)"
           >
             <!-- Photo with overlay -->
@@ -46,7 +46,7 @@
             </div>
             <!-- Info Area -->
             <div
-              class="p-5 flex flex-col gap-2 bg-p-soft/10 rounded-b-2xl h-[calc(100%-12rem)]"
+              class="p-5 flex flex-col gap-2 bg-p-soft/20 rounded-b-2xl h-[calc(100%-12rem)]"
             >
               <div
                 class="font-semibold text-p-medium text-lg truncate font-serif"
@@ -54,7 +54,7 @@
                 {{ tour.name }}
               </div>
               <div
-                class="flex items-center text-xs text-p-medium/70 gap-3 font-sans"
+                class="flex items-center text-xs text-p-medium gap-3 font-sans"
               >
                 <span class="flex items-center gap-1">
                   <svg

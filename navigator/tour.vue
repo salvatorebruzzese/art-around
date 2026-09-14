@@ -157,22 +157,22 @@
 
       <!-- Bottom Layer: Home, Voice, Map Buttons -->
       <div class="flex items-center justify-center gap-4">
-        <!-- Marketplace Button -->
+        <!-- Navigator Button -->
         <a
-          href="/marketplace"
-          class="shared-button-flex-secondary rounded-full w-12 h-12 shadow-md border border-p-soft hover:border-transparent flex items-center justify-center group"
+          href="/navigator"
+          class="shared-button-flex-secondary rounded-full w-12 h-12 shadow-md border border-p-soft hover:border-transparent flex items-center justify-center text-p-medium hover:text-p-light hover:bg-p-medium transition-colors duration-100 ease-out"
         >
           <svg
-            width="36"
-            height="36"
+            width="32"
+            height="32"
             viewBox="0 0 48 48"
+            fill="currentColor"
             xmlns="http://www.w3.org/2000/svg"
+            class="pointer-events-none"
           >
-            <rect width="48" height="48" rx="12" fill="none" stroke="none" />
+            <!-- Il path eredita currentColor istantaneamente o tramite la transizione del wrapper -->
             <path
-              d="M12 20 L15 12 H33 L36 20 V24 H34 V36 H14 V24 H12 V20 Z M18 24 V34 H30 V24 H18 Z M16 18 H32 L30 14 H18 L16 18 Z"
-              fill="var(--color-p-medium)"
-              class="group-hover:fill-[var(--color-p-light)] transition-colors"
+              d="M24 8 A16 16 0 1 0 24 40 A16 16 0 0 0 24 8 Z M24 12 A12 12 0 1 1 24 36 A12 12 0 0 1 24 12 Z M18 30 L22 20 L32 16 L28 26 L18 30 Z M25.5 23.5 A1.5 1.5 0 1 0 25.5 20.5 A1.5 1.5 0 0 0 25.5 23.5 Z"
             />
           </svg>
         </a>
