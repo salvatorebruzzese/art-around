@@ -282,9 +282,6 @@ const user = reactive({
 const authors = reactive({})
 const showTourConfirmOverlay = ref(false)
 const selectedTour = ref(null)
-const allTours = ref([])
-const allMuseums = ref([])
-const itemsMeta = ref({})
 const itemsByTour = ref({})
 
 const showTourConfirm = (tour) => {
@@ -331,44 +328,6 @@ const fetchAuthor = async (authorId) => {
   } catch (e) {
     authors[authorId] = 'Unknown'
   }
-}
-
-const fetchAllTourItems = async () => {
-  let tourIds = []
-  itemsByTour.value = {}
-
-  for (const m of museums.value) {
-    for (const tour of m.tours || []) {
-      if (tour._id) tourIds.push(tour._id)
-    }
-  }
-
-  const newItemsMeta = {}
-
-  await Promise.all(
-    tourIds.map(async (tid) => {
-      const res = await fetch(`/api/items?tour=${tid}`)
-      if (res.ok) {
-        const items = await res.json()
-        const itemDetails = await Promise.all(
-          items.map(async (imeta) => {
-            try {
-              const idataRes = await fetch(`/api/items/${imeta._id}`)
-              if (idataRes.ok) {
-                return await idataRes.json()
-              }
-            } catch {}
-            return null
-          }),
-        )
-        const validDetails = itemDetails.filter(Boolean)
-        newItemsMeta[tid] = validDetails
-        itemsByTour.value[tid] = validDetails
-      }
-    }),
-  )
-
-  itemsMeta.value = newItemsMeta
 }
 
 const getItemsDuration = (itemIds) => {

@@ -1,6 +1,7 @@
+<!-- eslint-disable vue/multi-word-component-names -->
 <template>
   <div
-    class="min-h-screen w-full flex items-center justify-center p-4 bg-p-light selection:bg-p-soft font-serif text-p-dark"
+    class="min-h-screen w-full flex flex-col items-center justify-center p-4 bg-p-light selection:bg-p-soft font-sans text-p-dark"
   >
     <div
       class="flex flex-col items-center w-full max-w-md bg-p-light rounded-2xl border border-p-soft shadow-xl p-8 gap-6 text-center"
@@ -51,6 +52,11 @@
         </div>
       </div>
     </div>
+    <a
+      href="/navigator/"
+      class="block text-center mt-6 text-p-medium hover:text-p-dark hover:underline text-md"
+      >Torna indietro</a
+    >
   </div>
 </template>
 
