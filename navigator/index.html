@@ -6,37 +6,20 @@
     <link href="../styles.css" rel="stylesheet" type="text/css" />
     <title>Navigator</title>
   </head>
-  <!-- Usa min-h-screen invece di h-screen e w-full per evitare problemi di overflow e viewport mobile -->
   <body class="min-h-screen w-full flex items-center justify-center">
-    <!-- Un elemento <nav> richiede link navigabili (href) o liste semantiche (ul > li) -->
     <nav
       aria-label="Opzioni di navigazione"
-      class="flex flex-col items-center gap-4"
+      class="flex flex-col w-full max-w-sm py-4 px-8 items-center gap-4"
     >
-      <ul class="flex flex-col gap-4 list-none p-0 m-0">
-        <li class="flex flex-col items-center text-center">
-          <a href="/navigator/libre" class="shared-button-full-primary"
-            >Libre</a
-          >
-          <p class="text-sm text-p-medium mt-2 mb-4">
-            Massima libertà per chi visita da solo
-          </p>
-        </li>
-        <li class="flex flex-col items-center text-center">
-          <a href="/navigator/master" class="shared-button-full-secondary"
-            >Master</a
-          >
-          <p class="text-sm text-p-medium mt-2 mb-4">
-            Per chi ha molto da fare
-          </p>
-        </li>
-        <li class="flex flex-col items-center text-center">
-          <a href="/navigator/guided" class="shared-button-full-secondary"
-            >Guided</a
-          >
-          <p class="text-sm text-p-medium mt-2 mb-4">Visita guidata</p>
-        </li>
-      </ul>
+      <a href="/navigator/libre" class="shared-button-full-primary"
+        >Visita individuale</a
+      >
+      <a href="/navigator/master" class="shared-button-full-secondary"
+        >Area guide</a
+      >
+      <a href="/navigator/guided" class="shared-button-full-secondary"
+        >Visita guidata</a
+      >
     </nav>
   </body>
 </html>
