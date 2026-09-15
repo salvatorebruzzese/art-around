@@ -66,6 +66,6 @@ const emit = defineEmits(['select-tour'])
 const { search, searchResults, isLoading, onSearchInput } = useMuseumSearch()
 
 const selectTourToGuide = (item) => {
-  emit('select-tour', item)
+  window.location.href = '/navigator/master/' + item._id
 }
 </script>

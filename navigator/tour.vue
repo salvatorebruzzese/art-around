@@ -5,7 +5,6 @@
     <!-- Scrollable Main Viewport (Top Half: Detail / Map) -->
     <main class="overflow-y-auto min-h-0 max-h-7/10 w-full md:pt-6">
       <!-- Detail View -->
-      <!-- TODO: add the indicator dots of the carousel and THEN the scrollbar-hide -->
       <div
         v-if="!isMapView"
         class="mx-auto w-full max-w-4xl bg-p-light rounded-2xl md:rounded-3xl shadow-lg shadow-p-soft p-6 mb-4 flex overflow-x-auto snap-x snap-mandatory md:grid md:grid-cols-2 gap-6"
@@ -228,7 +227,6 @@
             xmlns="http://www.w3.org/2000/svg"
             class="pointer-events-none"
           >
-            <!-- Il path eredita currentColor istantaneamente o tramite la transizione del wrapper -->
             <path
               d="M24 8 A16 16 0 1 0 24 40 A16 16 0 0 0 24 8 Z M24 12 A12 12 0 1 1 24 36 A12 12 0 0 1 24 12 Z M18 30 L22 20 L32 16 L28 26 L18 30 Z M25.5 23.5 A1.5 1.5 0 1 0 25.5 20.5 A1.5 1.5 0 0 0 25.5 23.5 Z"
             />
@@ -349,7 +347,7 @@ class TourController {
   }
 
   goPrevOrReturn() {
-    if (!this.guided && this.detachedStack.length) this.returnToNav()
+    if (this.detachedStack.length) this.returnToNav()
     else this.goPrev()
   }
 
@@ -357,16 +355,63 @@ class TourController {
 }
 
 class LibreTourController extends TourController {
-  constructor({ onShowItem, ...opts } = {}) {
+  // Navigazione puramente autonoma e locale senza comunicazioni di rete
+  constructor(opts = {}) {
     super(opts)
-    this.onShowItem = onShowItem
+  }
+}
+
+class MasterTourController extends TourController {
+  // Gestisce la regia della sessione effettuando il broadcast verso il server
+  constructor({ sessionId, ...opts } = {}) {
+    super(opts)
+    this.sessionId = sessionId
+    this.lastBroadcastItemId = null
+    this.abortController = null
   }
 
   emit() {
     super.emit()
     const currentItemId = this.getCurrentItemId()
-    if (currentItemId && typeof this.onShowItem === 'function') {
-      this.onShowItem(currentItemId)
+    if (currentItemId) {
+      this.broadcastShowItem(currentItemId)
+    }
+  }
+
+  async broadcastShowItem(itemId) {
+    if (!itemId || !this.sessionId || this.lastBroadcastItemId === itemId) {
+      return
+    }
+
+    if (this.abortController) {
+      this.abortController.abort()
+    }
+    this.abortController = new AbortController()
+
+    this.lastBroadcastItemId = itemId
+    try {
+      await fetch(
+        `/api/sessions/${encodeURIComponent(this.sessionId)}/showItem`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ itemId }),
+          signal: this.abortController.signal,
+        },
+      )
+    } catch (e) {
+      if (e.name !== 'AbortError') {
+        // Ignora fallimenti temporanei di rete per non bloccare la UI locale
+      }
+    }
+  }
+
+  teardown() {
+    if (this.abortController) {
+      this.abortController.abort()
+      this.abortController = null
     }
   }
 }
@@ -421,6 +466,7 @@ class GuidedTourController extends TourController {
   goNext() {}
   openRefItem() {}
   returnToNav() {}
+  goPrevOrReturn() {}
 
   teardown() {
     if (this.eventSource) {
@@ -454,15 +500,17 @@ export default {
       selectedExplanationIdx: 0,
       userSelectedLevel: null,
       controller: null,
-      controllerMode: 'libre',
+      controllerMode: 'libre', // 'libre' | 'guided' | 'master'
       sessionId: '',
       sessionUsername: '',
-      lastBroadcastItemId: null,
     }
   },
   computed: {
     isGuided() {
       return this.controllerMode === 'guided'
+    },
+    isMaster() {
+      return this.controllerMode === 'master'
     },
     currentItem() {
       const idxObj = this.getCurrentIdxObj()
@@ -495,7 +543,6 @@ export default {
       return []
     },
     selectedExplanation() {
-      // returns the currently selected explanation, fallback to first
       const exps = this.explanations
       if (!exps.length) return {}
       return exps[this.selectedExplanationIdx] || exps[0]
@@ -515,18 +562,17 @@ export default {
           this.refsItems = []
         }
         this.stopAudio()
-        // select explanation index based on cached level if possible, else fallback
         this.setBestExplanationIdx()
       },
       immediate: true,
     },
-    explanations(newList, oldList) {
+    explanations() {
       this.setBestExplanationIdx()
     },
-    audioMuted(muted) {
+    audioMuted() {
       this.syncAudioProps()
     },
-    audioRate(rate) {
+    audioRate() {
       this.syncAudioProps()
     },
     bottomOverlay(val) {
@@ -535,7 +581,6 @@ export default {
   },
   created() {
     this.initTour()
-    // Restore cached audioRate if present, else set default
     if (typeof window !== 'undefined') {
       const cachedRate = localStorage.getItem('audioRate')
       const r = parseFloat(cachedRate)
@@ -554,19 +599,27 @@ export default {
       let mode = 'libre'
       let sessionId = ''
       let username = ''
+
       if (typeof window !== 'undefined') {
-        const url = new URL(window.location.href)
+        const fullUrl = window.location.href
+        const modeMatch = fullUrl.match(/\b(libre|guided|master)\b/i)
+        if (modeMatch) {
+          mode = modeMatch[1].toLowerCase()
+        }
+
+        const url = new URL(fullUrl)
         tourId = url.pathname.split('/').filter(Boolean).at(2)
 
         const urlParams = new URLSearchParams(window.location.search)
-        mode = urlParams.get('mode') === 'guided' ? 'guided' : 'libre'
         sessionId = urlParams.get('session') || urlParams.get('sessionId') || ''
         username = urlParams.get('username') || ''
       }
+
       if (!tourId) {
         tourId =
           this.$route?.params?.id || this.$route?.query?.tour || 'demo-tour'
       }
+
       return { tourId, mode, sessionId, username }
     },
     applyControllerState(state) {
@@ -581,6 +634,7 @@ export default {
         itemNav: this.itemNav,
         onChange: this.applyControllerState,
       }
+
       if (this.controllerMode === 'guided' && this.sessionId) {
         this.controller = new GuidedTourController({
           ...common,
@@ -588,39 +642,16 @@ export default {
           username: this.sessionUsername,
         })
         this.controller.connect()
+      } else if (this.controllerMode === 'master' && this.sessionId) {
+        this.controller = new MasterTourController({
+          ...common,
+          sessionId: this.sessionId,
+        })
       } else {
         this.controllerMode = 'libre'
-        this.controller = new LibreTourController({
-          ...common,
-          onShowItem: (itemId) => this.broadcastShowItem(itemId),
-        })
+        this.controller = new LibreTourController(common)
       }
       this.controller.setItemNav(this.itemNav)
-    },
-    async broadcastShowItem(itemId) {
-      if (
-        !itemId ||
-        !this.sessionId ||
-        this.controllerMode !== 'libre' ||
-        this.lastBroadcastItemId === itemId
-      ) {
-        return
-      }
-      this.lastBroadcastItemId = itemId
-      try {
-        await fetch(
-          `/api/sessions/${encodeURIComponent(this.sessionId)}/showItem`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ itemId }),
-          },
-        )
-      } catch (_e) {
-        // best effort sync for guided listeners
-      }
     },
     async initTour() {
       const settings = this.resolveTourSettings()
@@ -628,7 +659,6 @@ export default {
       this.controllerMode = settings.mode
       this.sessionId = settings.sessionId
       this.sessionUsername = settings.username
-      this.lastBroadcastItemId = null
       try {
         const nav = new TourNavigation()
         await nav.initialize(this.tourId, null)
@@ -790,7 +820,6 @@ export default {
       return m > 0 ? `${m}m ${s}s` : `${s}s`
     },
     onExplanationIdxChange() {
-      // store user-selected level string for later cache
       const exps = this.explanations
       if (!exps.length) {
         this.userSelectedLevel = null
@@ -804,21 +833,16 @@ export default {
       }
     },
     setBestExplanationIdx() {
-      // On current item or explanations change, try to select the cached user-selected level if possible.
       const exps = this.explanations
-      // If no explanations, reset
       if (!exps.length) {
         this.selectedExplanationIdx = 0
         return
       }
-      // If only one, always 0
       if (exps.length === 1) {
         this.selectedExplanationIdx = 0
         return
       }
-      // Try to find user preferred level
       if (this.userSelectedLevel) {
-        // Try exact match first
         const prefIdx = exps.findIndex(
           (ex) => ex.level === this.userSelectedLevel,
         )
@@ -826,10 +850,8 @@ export default {
           this.selectedExplanationIdx = prefIdx
           return
         }
-        // If not found, try to find the nearest
         const possibleLevels = ['simple', 'normal', 'advanced']
         const userIdx = possibleLevels.indexOf(this.userSelectedLevel)
-        // pick the first available in order nearest the userIdx
         let nearestIdx = null
         let nearestDistance = Infinity
         exps.forEach((ex, idx) => {
@@ -845,11 +867,9 @@ export default {
           this.selectedExplanationIdx = nearestIdx
           return
         }
-        // Fallback: select the first
         this.selectedExplanationIdx = 0
         return
       }
-      // No cached level, default to 0
       this.selectedExplanationIdx = 0
     },
   },

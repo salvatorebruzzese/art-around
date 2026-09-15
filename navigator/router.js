@@ -22,6 +22,10 @@ router.get('/master', (req, res) => {
   res.sendFile(join(rootDir, 'navigator/master.html'))
 })
 
+router.get('/master/:id', (req, res) => {
+  res.sendFile(join(rootDir, 'navigator/tour.html'))
+})
+
 router.get('/guided', (req, res) => {
   res.sendFile(join(rootDir, 'navigator/otp.html'))
 })
