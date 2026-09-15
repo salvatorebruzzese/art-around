@@ -102,7 +102,8 @@
       <a
         href="/home"
         class="nav-icon-link group !p-0 !border-none shadow-sm rounded-xl hover:!bg-transparent"
-        ><svg
+      >
+        <svg
           width="48"
           height="48"
           viewBox="0 0 48 48"
@@ -120,8 +121,9 @@
             d="M24 12 L10 24 H14 V36 H22 V28 H26 V36 H34 V24 H38 Z"
             fill="var(--color-p-medium)"
             class="group-hover:fill-[var(--color-p-light)] transition-colors"
-          /></svg
-      ></a>
+          />
+        </svg>
+      </a>
       <button
         @click="showSearch = true"
         aria-label="Search"
@@ -267,11 +269,10 @@
 
 <script setup>
 import { ref, reactive, watch, onMounted } from 'vue'
+import { useMuseumSearch } from './museumSearch'
 
 // State (Reactive Variables)
 const museums = ref([])
-const showSearch = ref(false)
-const search = ref('')
 const user = reactive({
   name: '',
   email: '',
@@ -283,17 +284,30 @@ const showTourConfirmOverlay = ref(false)
 const selectedTour = ref(null)
 const allTours = ref([])
 const allMuseums = ref([])
-const searchResults = ref([])
 const itemsMeta = ref({})
 const itemsByTour = ref({})
 
-const goToSearchResult = (item) => {
-  if (item.type === 'Museo') {
-    window.location.href = `/navigator/libre/museum/${item._id}`
-  } else {
-    showTourConfirm(item._tourObj || item)
+const showTourConfirm = (tour) => {
+  selectedTour.value = tour
+  showTourConfirmOverlay.value = true
+}
+
+const closeTourConfirm = () => {
+  showTourConfirmOverlay.value = false
+  selectedTour.value = null
+}
+
+const confirmStartTour = () => {
+  if (selectedTour.value && selectedTour.value._id) {
+    window.location.href = `/navigator/libre/${selectedTour.value._id}`
   }
 }
+
+// Search Composable
+const { showSearch, search, searchResults, onSearchInput, goToSearchResult } =
+  useMuseumSearch(museums, {
+    onSelectTour: (tour) => showTourConfirm(tour),
+  })
 
 const getAuthorName = (authorId) => {
   if (!authorId) return ''
@@ -350,56 +364,6 @@ const fetchAllTourItems = async () => {
   itemsMeta.value = newItemsMeta
 }
 
-const fetchMuseumsAndTours = async () => {
-  try {
-    const museumsRes = await fetch('/api/museums')
-    let museumsMeta = await museumsRes.json()
-
-    const allMuseumsFull = await Promise.all(
-      museumsMeta.map(async (meta) => {
-        try {
-          const fullRes = await fetch(`/api/museums/${meta._id}`)
-          const fullMuseum = await fullRes.json()
-          let tours = []
-          const toursRes = await fetch(`/api/tours?museum=${fullMuseum._id}`)
-          if (toursRes.ok) {
-            tours = await toursRes.json()
-          }
-          return { ...fullMuseum, tours }
-        } catch (err) {
-          return { ...meta, tours: [] }
-        }
-      }),
-    )
-    museums.value = allMuseumsFull
-
-    let allToursRes = await fetch('/api/tours')
-    let toursData = allToursRes.ok ? await allToursRes.json() : []
-    allMuseums.value = museumsMeta
-    allTours.value = toursData
-
-    for (const m of museums.value) {
-      for (const t of m.tours || []) {
-        t._museumName = m.name
-        t._tourObj = t
-      }
-    }
-
-    const authorIds = new Set()
-    for (const museum of museums.value) {
-      for (const tour of museum.tours || []) {
-        if (tour.author) authorIds.add(tour.author)
-      }
-    }
-
-    await Promise.all(Array.from(authorIds).map((id) => fetchAuthor(id)))
-
-    await fetchAllTourItems()
-  } catch (err) {
-    museums.value = []
-  }
-}
-
 const getItemsDuration = (itemIds) => {
   if (!Array.isArray(itemIds) || !itemIds.length) return '--'
 
@@ -425,22 +389,6 @@ const getItemsDuration = (itemIds) => {
   }
 
   return Math.round(totalSec / 60) || '--'
-}
-
-const showTourConfirm = (tour) => {
-  selectedTour.value = tour
-  showTourConfirmOverlay.value = true
-}
-
-const closeTourConfirm = () => {
-  showTourConfirmOverlay.value = false
-  selectedTour.value = null
-}
-
-const confirmStartTour = () => {
-  if (selectedTour.value && selectedTour.value._id) {
-    window.location.href = `/navigator/libre/${selectedTour.value._id}`
-  }
 }
 
 const checkLoggedIn = async () => {
@@ -477,37 +425,6 @@ const checkLoggedIn = async () => {
 
 const openProfile = () => {
   window.location.href = '/profile'
-}
-
-const onSearchInput = async () => {
-  const searchTerm = search.value.trim().toLowerCase()
-  if (!searchTerm) {
-    searchResults.value = []
-    return
-  }
-
-  let results = []
-
-  for (const m of museums.value) {
-    if (m.name && m.name.toLowerCase().includes(searchTerm)) {
-      results.push({ _id: m._id, name: m.name, type: 'Museo' })
-    }
-  }
-
-  for (const m of museums.value) {
-    for (const t of m.tours || []) {
-      if (t.name && t.name.toLowerCase().includes(searchTerm)) {
-        results.push({
-          _id: t._id,
-          name: t.name,
-          type: m.name || 'Tour',
-          _tourObj: t,
-        })
-      }
-    }
-  }
-
-  searchResults.value = results
 }
 
 // Watchers

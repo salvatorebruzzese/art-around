@@ -13,6 +13,8 @@ export default defineConfig({
         otp: 'otp.html',
         app: 'app.html',
         appVue: 'app.vue',
+        master: 'master.html',
+        masterVue: 'master.vue',
         tour: 'tour.html',
         tourVue: 'tour.vue',
       },
