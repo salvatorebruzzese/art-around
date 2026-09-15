@@ -4,6 +4,21 @@
     class="min-h-screen w-full flex flex-col items-center justify-center p-4 bg-p-light selection:bg-p-soft font-sans text-p-dark"
   >
     <div
+      v-if="!sessionName"
+      class="flex flex-col items-center w-full max-w-md bg-p-light rounded-2xl border border-p-soft shadow-xl p-8 gap-6 text-center"
+    >
+      <h1 class="text-3xl font-semibold text-p-medium">
+        Scegli un nome in codice per la visita
+      </h1>
+      <input
+        v-model="sessionName"
+        type="text"
+        class="input input-bordered rounded-full w-full border border-p-soft bg-p-light text-p-dark placeholder-p-medium/60 focus:border-p-medium focus:ring-2 focus:ring-p-soft focus:outline-none font-sans font-normal shadow-sm px-6 py-3 text-base disabled:opacity-50"
+        placeholder="Nome in codice"
+      />
+    </div>
+    <div
+      v-else
       class="flex flex-col items-center w-full max-w-md bg-p-light rounded-2xl border border-p-soft shadow-xl p-8 gap-6 text-center"
     >
       <h1 class="text-3xl font-semibold text-p-medium">Scegli la visita</h1>
@@ -63,9 +78,9 @@ import { onMounted } from 'vue'
 import { useMuseumSearch } from './museumSearch'
 import { checkLogIn } from './checkLogIn'
 
-const emit = defineEmits(['select-tour'])
-
 const { search, searchResults, isLoading, onSearchInput } = useMuseumSearch()
+
+let sessionName = undefined
 
 const selectTourToGuide = (item) => {
   window.location.href = '/navigator/master/' + item._id
