@@ -2,20 +2,6 @@
   <div
     class="flex flex-col items-center w-full min-h-screen max-w-screen pb-24 font-serif text-p-dark selection:bg-p-soft"
   >
-    <div
-      class="flex flex-col items-center rounded-xl shadow-md shadow-p-soft p-4 m-4 mb-8 gap-4 text-center max-w-9/10"
-    >
-      <h1 class="text-3xl text-p-medium">Hai ricevuto un codice?</h1>
-      <label class="border border-p-soft">
-        <input
-          type="text"
-          autocomplete="one-time-code"
-          inputmode="text"
-          required
-        />
-      </label>
-    </div>
-
     <!-- Museums List -->
     <div v-for="museum in museums" :key="museum._id" class="mb-8 max-w-screen">
       <h2 class="text-2xl font-semibold mb-3 px-4 font-sans text-p-medium">

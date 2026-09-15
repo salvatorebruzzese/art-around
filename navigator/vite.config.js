@@ -10,6 +10,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: 'index.html',
+        otp: 'otp.html',
         app: 'app.html',
         appVue: 'app.vue',
         tour: 'tour.html',
