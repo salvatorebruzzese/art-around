@@ -59,7 +59,9 @@
 </template>
 
 <script setup>
+import { onMounted } from 'vue'
 import { useMuseumSearch } from './museumSearch'
+import { checkLogIn } from './checkLogIn'
 
 const emit = defineEmits(['select-tour'])
 
@@ -68,4 +70,9 @@ const { search, searchResults, isLoading, onSearchInput } = useMuseumSearch()
 const selectTourToGuide = (item) => {
   window.location.href = '/navigator/master/' + item._id
 }
+
+onMounted(async () => {
+  const loggedIn = await checkLogIn()
+  if (!loggedIn) return
+})
 </script>

@@ -270,15 +270,10 @@
 <script setup>
 import { ref, reactive, watch, onMounted } from 'vue'
 import { useMuseumSearch } from './museumSearch'
+import { checkLogIn } from './checkLogIn'
 
 // State (Reactive Variables)
 const museums = ref([])
-const user = reactive({
-  name: '',
-  email: '',
-  avatar: '',
-  initials: '',
-})
 const authors = reactive({})
 const showTourConfirmOverlay = ref(false)
 const selectedTour = ref(null)
@@ -357,38 +352,6 @@ const getItemsDuration = (itemIds) => {
   return Math.round(totalSec / 60) || '--'
 }
 
-const checkLoggedIn = async () => {
-  try {
-    const res = await fetch('/api/profile')
-    if (!res.ok) {
-      window.location.href = '/login'
-      return false
-    }
-    const result = await res.json()
-    if (!result || !result.username) {
-      window.location.href = '/login'
-      return false
-    }
-    user.name = result.username || ''
-    user.email = result.email || ''
-    user.avatar = result.avatar || ''
-    if (user.name) {
-      user.initials =
-        user.name
-          .split(' ')
-          .map((n) => n[0])
-          .join('')
-          .toUpperCase() || ''
-    } else {
-      user.initials = ''
-    }
-    return true
-  } catch (e) {
-    window.location.href = '/login'
-    return false
-  }
-}
-
 const openProfile = () => {
   window.location.href = '/profile'
 }
@@ -414,7 +377,7 @@ watch(
 
 // Lifecycle Hook
 onMounted(async () => {
-  const loggedIn = await checkLoggedIn()
+  const loggedIn = await checkLogIn()
   if (!loggedIn) return
   await fetchMuseumsAndTours()
   museums.value = remoteMuseums.value
