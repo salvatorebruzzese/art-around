@@ -62,7 +62,9 @@
                 v-for="(ex, idx) in explanations"
                 :key="ex.level || idx"
                 type="button"
-                @click="selectedExplanationIdx = idx"
+                @click="
+                  ((selectedExplanationIdx = idx), onExplanationIdxChange())
+                "
                 class="shared-button-flex-secondary shadow-sm shadow-p-soft cursor-pointer transition-colors"
                 :class="{
                   '!bg-p-soft !shadow-none': selectedExplanationIdx === idx,
