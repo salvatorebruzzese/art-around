@@ -14,9 +14,7 @@
           v-model="search"
           :disabled="isLoading"
           class="input input-bordered rounded-full w-full border border-p-soft bg-p-light text-p-dark placeholder-p-medium/60 focus:border-p-medium focus:ring-2 focus:ring-p-soft focus:outline-none font-sans font-normal shadow-sm px-6 py-3 text-base disabled:opacity-50"
-          :placeholder="
-            isLoading ? 'Caricamento dati...' : 'Cerca tra tour e musei…'
-          "
+          :placeholder="isLoading ? 'Caricamento dati...' : 'Cerca tour'"
           @input="onSearchInput"
         />
 

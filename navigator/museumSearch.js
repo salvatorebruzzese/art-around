@@ -59,12 +59,7 @@ export function useMuseumSearch(options = {}) {
 
     const results = []
 
-    for (const m of museums.value) {
-      if (m.name && m.name.toLowerCase().includes(searchTerm)) {
-        results.push({ _id: m._id, name: m.name, type: 'Museo' })
-      }
-    }
-
+    // Filtra unicamente i tour ignorando i musei
     for (const m of museums.value) {
       for (const t of m.tours || []) {
         if (t.name && t.name.toLowerCase().includes(searchTerm)) {
@@ -82,11 +77,6 @@ export function useMuseumSearch(options = {}) {
   }
 
   const goToSearchResult = (item) => {
-    if (item.type === 'Museo') {
-      window.location.href = `/navigator/libre/museum/${item._id}`
-      return
-    }
-
     const tourData = item._tourObj || item
     if (options.onSelectTour) {
       options.onSelectTour(tourData)
@@ -95,7 +85,6 @@ export function useMuseumSearch(options = {}) {
     }
   }
 
-  // Carica automaticamente i dati al montaggio del componente
   onMounted(async () => {
     await fetchMuseumsAndTours()
   })

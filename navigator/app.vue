@@ -146,7 +146,7 @@
               d="M21 21l-4.35-4.35"
             />
           </svg>
-          <span class="text-p-medium/60 text-sm">Cerca tour, musei…</span>
+          <span class="text-p-medium/60 text-sm">Cerca tour</span>
         </div>
       </button>
     </nav>
