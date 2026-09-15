@@ -554,7 +554,7 @@ export default {
       let username = ''
       if (typeof window !== 'undefined') {
         const url = new URL(window.location.href)
-        tourId = url.pathname.split('/').filter(Boolean).at(1)
+        tourId = url.pathname.split('/').filter(Boolean).at(2)
 
         const urlParams = new URLSearchParams(window.location.search)
         mode = urlParams.get('mode') === 'guided' ? 'guided' : 'libre'
