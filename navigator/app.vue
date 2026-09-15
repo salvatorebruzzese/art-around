@@ -304,10 +304,17 @@ const confirmStartTour = () => {
 }
 
 // Search Composable
-const { showSearch, search, searchResults, onSearchInput, goToSearchResult } =
-  useMuseumSearch(museums, {
-    onSelectTour: (tour) => showTourConfirm(tour),
-  })
+const {
+  museums: remoteMuseums,
+  showSearch,
+  search,
+  searchResults,
+  onSearchInput,
+  goToSearchResult,
+  fetchMuseumsAndTours,
+} = useMuseumSearch(museums, {
+  onSelectTour: (tour) => showTourConfirm(tour),
+})
 
 const getAuthorName = (authorId) => {
   if (!authorId) return ''
@@ -451,5 +458,6 @@ onMounted(async () => {
   const loggedIn = await checkLoggedIn()
   if (!loggedIn) return
   await fetchMuseumsAndTours()
+  museums.value = remoteMuseums.value
 })
 </script>
