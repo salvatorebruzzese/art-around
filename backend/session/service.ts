@@ -5,7 +5,8 @@ import { Types } from 'mongoose'
 import { Session, SSEClient } from './model.js'
 import { AccessDenied, DBError, NotFound, notFound } from '../shared/errors.js'
 import UserService from '../user/service.js'
-import { IUser } from '../user/model.js'
+import { IUser, UserQuery } from '../user/model.js'
+import { ObjectId } from 'mongodb'
 
 const sessions: Map<string, Session> = new Map()
 
@@ -117,4 +118,10 @@ export function submitQuiz(
 export function getSession(sessionId: string): Either<NotFound, Session> {
   const session = sessions.get(sessionId)
   return session ? Right(session) : Left(notFound())
+}
+
+export function getClients(
+  sessionId: string,
+): Either<NotFound, Types.ObjectId[]> {
+  return getSession(sessionId).map((session) => session.clients)
 }

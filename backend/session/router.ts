@@ -136,4 +136,13 @@ router.get('/:id', async (req, res) => {
   })
 })
 
+router.get('/:id/clients', async (req, res) => {
+  const result = SessionService.getClients(req.params.id as string)
+
+  result.caseOf({
+    Right: (clients) => res.json(clients),
+    Left: handleLeft(res),
+  })
+})
+
 export default router
