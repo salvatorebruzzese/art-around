@@ -970,6 +970,22 @@ export default {
       }
       this.selectedExplanationIdx = 0
     },
+    async fetchClients() {
+      if (!this.sessionId || this.isLoadingClients) return
+
+      this.isLoadingClients = true
+      try {
+        const res = await fetch(
+          `/api/sessions/${encodeURIComponent(this.sessionId)}/clients`,
+        )
+        if (!res.ok) throw new Error(`HTTP error: ${res.status}`)
+        this.clients = await res.json()
+      } catch (err) {
+        console.error('Errore nel caricamento dei clients:', err)
+      } finally {
+        this.isLoadingClients = false
+      }
+    },
   },
   beforeUnmount() {
     if (this.controller) {
@@ -977,22 +993,6 @@ export default {
       this.controller = null
     }
     this.stopAudio()
-  },
-  async fetchClients() {
-    if (!this.sessionId || this.isLoadingClients) return
-
-    this.isLoadingClients = true
-    try {
-      const res = await fetch(
-        `/api/sessions/${encodeURIComponent(this.sessionId)}/clients`,
-      )
-      if (!res.ok) throw new Error(`HTTP error: ${res.status}`)
-      this.clients = await res.json()
-    } catch (err) {
-      console.error('Errore nel caricamento dei clients:', err)
-    } finally {
-      this.isLoadingClients = false
-    }
   },
 }
 </script>
