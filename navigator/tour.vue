@@ -6,10 +6,11 @@
     <main class="overflow-y-auto min-h-0 max-h-7/10 w-full md:pt-6">
       <!-- Detail View -->
       <div
-        v-if="!isMapView"
-        class="mx-auto w-full max-w-4xl bg-p-light rounded-2xl md:rounded-3xl shadow-lg shadow-p-soft p-6 mb-4 flex overflow-x-auto snap-x snap-mandatory md:grid md:grid-cols-2 gap-6"
+        v-if="!isMapView || isMaster"
+        class="mx-auto w-full max-w-4xl bg-p-light rounded-2xl md:rounded-3xl shadow-lg shadow-p-soft p-6 mb-4 flex overflow-x-auto snap-x snap-mandatory md:grid gap-6"
+        :class="isMaster ? 'md:grid-cols-1' : 'md:grid-cols-2'"
       >
-        <!-- Slide 1 (Default): Image + Title on Mobile -->
+        <!-- Slide 1 (Default): Image + Title-->
         <section
           class="w-full shrink-0 snap-center flex flex-col items-center justify-center gap-4 md:w-auto md:shrink"
         >
@@ -30,7 +31,6 @@
             />
           </figure>
 
-          <!-- Title visible under image on mobile, hidden on desktop -->
           <h1
             class="font-serif text-2xl text-p-medium font-bold text-center md:hidden"
           >
@@ -38,18 +38,17 @@
           </h1>
         </section>
 
-        <!-- Slide 2: Spiegazione (Reached on swipe left) -->
+        <!-- Slide 2: Spiegazione (Nascosto in master) -->
         <section
+          v-if="!isMaster"
           class="w-full shrink-0 snap-center flex flex-col justify-start md:justify-center gap-4 h-full md:w-auto md:shrink"
         >
-          <!-- Title visible on desktop side column -->
           <h1
             class="hidden md:block font-serif text-2xl text-p-medium font-bold"
           >
             {{ currentItem ? currentItem.name : '--' }}
           </h1>
 
-          <!-- Explanation Level Selector -->
           <div v-if="explanations && explanations.length > 1" class="w-full">
             <label
               class="font-semibold mb-2 text-base text-p-medium font-sans block"
@@ -74,7 +73,6 @@
             </div>
           </div>
 
-          <!-- Explanation Content -->
           <div class="flex flex-col">
             <div v-if="explanations && explanations.length" class="my-4">
               <div>
@@ -94,7 +92,6 @@
                 </div>
               </div>
             </div>
-            <!-- Fallback description if no explanations -->
             <div
               v-else-if="currentItem && currentItem.description"
               class="text-lg font-serif text-p-dark leading-relaxed my-4"
@@ -111,7 +108,7 @@
           </div>
         </section>
 
-        <!-- Slide 3: Oggetti correlati -->
+        <!-- Slide 3: Oggetti correlati (Visibile anche in master) -->
         <section
           class="w-full shrink-0 snap-center flex flex-col justify-start md:justify-center gap-4 h-full md:w-auto md:shrink"
         >
@@ -145,12 +142,18 @@
               </div>
             </div>
           </div>
+          <div
+            v-else-if="isMaster"
+            class="text-p-medium/40 font-sans my-12 text-center"
+          >
+            Nessun oggetto correlato disponibile.
+          </div>
         </section>
       </div>
 
-      <!-- Map View -->
+      <!-- Map View (Disabilitata in master) -->
       <div
-        v-else
+        v-else-if="!isMaster"
         class="mx-auto grid w-full max-w-4xl grid-cols-1 md:rounded-3xl md:grid-cols-2 gap-6 bg-p-light rounded-2xl shadow-lg shadow-p-soft p-6 mb-4"
       >
         <div class="text-center">
@@ -160,13 +163,13 @@
       </div>
     </main>
 
-    <!-- Bottom Dock: Navigation & Voice Buttons -->
+    <!-- Bottom Dock: Navigation -->
     <footer
       class="flex-shrink-0 w-full max-w-4xl mx-auto flex flex-col gap-4 items-center px-4 pt-2 pb-[max(1rem,env(safe-area-inset-bottom))]"
     >
-      <!-- Top Layer: Move Buttons -->
+      <!-- Top Layer: Prev / Next Buttons -->
       <div
-        v-if="!isMapView"
+        v-if="!isMapView || isMaster"
         class="flex items-center justify-center gap-4 w-full"
       >
         <!-- Previous Button -->
@@ -212,8 +215,8 @@
         </button>
       </div>
 
-      <!-- Bottom Layer: Home, Voice, Map Buttons -->
-      <div class="flex items-center justify-center gap-4">
+      <!-- Bottom Layer: Home, Voice, Map (Nascosto in master) -->
+      <div v-if="!isMaster" class="flex items-center justify-center gap-4">
         <!-- Navigator Button -->
         <a
           href="/navigator"
@@ -278,7 +281,6 @@
     </footer>
   </div>
 </template>
-
 <script>
 import { ref } from 'vue'
 import { TourNavigation } from '../marketplace/tourNav.js'
