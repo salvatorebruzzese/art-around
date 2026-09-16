@@ -164,10 +164,36 @@
 
       <div
         v-else-if="isFollowersView"
-        class="mx-auto grid w-full max-w-4xl grid-cols-1 md:rounded-3xl md:grid-cols-2 gap-6 bg-p-light rounded-2xl shadow-lg shadow-p-soft p-6 mb-4"
+        class="mx-auto grid w-full max-w-4xl grid-cols-1 md:rounded-3xl md:grid-cols-2 gap-6 bg-p-light rounded-2xl shadow-lg shadow-p-soft p-6 mb-4 font-sans"
       >
         <div class="text-center">
           <h2 class="text-2xl font-bold text-p-medium">Utenti connessi</h2>
+        </div>
+        <!-- Sezione Partecipanti / Clients -->
+        <div v-if="isMaster" class="w-full max-w-4xl mx-auto p-4">
+          <h3 class="text-xl font-bold text-p-medium mb-3">
+            Partecipanti Connessi ({{ clients.length }})
+          </h3>
+
+          <!-- Stato di caricamento -->
+          <div v-if="isLoadingClients" class="text-p-medium/60 text-sm">
+            Caricamento partecipanti...
+          </div>
+
+          <ul v-else-if="clients.length" class="flex flex-wrap gap-2">
+            <li
+              v-for="client in clients"
+              :key="typeof client === 'string' ? client : client._id"
+              class="px-3 py-1 bg-p-light border border-p-soft rounded-full text-sm font-sans shadow-sm flex items-center gap-2"
+            >
+              <span class="w-2 h-2 rounded-full bg-green-500"></span>
+              <span>{{ client.username || client._id || client }}</span>
+            </li>
+          </ul>
+
+          <div v-else class="text-p-medium/40 text-sm">
+            Nessun partecipante connesso al momento.
+          </div>
         </div>
         <button
           @click="fetch('/api/session/' + tourId + '/startQuiz')"
@@ -298,7 +324,7 @@
         <!-- Followers View Button -->
         <button
           v-if="isMaster"
-          @click="isFollowersView = !isFollowersView"
+          @click="((isFollowersView = !isFollowersView), isSessionReady)"
           class="shared-button-flex-secondary rounded-full w-12 h-12 shadow-md border border-p-soft hover:border-transparent flex items-center justify-center"
           :class="{ 'bg-p-soft': isFollowersView }"
         >
@@ -548,6 +574,7 @@ export default {
       tour: null,
       itemNav: [],
       items: [],
+      clients: [],
       curItemIdx: 0,
       detachedStack: [],
       refsItems: [],
@@ -560,6 +587,7 @@ export default {
       overlayVisible: ref(false),
       isMapView: ref(false),
       isFollowersView: ref(false),
+      isLoadingClients: false,
       audioMuted: false,
       audioVolume: 1,
       selectedExplanationIdx: 0,
@@ -630,6 +658,11 @@ export default {
         this.setBestExplanationIdx()
       },
       immediate: true,
+    },
+    isSessionReady(newVal) {
+      if (newVal === true) {
+        this.fetchClients()
+      }
     },
     explanations() {
       this.setBestExplanationIdx()
@@ -944,6 +977,22 @@ export default {
       this.controller = null
     }
     this.stopAudio()
+  },
+  async fetchClients() {
+    if (!this.sessionId || this.isLoadingClients) return
+
+    this.isLoadingClients = true
+    try {
+      const res = await fetch(
+        `/api/sessions/${encodeURIComponent(this.sessionId)}/clients`,
+      )
+      if (!res.ok) throw new Error(`HTTP error: ${res.status}`)
+      this.clients = await res.json()
+    } catch (err) {
+      console.error('Errore nel caricamento dei clients:', err)
+    } finally {
+      this.isLoadingClients = false
+    }
   },
 }
 </script>
