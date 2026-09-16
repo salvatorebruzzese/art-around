@@ -1,7 +1,5 @@
 <!-- eslint-disable vue/multi-word-component-names -->
-<template
-  class="h-screen overflow-hidden flex flex-col items-center justify-center"
->
+<template>
   <div
     class="flex flex-col justify-center items-center rounded-xl shadow-md shadow-p-soft py-4 px-8 gap-4 text-center max-w-md mx-4"
   >
