@@ -6,7 +6,7 @@
     <main class="overflow-y-auto min-h-0 max-h-7/10 w-full md:pt-6">
       <!-- Detail View -->
       <div
-        v-if="!isMapView || isMaster"
+        v-if="!isMapView && !isFollowersView"
         class="mx-auto w-full max-w-4xl bg-p-light rounded-2xl md:rounded-3xl shadow-lg shadow-p-soft p-6 mb-4 flex overflow-x-auto snap-x snap-mandatory md:grid gap-6"
         :class="isMaster ? 'md:grid-cols-1' : 'md:grid-cols-2'"
       >
@@ -151,15 +151,30 @@
         </section>
       </div>
 
-      <!-- Map View (Disabilitata in master) -->
+      <!-- Map View -->
       <div
-        v-else-if="!isMaster"
+        v-else-if="isMapView"
         class="mx-auto grid w-full max-w-4xl grid-cols-1 md:rounded-3xl md:grid-cols-2 gap-6 bg-p-light rounded-2xl shadow-lg shadow-p-soft p-6 mb-4"
       >
         <div class="text-center">
           <h2 class="text-2xl font-bold text-p-medium">Mappa del Museo</h2>
           <p class="text-p-dark mt-2">Visualizzazione del percorso</p>
         </div>
+      </div>
+
+      <div
+        v-else-if="isFollowersView"
+        class="mx-auto grid w-full max-w-4xl grid-cols-1 md:rounded-3xl md:grid-cols-2 gap-6 bg-p-light rounded-2xl shadow-lg shadow-p-soft p-6 mb-4"
+      >
+        <div class="text-center">
+          <h2 class="text-2xl font-bold text-p-medium">Utenti connessi</h2>
+        </div>
+        <button
+          @click="fetch('/api/session/' + tourId + '/startQuiz')"
+          class="shared-button-full-primary"
+        >
+          Somministra quiz
+        </button>
       </div>
     </main>
 
@@ -169,7 +184,7 @@
     >
       <!-- Top Layer: Prev / Next Buttons -->
       <div
-        v-if="!isMapView || isMaster"
+        v-if="!isMapView"
         class="flex items-center justify-center gap-4 w-full"
       >
         <!-- Previous Button -->
@@ -216,7 +231,7 @@
       </div>
 
       <!-- Bottom Layer: Home, Voice, Map (Nascosto in master) -->
-      <div v-if="!isMaster" class="flex items-center justify-center gap-4">
+      <div class="flex items-center justify-center gap-4">
         <!-- Navigator Button -->
         <a
           href="/navigator"
@@ -238,6 +253,7 @@
 
         <!-- Voice Button -->
         <button
+          v-if="!isMaster"
           class="shared-button-flex-primary rounded-full w-20 h-20 shadow-xl border border-p-soft hover:border-transparent flex items-center justify-center"
         >
           <svg
@@ -259,6 +275,7 @@
         <!-- Map Button -->
         <button
           @click="isMapView = !isMapView"
+          v-if="!isMaster"
           class="shared-button-flex-secondary rounded-full w-12 h-12 shadow-md border border-p-soft hover:border-transparent flex items-center justify-center"
           :class="{ 'bg-p-soft': isMapView }"
         >
@@ -275,6 +292,30 @@
             <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
             <line x1="8" y1="2" x2="8" y2="18" />
             <line x1="16" y1="6" x2="16" y2="22" />
+          </svg>
+        </button>
+
+        <!-- Followers View Button -->
+        <button
+          v-if="isMaster"
+          @click="isFollowersView = !isFollowersView"
+          class="shared-button-flex-secondary rounded-full w-12 h-12 shadow-md border border-p-soft hover:border-transparent flex items-center justify-center"
+          :class="{ 'bg-p-soft': isFollowersView }"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
           </svg>
         </button>
       </div>
@@ -410,6 +451,27 @@ class MasterTourController extends TourController {
     }
   }
 
+  async startQuiz() {
+    if (!this.tourId || this.isStartingQuiz) return
+
+    this.isStartingQuiz = true
+    try {
+      await fetch(
+        `/api/session/${encodeURIComponent(this.sessionId)}/startQuiz`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        },
+      )
+    } catch (err) {
+      console.error('Errore durante startQuiz:', err)
+    } finally {
+      this.isStartingQuiz = false
+    }
+  }
+
   teardown() {
     if (this.abortController) {
       this.abortController.abort()
@@ -497,6 +559,7 @@ export default {
       loadedItemsMap: {},
       overlayVisible: ref(false),
       isMapView: ref(false),
+      isFollowersView: ref(false),
       audioMuted: false,
       audioVolume: 1,
       selectedExplanationIdx: 0,
