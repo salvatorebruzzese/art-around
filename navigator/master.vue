@@ -88,9 +88,21 @@ const { search, searchResults, isLoading, onSearchInput } = useMuseumSearch()
 const tempInput = ref('')
 const sessionName = ref('')
 
-const selectTourToGuide = (item) => {
-  window.location.href =
-    '/navigator/master/' + item._id + '?session=' + sessionName.value
+const selectTourToGuide = async (item) => {
+  const payload = { id: sessionName.value, tour: item._id }
+  try {
+    const response = await fetch('/api/sessions/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+
+    if (!response.ok) throw new Error(`HTTP error. Status: ${response.status}`)
+    window.location.href =
+      '/navigator/master/' + item._id + '?session=' + sessionName.value
+  } catch (e) {
+    console.log('Request failed:', e)
+  }
 }
 
 onMounted(async () => {

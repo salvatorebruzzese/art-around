@@ -21,7 +21,8 @@ router.post('/', ensureAuth, async (req, res) => {
   const Validate = z.object({
     id: z.string(),
     tour: z.string(),
-    quiz: z.object({
+    // REVIEW: why is this here? shouldn't the quiz be part of a tour creation in the editor/marketplace?
+    /*quiz: z.object({
       questions: z.array(
         z.object({
           prompt: z.string(),
@@ -30,7 +31,7 @@ router.post('/', ensureAuth, async (req, res) => {
           timeLimit: z.number(),
         }),
       ),
-    }),
+    }), */
   })
   const parse = Validate.safeParse(req.body)
   if (!parse.success) return res.status(400).json({ error: parse.error })
