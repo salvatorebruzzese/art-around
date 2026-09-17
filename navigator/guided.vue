@@ -58,7 +58,7 @@ export default {
         const session = await response.json()
         this.doesSessionExist = true
 
-        window.location.href = `/navigator/guided/${session.tour}`
+        window.location.href = `/navigator/guided/${encodeURIComponent(session.tour)}/?session=${encodeURIComponent(session.id)}`
       } catch (err) {
         console.error('Errore durante la verifica:', err)
         this.doesSessionExist = false

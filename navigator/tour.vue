@@ -210,12 +210,12 @@
     >
       <!-- Top Layer: Prev / Next Buttons -->
       <div
-        v-if="!isMapView"
+        v-if="!isMapView && !isGuided"
         class="flex items-center justify-center gap-4 w-full"
       >
         <!-- Previous Button -->
         <button
-          v-if="!isGuided && (canGoPrev || detachedStack.length > 0)"
+          v-if="canGoPrev || detachedStack.length > 0"
           @click="goPrevOrReturn"
           aria-label="Item precedente"
           class="shared-button-flex-secondary rounded-md w-16 h-16 shadow-lg border border-p-soft hover:border-transparent flex items-center justify-center"
@@ -236,7 +236,7 @@
 
         <!-- Next Button -->
         <button
-          v-if="!isGuided && canGoNext"
+          v-if="canGoNext"
           @click="goNext"
           aria-label="Item successivo"
           class="shared-button-flex-secondary rounded-md w-16 h-16 shadow-lg border border-p-soft hover:border-transparent flex items-center justify-center"
@@ -256,7 +256,7 @@
         </button>
       </div>
 
-      <!-- Bottom Layer: Home, Voice, Map (Nascosto in master) -->
+      <!-- Bottom Layer: Home, Voice, Map, Followers -->
       <div class="flex items-center justify-center gap-4">
         <!-- Navigator Button -->
         <a
