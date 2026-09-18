@@ -19,6 +19,4 @@ export interface Session {
   quizStartedAt?: Date
   createdAt: Date
   state: 'waiting' | 'started' | 'quiz'
-  // Do not serialize/store: this is runtime only!
-  sseClients?: SSEClient[]
 }

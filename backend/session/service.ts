@@ -2,13 +2,21 @@ import { Either, Left, Right } from 'purify-ts/Either'
 import { Response } from 'express'
 import crypto from 'crypto'
 import { Types } from 'mongoose'
-import { Session, SSEClient } from './model.js'
+import { Session } from './model.js'
 import { AccessDenied, DBError, NotFound, notFound } from '../shared/errors.js'
 import UserService from '../user/service.js'
-import { IUser, UserQuery } from '../user/model.js'
-import { ObjectId } from 'mongodb'
+import { IUser } from '../user/model.js'
 
+export interface SSEClient {
+  userId: Types.ObjectId
+  res: Response
+}
+
+// Sessioni di dominio (nessun socket salvato dentro Session)
 const sessions: Map<string, Session> = new Map()
+
+// Registry runtime separato: Map<sessionId, SSEClient[]>
+const sseRegistry: Map<string, SSEClient[]> = new Map()
 
 export function createSession(
   id: string,
@@ -16,41 +24,16 @@ export function createSession(
   tour: Types.ObjectId,
 ): Either<NotFound, Session> {
   const session: Session = {
-    id: id,
+    id,
     tour,
     owner,
     clients: [],
     currentStep: { type: 'gathering' },
     createdAt: new Date(),
     state: 'waiting',
-    sseClients: [],
   }
   sessions.set(id, session)
   return Right(session)
-}
-export async function joinSessionWithSSENoAcc(
-  sessionId: string,
-  res: Response,
-  username: string,
-): Promise<
-  Either<DBError | AccessDenied | NotFound, [Partial<IUser>, string, Session]>
-> {
-  const password = crypto.randomBytes(16).toString('hex')
-  const result = await UserService.createUser({
-    username: username,
-    email: 'nomail@mail.com',
-    password: password, // 16 bytes = 32 hex chars
-  })
-
-  if (result.isLeft()) return result
-  const user = result.unsafeCoerce()
-  const userId = user._id
-
-  const session = sessions.get(sessionId)
-  if (!session) return Left(notFound())
-
-  const sessionResult = joinSessionWithSSE(sessionId, { res, userId })
-  return sessionResult.map((session) => [user, password, session])
 }
 
 export function joinSessionWithSSE(
@@ -58,23 +41,69 @@ export function joinSessionWithSSE(
   client: SSEClient,
 ): Either<NotFound, Session> {
   const session = sessions.get(sessionId)
-  const pupil = client.userId
   if (!session) return Left(notFound())
-  if (!session.clients.some((id) => id.equals(pupil)))
+
+  const pupil = client.userId
+
+  // Aggiorna la sessione di dominio
+  if (!session.clients.some((id) => id.equals(pupil))) {
     session.clients.push(pupil)
-  session.sseClients = session.sseClients || []
-  if (!session.sseClients.some((c) => c.userId.equals(pupil)))
-    session.sseClients.push(client)
+  }
+
+  // Aggiorna il registry in-memory SSE
+  const existingClients = sseRegistry.get(sessionId) ?? []
+  if (!existingClients.some((c) => c.userId.equals(pupil))) {
+    existingClients.push(client)
+    sseRegistry.set(sessionId, existingClients)
+  }
+
   return Right(session)
+}
+
+export async function joinSessionWithSSENoAcc(
+  sessionId: string,
+  res: Response,
+  username: string,
+): Promise<
+  Either<DBError | AccessDenied | NotFound, [Partial<IUser>, string, Session]>
+> {
+  const session = sessions.get(sessionId)
+  if (!session) return Left(notFound())
+
+  const password = crypto.randomBytes(16).toString('hex')
+  const result = await UserService.createUser({
+    username,
+    email: 'nomail@mail.com',
+    password,
+  })
+
+  if (result.isLeft()) return result
+  const user = result.unsafeCoerce()
+  const userId = user._id as Types.ObjectId
+
+  const sessionResult = joinSessionWithSSE(sessionId, { res, userId })
+  return sessionResult.map((s) => [user, password, s])
 }
 
 export function removeSSEClient(
   sessionId: string,
   userId: Types.ObjectId,
 ): void {
-  const session = sessions.get(sessionId)
-  if (!session || !session.sseClients) return
-  session.sseClients = session.sseClients.filter((c) => c.userId !== userId)
+  const clients = sseRegistry.get(sessionId)
+  if (!clients) return
+
+  // Confronto corretto tramite metodo .equals() di Mongoose/BSON
+  const filtered = clients.filter((c) => !c.userId.equals(userId))
+
+  if (filtered.length === 0) {
+    sseRegistry.delete(sessionId)
+  } else {
+    sseRegistry.set(sessionId, filtered)
+  }
+}
+
+export function getSSEStream(sessionId: string): Response[] {
+  return (sseRegistry.get(sessionId) ?? []).map((c) => c.res)
 }
 
 export function showItem(
@@ -105,11 +134,6 @@ export function submitQuiz(
 ): Either<NotFound, Session> {
   const session = sessions.get(sessionId)
   if (!session || session.state !== 'quiz') return Left(notFound())
-  // if (!session.quizAnswers) session.quizAnswers = {}
-  // session.quizAnswers[userId.toHexString()] = {
-  //   answers,
-  //   submittedAt: new Date(),
-  // }
   return Right(session)
 }
 

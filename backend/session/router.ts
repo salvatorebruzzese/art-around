@@ -4,38 +4,34 @@ import { Types } from 'mongoose'
 import { ensureAuth } from '../accessControl.js'
 import * as SessionService from './service.js'
 import { handleLeft } from '../shared/router.js'
-import { Session } from './model.js'
 import UserService from '../user/service.js'
 
 const router = express.Router()
 type Event = 'showItem' | 'startQuiz' | 'quizAnswer'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function sendSessionEvent(session: Session, event: Event, data: any) {
-  if (!session.sseClients) return
+// Emette l'evento recuperando gli stream attivi da SessionService
+function sendSessionEvent(
+  sessionId: string,
+  event: Event,
+  data: unknown,
+): void {
+  const streams = SessionService.getSSEStream(sessionId)
   const payload = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`
-  session.sseClients.forEach(({ res }) => res.write(payload))
+  streams.forEach((res) => res.write(payload))
 }
 
 router.post('/', ensureAuth, async (req, res) => {
   const Validate = z.object({
-    id: z.string(),
-    tour: z.string(),
-    // REVIEW: why is this here? shouldn't the quiz be part of a tour creation in the editor/marketplace?
-    /*quiz: z.object({
-      questions: z.array(
-        z.object({
-          prompt: z.string(),
-          options: z.array(z.string()),
-          correct: z.number(),
-          timeLimit: z.number(),
-        }),
-      ),
-    }), */
+    id: z.string().min(1),
+    tour: z.string().refine((val) => Types.ObjectId.isValid(val), {
+      message: 'Invalid ObjectId for tour',
+    }),
   })
+
   const parse = Validate.safeParse(req.body)
   if (!parse.success) return res.status(400).json({ error: parse.error })
   const { id, tour } = parse.data
+
   const result = SessionService.createSession(
     id,
     req.user!._id,
@@ -49,17 +45,29 @@ router.post('/', ensureAuth, async (req, res) => {
 })
 
 router.get('/:id/join', async (req, res) => {
-  const username = ('tmp-' + req.query.username) as string
-  const sessionId = req.params.id as string
+  const QuerySchema = z.object({
+    username: z.string().min(1),
+  })
+  const queryParse = QuerySchema.safeParse(req.query)
+  if (!queryParse.success) {
+    return res.status(400).json({ error: queryParse.error })
+  }
+
+  const username = `tmp-${queryParse.data.username}`
+  const sessionId = req.params.id
+
   const addResult = await SessionService.joinSessionWithSSENoAcc(
     sessionId,
     res,
     username,
   )
 
-  if (addResult.isLeft()) return res.status(404)
-  const [user, password, _session] = addResult.unsafeCoerce()
-  const userId = user._id
+  if (addResult.isLeft()) {
+    return res.status(404).json({ error: 'Session not found' })
+  }
+
+  const [user, password] = addResult.unsafeCoerce()
+  const userId = user._id as Types.ObjectId
 
   res.set({
     'Cache-Control': 'no-cache',
@@ -68,29 +76,42 @@ router.get('/:id/join', async (req, res) => {
   })
   res.flushHeaders()
   res.write('\n')
+
   const joinPayload = `event: hasJoined\ndata: ${JSON.stringify({ username: user.username, password })}\n\n`
   res.write(joinPayload)
 
   req.on('close', () => {
-    console.log('Closed connection: ', sessionId, userId)
     SessionService.removeSSEClient(sessionId, userId)
-    UserService.deleteUser(userId, userId)
+    UserService.deleteUser(userId, userId).catch((err) =>
+      console.error(
+        `Failed to delete temporary user ${userId.toHexString()}:`,
+        err,
+      ),
+    )
   })
 })
 
 router.post('/:id/showItem', ensureAuth, async (req, res) => {
-  const Validate = z.object({ itemId: z.string() })
+  const Validate = z.object({
+    itemId: z.string().refine((val) => Types.ObjectId.isValid(val), {
+      message: 'Invalid ObjectId for itemId',
+    }),
+  })
+
   const parse = Validate.safeParse(req.body)
   if (!parse.success) return res.status(400).json({ error: parse.error })
   const { itemId } = parse.data
+  const sessionId = req.params.id as string
+
   const result = SessionService.showItem(
-    req.params.id as string,
+    sessionId,
     new Types.ObjectId(itemId),
-    req.user!._id, // REVIEW: should new Types.ObjectId?
+    req.user!._id,
   )
+
   result.caseOf({
     Right: (session) => {
-      sendSessionEvent(session, 'showItem', { itemId })
+      sendSessionEvent(sessionId, 'showItem', { itemId })
       return res.json(session)
     },
     Left: handleLeft(res),
@@ -98,10 +119,12 @@ router.post('/:id/showItem', ensureAuth, async (req, res) => {
 })
 
 router.post('/:id/startQuiz', ensureAuth, async (req, res) => {
-  const result = SessionService.startQuiz(req.params.id as string)
+  const sessionId = req.params.id
+  const result = SessionService.startQuiz(sessionId as string)
+
   result.caseOf({
     Right: (session) => {
-      sendSessionEvent(session, 'startQuiz', {})
+      sendSessionEvent(sessionId as string, 'startQuiz', {})
       return res.json(session)
     },
     Left: handleLeft(res),
@@ -113,23 +136,27 @@ router.post('/:id/submitQuiz', ensureAuth, async (req, res) => {
   const parse = Validate.safeParse(req.body)
   if (!parse.success) return res.status(400).json({ error: parse.error })
   const { answers } = parse.data
+  const sessionId = req.params.id
+
   const result = SessionService.submitQuiz(
-    req.params.id as string,
+    sessionId as string,
     req.user!._id,
     answers,
   )
+
   result.caseOf({
-    Right: (session) => {
-      sendSessionEvent(session, 'quizAnswer', { userId: req.user!._id })
+    Right: () => {
+      sendSessionEvent(sessionId as string, 'quizAnswer', {
+        userId: req.user!._id,
+      })
       return res.json({ status: 'ok' })
     },
     Left: handleLeft(res),
   })
 })
 
-// For inspection/debug
 router.get('/:id', async (req, res) => {
-  const result = SessionService.getSession(req.params.id as string)
+  const result = SessionService.getSession(req.params.id)
 
   result.caseOf({
     Right: (session) => res.json(session),
@@ -138,7 +165,7 @@ router.get('/:id', async (req, res) => {
 })
 
 router.get('/:id/clients', async (req, res) => {
-  const result = SessionService.getClients(req.params.id as string)
+  const result = SessionService.getClients(req.params.id)
 
   result.caseOf({
     Right: (clients) => res.json(clients),
