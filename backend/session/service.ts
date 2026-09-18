@@ -48,8 +48,6 @@ export async function joinSessionWithSSENoAcc(
 
   const session = sessions.get(sessionId)
   if (!session) return Left(notFound())
-  user.purchasedTours = [session.tour]
-  await (user as IUser).save()
 
   const sessionResult = joinSessionWithSSE(sessionId, { res, userId })
   return sessionResult.map((session) => [user, password, session])
