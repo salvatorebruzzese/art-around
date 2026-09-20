@@ -31,29 +31,39 @@ const ASSETS_PER_USER = 30
 
 const sampleMuseumsData = [
   {
-    name: 'Louvre Museum',
-    address: 'Rue de Rivoli, 75001 Paris, France',
-    description: 'World-famous art museum in Paris.',
+    name: 'Museo del Louvre',
+    address: 'Rue de Rivoli, 75001 Parigi, Francia',
+    description: "Celebre museo d'arte a Parigi.",
+    toilets: 'Piano terra, ala Richelieu; Hall Napoléon',
+    reception: 'Hall della Piramide - Punto Informazioni',
   },
   {
     name: 'The Metropolitan Museum of Art',
-    address: '1000 5th Ave, New York, NY 10028, USA',
-    description: 'The Met in New York City.',
+    address: '1000 5th Ave, New York, NY 10028, Stati Uniti',
+    description: 'Il celebre Met di New York.',
+    toilets: 'Piano terra del Great Hall; primo piano vicino alla caffetteria',
+    reception: 'Ingresso Principale - Banco Accoglienza del Great Hall',
   },
   {
-    name: 'Uffizi Gallery',
-    address: 'Piazzale degli Uffizi, 6, 50122 Firenze FI, Italy',
-    description: 'Prominent art museum in Florence.',
+    name: 'Galleria degli Uffizi',
+    address: 'Piazzale degli Uffizi, 6, 50122 Firenze FI, Italia',
+    description: 'Importante museo statale di Firenze.',
+    toilets: 'Primo piano adiacente alla caffetteria; piano terra uscita',
+    reception: 'Piazzale degli Uffizi - Porta 1 Accoglienza',
   },
   {
     name: 'Museo Egizio',
-    address: 'Via Accademia delle Scienze, 6, 10123 Torino TO, Italy',
-    description: 'Famous museum dedicated to Egyptian antiquities.',
+    address: 'Via Accademia delle Scienze, 6, 10123 Torino TO, Italia',
+    description: 'Museo dedicato alla storia e alle antichità egizie.',
+    toilets: 'Piano interrato accanto al guardaroba',
+    reception: 'Atrio di ingresso al piano terra',
   },
   {
     name: 'Museo di Capodimonte',
-    address: 'Via Miano, 2, 80131 Napoli NA, Italy',
-    description: 'Art museum in Naples with a vast collection.',
+    address: 'Via Miano, 2, 80131 Napoli NA, Italia',
+    description: "Museo d'arte a Napoli con un ricco patrimonio storico.",
+    toilets: 'Piano terra, lato ovest del cortile interno',
+    reception: 'Punto biglietteria e informazioni nel cortile principale',
   },
 ]
 
@@ -186,16 +196,18 @@ async function seed() {
         // rotate through author assets if more than 1 (cycle assets)
         const thumbnail = assetList[ti % assetList.length]
         const tour = await Tour.create({
-          name: `Tour ${ti + 1} for ${museum.name}`,
+          name: `Percorso ${ti + 1} per ${museum.name}`,
           author: author._id,
           thumbnail,
           museum: museum._id,
           price: 5 + ti * 3,
           items: [],
           itemNav: [],
-          description: `Description for tour ${ti + 1} at ${museum.name}`,
+          description: `Descrizione del percorso ${ti + 1} presso ${museum.name}`,
+          tourEntryLocation: `Ala A - Ingresso ${ti + 1}`,
+          tourExitLocation: `Ala B - Uscita ${ti + 1}`,
         })
-        await User.findByIdAndUpdate(author._id, {
+        User.findByIdAndUpdate(author._id, {
           $push: { authoredTours: tour._id },
         })
         // --- ITEMS ---
