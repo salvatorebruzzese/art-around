@@ -4,23 +4,21 @@ const SpeechRecognition =
 const SpeechRecognitionEvent =
   window.SpeechRecognitionEvent || window.webkitSpeechRecognitionEvent
 
-export function speechSynthesizer(inputTextContent) {
+// Function to let synthesizer speak some text content
+export function startSpeechSynthesis(inputTextContent) {
   const utterance = new SpeechSynthesisUtterance(inputTextContent)
   utterance.lang = 'it-IT'
 
   synth.speak(utterance)
 }
 
-export function speechRecognizer(startButton) {
+// Function that returns the object to start recognition
+export function speechRecognizer() {
   const recognition = new SpeechRecognition()
 
   recognition.lang = 'it-IT'
   recognition.interimResults = false
   recognition.maxAlternatives = 1
 
-  startButton.onclick = (status) => {
-    if (!status) {
-      recognition.start()
-    } else recognition.abort()
-  }
+  return recognition
 }

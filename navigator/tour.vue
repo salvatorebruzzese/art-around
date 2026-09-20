@@ -371,7 +371,7 @@
 <script>
 import { ref, Transition } from 'vue'
 import { TourNavigation } from '../marketplace/tourNav.js'
-import { speechRecognizer, speechSynthesizer } from './speechSyntesis.js'
+import { speechRecognizer, startSpeechSynthesis } from './speechSyntesis.js'
 
 class TourController {
   constructor({ itemNav = [], onChange = null } = {}) {
