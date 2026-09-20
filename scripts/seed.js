@@ -23,7 +23,7 @@ dotenv.config({ path: path.join(process.cwd(), '.env') })
 
 const mongouri = `mongodb://${process.env.MONGO_USR}:${process.env.MONGO_PWD}@${process.env.MONGO_SITE}`
 
-const USER_COUNT = 10
+const USER_COUNT = 5
 const MUSEUM_COUNT = 5
 const TOURS_PER_MUSEUM = 4
 const ITEMS_PER_TOUR = 8
