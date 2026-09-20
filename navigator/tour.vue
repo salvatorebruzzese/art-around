@@ -280,22 +280,42 @@
         <!-- Voice Button -->
         <button
           v-if="!isMaster"
+          @click="userIsSpeaking = !userIsSpeaking"
           class="shared-button-flex-primary rounded-full w-20 h-20 shadow-xl border border-p-soft hover:border-transparent flex items-center justify-center"
         >
-          <svg
-            width="36"
-            height="32"
-            viewBox="0 0 32 32"
-            fill="currentColor"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M1 16c0-2 1-4 3-4s3 2 3 4v4c0 2-1 4-3 4s-3-2-3-4v-4z" />
-            <path d="M13 10c0-2 1-4 3-4s3 2 3 4v12c0 2-1 4-3 4s-3-2-3-4v-12z" />
-            <path d="M25 16c0-2 1-4 3-4s3 2 3 4v4c0 2-1 4-3 4s-3-2-3-4v-4z" />
-          </svg>
+          <Transition name="fade" mode="out-in">
+            <svg
+              v-if="!userIsSpeaking"
+              width="36"
+              height="32"
+              viewBox="0 0 32 32"
+              fill="currentColor"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M1 16c0-2 1-4 3-4s3 2 3 4v4c0 2-1 4-3 4s-3-2-3-4v-4z" />
+              <path
+                d="M13 10c0-2 1-4 3-4s3 2 3 4v12c0 2-1 4-3 4s-3-2-3-4v-12z"
+              />
+              <path d="M25 16c0-2 1-4 3-4s3 2 3 4v4c0 2-1 4-3 4s-3-2-3-4v-4z" />
+            </svg>
+            <svg
+              v-else
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 32"
+              width="32"
+              height="32"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <rect x="6" y="6" width="20" height="20" rx="2" ry="2" />
+            </svg>
+          </Transition>
         </button>
 
         <!-- Map Button -->
@@ -349,7 +369,7 @@
   </div>
 </template>
 <script>
-import { ref } from 'vue'
+import { ref, Transition } from 'vue'
 import { TourNavigation } from '../marketplace/tourNav.js'
 
 class TourController {
@@ -588,6 +608,7 @@ export default {
       isMapView: ref(false),
       isFollowersView: ref(false),
       isLoadingClients: false,
+      userIsSpeaking: ref(false),
       audioMuted: false,
       audioVolume: 1,
       selectedExplanationIdx: 0,
