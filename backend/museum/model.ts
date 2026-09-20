@@ -8,6 +8,8 @@ export interface IMuseum extends Document {
   description?: string
   address?: string
   tours?: Types.ObjectId[]
+  toilets?: string
+  reception?: string
 }
 
 export const museumSchema = new Schema<IMuseum>(
@@ -17,6 +19,8 @@ export const museumSchema = new Schema<IMuseum>(
     description: { type: String },
     address: { type: String },
     tours: [{ type: Schema.Types.ObjectId, ref: 'Tour' }],
+    toilets: { type: String },
+    reception: { type: String },
   },
   { timestamps: true },
 )
@@ -25,9 +29,11 @@ export const Museum = mongoose.model<IMuseum>('Museum', museumSchema)
 
 const MuseumQuerySchemaZod = z.object({
   name: z.string().optional(),
-  description: z.string().optional(), // TODO: partial match
+  description: z.string().optional(),
   address: z.string().optional(),
   tours: z.array(objectIdZod).optional(),
+  toilets: z.string().optional(),
+  reception: z.string().optional(),
 })
 
 export type MuseumQuery = z.infer<typeof MuseumQuerySchemaZod>

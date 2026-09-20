@@ -28,6 +28,8 @@ interface _Tour {
   description?: string
   price: number
   quiz: Quiz
+  tourEntryLocation: string
+  tourExitLocation: string
 }
 
 export interface ITour extends Document, _Tour {}
@@ -52,6 +54,8 @@ export const tourSchema = new Schema<ITour>(
         },
       ],
     },
+    tourEntryLocation: { type: String },
+    tourExitLocation: { type: String },
   },
   { timestamps: true },
 )
@@ -81,6 +85,8 @@ const TourInputSchemaZod = z.object({
       }),
     ),
   }),
+  tourEntryLocation: z.string(),
+  tourExitLocation: z.string(),
 })
 
 const TourQuerySchemaZod = z.object({
@@ -91,6 +97,8 @@ const TourQuerySchemaZod = z.object({
   items: z.array(objectIdZod).optional(),
   thumbnail: objectIdZod.optional(),
   description: z.string().optional(),
+  tourEntryLocation: z.string().optional(),
+  tourExitLocation: z.string().optional(),
 })
 
 const TourPatchSchemaZod = TourInputSchemaZod.partial()
@@ -113,5 +121,6 @@ export const safeTourFields: (keyof _Tour)[] = [
   'museum',
   'description',
   'thumbnail',
-  // fill as needed
+  'tourEntryLocation',
+  'tourExitLocation',
 ]

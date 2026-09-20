@@ -137,7 +137,6 @@ La lista dei comandi, così come sono visti internamente dal sistema di interazi
 - `avanti` va all'opera successiva nella visita.
 - `indietro` va all'opera precedente nella visita.
 - `autoreOpera` dà le informazioni nel campo autore per le opere di tipo opera.
-- `stileOpera` dà le informazioni nel campo stile per le opere di tipo opera.
 - `complicaSpiegazione` passa al livello successivo disponibile del linguaggio.
 - `semplificaSpiegazione` passa al livello precedente disponibile del linguaggio.
 - `entrataMostra` fornisce un'indicazione assoluta sulla posizione dell'entrata della mostra.

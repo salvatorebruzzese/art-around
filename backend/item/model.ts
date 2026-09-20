@@ -1,5 +1,4 @@
 import mongoose, { Schema, Document, Types } from 'mongoose'
-import { IGeoPosition } from '../shared/models.js'
 import z from 'zod'
 import { makeZodValidator, objectIdZod } from '../shared/validation.js'
 
@@ -45,7 +44,7 @@ interface _Item {
   license: string
   tags?: string[]
   image?: Types.ObjectId
-  position?: IGeoPosition
+  position?: string
   refs?: Types.ObjectId[]
 }
 
@@ -65,6 +64,7 @@ export const itemSchema = new Schema<IItem>(
     },
     license: String,
     tour: { type: Schema.ObjectId, ref: 'Tour', required: true },
+    position: { type: String },
     tags: [{ type: String }],
     refs: [{ type: Schema.ObjectId, ref: 'Item' }],
     image: { type: Schema.ObjectId, ref: 'Asset' },
@@ -114,6 +114,7 @@ const ItemInputSchemaZod = z.object({
   name: z.string(),
   itemAuthor: objectIdZod,
   tour: objectIdZod,
+  position: z.string(),
   explanations: z.array(DescriptionSchemaZod),
   license: z.string(),
   tags: z.array(z.string()).optional(),
@@ -125,6 +126,7 @@ const ItemQuerySchemaZod = z.object({
   name: z.string().optional(),
   itemAuthor: objectIdZod.optional(),
   tour: objectIdZod.optional(),
+  position: z.string().optional(),
   explanations: z.array(DescriptionSchemaZod).optional(),
   license: z.string().optional(),
   refs: objectIdZod.array().optional(),
