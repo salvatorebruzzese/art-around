@@ -4,9 +4,7 @@ const SpeechRecognition =
 const SpeechRecognitionEvent =
   window.SpeechRecognitionEvent || window.webkitSpeechRecognitionEvent
 
-export function speechSynthesizer(inputTextElement) {
-  const inputTextContent = inputTextElement.textContent
-
+export function speechSynthesizer(inputTextContent) {
   const utterance = new SpeechSynthesisUtterance(inputTextContent)
   utterance.lang = 'it-IT'
 
@@ -23,7 +21,6 @@ export function speechRecognizer(startButton) {
   startButton.onclick = (status) => {
     if (!status) {
       recognition.start()
-      // Change the icon to a stop icon
     } else recognition.abort()
   }
 }

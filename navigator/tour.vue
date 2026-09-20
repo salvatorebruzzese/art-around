@@ -371,6 +371,7 @@
 <script>
 import { ref, Transition } from 'vue'
 import { TourNavigation } from '../marketplace/tourNav.js'
+import { speechRecognizer, speechSynthesizer } from './speechSyntesis.js'
 
 class TourController {
   constructor({ itemNav = [], onChange = null } = {}) {
@@ -600,7 +601,6 @@ export default {
       refsItems: [],
       bottomOverlay: false,
       audioPlaying: false,
-      audioRate: 1,
       touch0: null,
       openTouch0: null,
       loadedItemsMap: {},
@@ -609,8 +609,6 @@ export default {
       isFollowersView: ref(false),
       isLoadingClients: false,
       userIsSpeaking: ref(false),
-      audioMuted: false,
-      audioVolume: 1,
       selectedExplanationIdx: 0,
       userSelectedLevel: null,
       controller: null,
@@ -688,29 +686,9 @@ export default {
     explanations() {
       this.setBestExplanationIdx()
     },
-    audioMuted() {
-      this.syncAudioProps()
-    },
-    audioRate() {
-      this.syncAudioProps()
-    },
     bottomOverlay(val) {
       if (!val) this.syncAudioProps()
     },
-  },
-  created() {
-    this.initTour()
-    if (typeof window !== 'undefined') {
-      const cachedRate = localStorage.getItem('audioRate')
-      const r = parseFloat(cachedRate)
-      if (!isNaN(r) && [0.75, 1, 1.25, 1.5, 2].includes(r)) {
-        this.audioRate = r
-      } else {
-        this.audioRate = 1
-      }
-    } else {
-      this.audioRate = 1
-    }
   },
   methods: {
     resolveTourSettings() {
@@ -896,10 +874,6 @@ export default {
         this.audioPlaying = false
       }
     },
-    toggleMute() {
-      this.audioMuted = !this.audioMuted
-      this.syncAudioProps()
-    },
     syncAudioProps() {
       this.$nextTick(() => {
         const audioEl = this.$refs.audioEl
@@ -909,13 +883,6 @@ export default {
           audioEl.playbackRate = this.audioRate
         }
       })
-    },
-    onAudioRateChange(rate) {
-      this.audioRate = rate
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('audioRate', rate)
-      }
-      this.syncAudioProps()
     },
     getLevelLabel(level) {
       if (!level) return 'Descrizione'
