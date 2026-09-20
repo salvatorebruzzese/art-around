@@ -278,9 +278,10 @@
         </a>
 
         <!-- Voice Button -->
+        <!-- Voice Button -->
         <button
           v-if="!isMaster"
-          @click="userIsSpeaking = !userIsSpeaking"
+          @click="toggleSpeechRecognition"
           class="shared-button-flex-primary rounded-full w-20 h-20 shadow-xl border border-p-soft hover:border-transparent flex items-center justify-center"
         >
           <Transition name="fade" mode="out-in">
@@ -304,7 +305,7 @@
             <svg
               v-else
               xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 32"
+              viewBox="0 0 32 32"
               width="32"
               height="32"
               fill="none"
@@ -608,7 +609,9 @@ export default {
       isMapView: ref(false),
       isFollowersView: ref(false),
       isLoadingClients: false,
-      userIsSpeaking: ref(false),
+      userIsSpeaking: false,
+      currentSpokenCommand: '',
+      currentRecognizer: null,
       selectedExplanationIdx: 0,
       userSelectedLevel: null,
       controller: null,
@@ -686,11 +689,47 @@ export default {
     explanations() {
       this.setBestExplanationIdx()
     },
-    bottomOverlay(val) {
-      if (!val) this.syncAudioProps()
-    },
   },
   methods: {
+    toggleSpeechRecognition() {
+      if (this.userIsSpeaking) {
+        if (this.currentRecognizer) {
+          this.currentRecognizer.abort()
+        }
+        this.userIsSpeaking = false
+        return
+      }
+
+      try {
+        this.currentRecognizer = speechRecognizer()
+        if (!this.currentRecognizer) {
+          console.error(
+            'SpeechRecognition non supportato dal browser o funzione non definita.',
+          )
+          return
+        }
+
+        this.currentRecognizer.onresult = (event) => {
+          this.currentSpokenCommand = event.results[0][0].transcript
+          console.log('Comando vocale:', this.currentSpokenCommand)
+        }
+
+        this.currentRecognizer.onerror = (err) => {
+          console.error('Errore SpeechRecognition:', err)
+          this.userIsSpeaking = false
+        }
+
+        this.currentRecognizer.onend = () => {
+          this.userIsSpeaking = false
+        }
+
+        this.currentRecognizer.start()
+        this.userIsSpeaking = true
+      } catch (err) {
+        console.error('Impossibile avviare il riconoscimento vocale:', err)
+        this.userIsSpeaking = false
+      }
+    },
     resolveTourSettings() {
       let tourId = ''
       let mode = 'libre'
@@ -861,7 +900,6 @@ export default {
         audioEl.pause()
         this.audioPlaying = false
       } else {
-        this.syncAudioProps()
         audioEl.play()
         this.audioPlaying = true
       }
@@ -873,16 +911,6 @@ export default {
         audioEl.currentTime = 0
         this.audioPlaying = false
       }
-    },
-    syncAudioProps() {
-      this.$nextTick(() => {
-        const audioEl = this.$refs.audioEl
-        if (audioEl) {
-          audioEl.muted = this.audioMuted
-          audioEl.volume = this.audioVolume
-          audioEl.playbackRate = this.audioRate
-        }
-      })
     },
     getLevelLabel(level) {
       if (!level) return 'Descrizione'
