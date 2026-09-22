@@ -13,3 +13,9 @@ export async function saveTour({ _id, itemNav, items }) {
   if (!res.ok) throw new Error('Tour save failed')
   return await res.json()
 }
+
+export async function deleteTour(tourId) {
+  const res = await fetch(`/api/tours/${tourId}`, { method: 'DELETE' })
+  if (!res.ok) throw new Error('Tour deletion failed')
+  return await res.json()
+}

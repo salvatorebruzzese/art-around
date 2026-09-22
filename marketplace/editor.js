@@ -5,7 +5,7 @@ import {
   saveItemPromise,
   deleteItem as apiDeleteItem,
 } from '../marketplace/api/items'
-import { saveTour } from '../marketplace/api/tours'
+import { saveTour, deleteTour as apiDeleteTour } from '../marketplace/api/tours'
 import { loadAsset, loadImage } from './api/asset.js'
 
 import './userManager.js'
@@ -178,6 +178,29 @@ document.addEventListener('alpine:init', () => {
               "Errore durante l'eliminazione: " +
                 (e && e.message ? e.message : e),
             )
+          }
+        }
+
+        async deleteTour() {
+          try {
+            // Confirmation dialog
+            const confirmed = confirm(
+              'Sei sicuro di voler eliminare questo tour? Tutti gli item del tour saranno eliminati e questa azione non può essere annullata.',
+            )
+            if (!confirmed) return
+
+            // Call API to delete tour
+            await apiDeleteTour(this.tour._id)
+
+            // Success: redirect to marketplace
+            alert('Tour eliminato con successo!')
+            window.location.href = '/marketplace'
+          } catch (e) {
+            alert(
+              "Errore durante l'eliminazione del tour: " +
+                (e && e.message ? e.message : e),
+            )
+            console.error('Tour deletion error:', e)
           }
         }
       })(),
