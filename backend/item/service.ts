@@ -196,6 +196,10 @@ async function deleteItem(
   try {
     const tourId = item.tour
     await item.deleteOne()
+
+    // Clean up bidirectional references: remove this item from all other items' refs arrays
+    await Item.updateMany({ refs: id }, { $pull: { refs: id } })
+
     const promise = (await _getById(tourId, Tour)).chain((tour) => {
       tour.items = tour.items.filter((itemId) => !itemId.equals(id))
       tour.itemNav = tour.itemNav.filter((itemId) => !itemId.equals(id))
