@@ -1,0 +1,290 @@
+Art Around - robots.txt (replacement reference for agent.md)
+
+Purpose
+- This document is the operational architecture/debugging guide for the repository.
+- It prioritizes concrete code cross-references and practical integration behavior over high-level description.
+
+================================================================================
+1) Structural Overview
+================================================================================
+
+1.1 Runtime composition
+- Backend HTTP/SSE server: /home/runner/work/art-around/art-around/backend
+  - Entry + boot: backend/index.ts
+  - App wiring (middleware + static frontends + /api): backend/app.ts
+  - API root/router aggregation: backend/mainRouter.ts
+- Frontend #1 (Navigator, mobile-first): /home/runner/work/art-around/art-around/navigator
+- Frontend #2 (Marketplace+Editor, desktop-first): /home/runner/work/art-around/art-around/marketplace
+
+1.2 Backend architecture (layered by feature)
+- Routing layer: backend/<domain>/router.ts
+  - Input parsing/validation, auth gate, HTTP status mapping.
+- Service layer: backend/<domain>/service.ts
+  - Business logic, authorization checks, DB operations.
+- Data/model layer: backend/<domain>/model.ts
+  - Mongoose schemas + zod validators.
+- Shared infra:
+  - Error types + mapping: backend/shared/errors.ts, backend/shared/router.ts
+  - Validation helpers: backend/shared/validation.ts
+  - Access control + ensureAuth middleware: backend/accessControl.ts
+
+Mounted backend domains (backend/mainRouter.ts)
+- /api/items
+- /api/tours
+- /api/museums
+- /api/assets
+- /api/users
+- /api/sessions
+- /api/login, /api/signup, /api/logout, /api/profile
+
+1.3 Navigator internals (modules + objects)
+Core files
+- Page routing (server side HTML dispatch): navigator/router.js
+- Search/list screen: navigator/libre.vue + navigator/museumSearch.js
+- Guided session code entry: navigator/guided.vue
+- Teacher/session creation: navigator/master.vue
+- Tour runtime (libre/guided/master behavior): navigator/tour.vue
+
+Main runtime objects
+- Tour view-model state in tour.vue:
+  - tour, itemNav, items, clients, curItemIdx, detachedStack, loadedItemsMap, sessionId, controllerMode.
+- Controller hierarchy in tour.vue:
+  - TourController (base)
+  - LibreTourController (local navigation)
+  - MasterTourController (broadcasts showItem/start actions to backend)
+  - GuidedTourController (subscribes to SSE events via EventSource)
+- Search composition object in museumSearch.js:
+  - museums, search, searchResults, showSearch, isLoading, error.
+
+1.4 Marketplace+Editor internals (modules + objects)
+Core files
+- Marketplace catalog page: marketplace/marketplace.js + marketplace.html
+- Tour editor page: marketplace/editor.js + editor.html
+- Tour/item navigation helper: marketplace/tourNav.js
+- User state store: marketplace/userManager.js
+- API wrappers: marketplace/api/items.js, marketplace/api/tours.js, marketplace/api/asset.js
+- Viewer/profile/checkout support: marketplace/viewer.js, profile.js, checkout.js
+
+Main runtime objects
+- Alpine store userManager:
+  - _user, _userPromise; resolves /api/profile then /api/users/:id.
+- Marketplace list state:
+  - museums, allTours, allItems, filters, cartTours, currPreview.
+- Editor state (extends TourNavigation):
+  - tour, itemNav, items map keyed by itemId, selectedId; save/delete/upload flows.
+
+================================================================================
+2) Interface Definitions (types across boundaries)
+================================================================================
+
+2.1 Canonical backend domain data (DB + API payload basis)
+(See model files for authoritative fields)
+
+User (backend/user/model.ts)
+- _id: ObjectId
+- username: string
+- email: string
+- role: 'Guest'|'User'|'Teacher'|'Admin'
+- profilePicture?: ObjectId
+- authoredTours: ObjectId[]
+- purchasedTours: ObjectId[]
+- password stored server-side, not part of public profile payload.
+
+Tour (backend/tour/model.ts)
+- _id: ObjectId
+- name: string
+- author: ObjectId (User)
+- museum: ObjectId (Museum)
+- thumbnail?: ObjectId (Asset)
+- items: ObjectId[]
+- itemNav: ObjectId[]
+- description?: string
+- price: number
+- quiz: { questions: { prompt: string; options: string[]; correct: number; timeLimit: number }[] }
+- tourEntryLocation: string
+- tourExitLocation: string
+
+Item (backend/item/model.ts)
+- _id: ObjectId
+- name: string
+- itemAuthor: ObjectId (User)
+- tour: ObjectId (Tour)
+- explanations: { level: 'simple'|'normal'|'advanced'; text: string; durationSeconds: number }[]
+- license: string
+- position?: string
+- tags?: string[]
+- refs?: ObjectId[] (related items)
+- image?: ObjectId (Asset)
+
+Museum (backend/museum/model.ts)
+- _id: ObjectId
+- name: string
+- thumbnail?: ObjectId
+- description?: string
+- address?: string
+- tours?: ObjectId[]
+- toilets?: string
+- reception?: string
+
+Asset (backend/asset/model.ts)
+- _id: ObjectId
+- author: ObjectId
+- tour?: ObjectId
+- data: Buffer (served as binary by GET /api/assets/:id)
+- datatype: string (content-type)
+- public?: boolean
+- miniature?: ObjectId
+
+Session (backend/session/model.ts; in-memory runtime)
+- id: string (human-entered session code)
+- tour: ObjectId
+- owner: ObjectId
+- clients: ObjectId[]
+- currentStep: {type:'gathering'} | {type:'item', item:ObjectId} | {type:'quiz'}
+- quizStartedAt?: Date
+- createdAt: Date
+- state: 'waiting'|'started'|'quiz'
+
+2.2 Backend -> Navigator interfaces
+REST payloads consumed in navigator
+- GET /api/museums -> Museum[] metadata used by museumSearch.js
+- GET /api/museums/:id -> Museum detail
+- GET /api/tours?museum=<id> -> Tour[]
+- GET /api/tours/:id -> Tour detail for tour runtime
+- GET /api/items/:id -> Item detail (recursive refs load)
+- GET /api/assets/:id -> binary media
+- GET /api/sessions/:id -> Session (existence + tour binding)
+- GET /api/sessions/:id/clients -> currently returns ObjectId[] (service), while UI expects objects with username in places
+
+SSE/events for guided sessions
+- Join endpoint: GET /api/sessions/:id/join?username=<name>
+- Response stream content types: text/event-stream
+- Emitted event names from backend/session/router.ts:
+  - hasJoined (payload: { username, password })
+  - showItem (payload: { itemId })
+  - startQuiz (payload: {})
+  - quizAnswer (payload: { userId })
+
+2.3 Backend -> Marketplace+Editor interfaces
+REST payloads consumed in marketplace modules
+- GET /api/museums, GET /api/museums/:id
+- GET /api/tours, GET /api/tours/:id
+- POST /api/tours (create in editor new-tour flow)
+- PATCH /api/tours/:id (save itemNav/items)
+- GET /api/items?tour=<tourId>
+- GET /api/items/:id
+- POST/PATCH/DELETE /api/items(/:id)
+- POST /api/assets multipart/form-data (field name 'data')
+- PATCH /api/assets/:id multipart/form-data
+- GET /api/assets/:id (thumbnails/media)
+- GET /api/profile + GET /api/users/:id (user store hydration)
+- PATCH /api/users/:id (checkout purchase updates)
+- POST /api/logout
+
+2.4 Frontend <-> Frontend interfaces (relevant)
+No direct network API between navigator and marketplace.
+Coupling points:
+- Shared backend API contracts under /api.
+- Shared client utility imports from marketplace into navigator:
+  - navigator/tour.vue uses marketplace/tourNav.js (indirectly marketplace/api/* wrappers).
+This means schema changes in /api/tours or /api/items affect BOTH frontends.
+
+2.5 Auth/session contract
+- Login endpoint: POST /api/login returns { user: { _id, username, email } } and session cookie (connect.sid).
+- Protected endpoints rely on req.user via passport session middleware.
+- Unauthorized behavior is mostly 401 with { error: 'Unauthorized' } from ensureAuth.
+
+================================================================================
+3) API Interactions (practical scenarios)
+================================================================================
+
+3.1 Marketplace browse + preview
+1) marketplace.js parallel fetch:
+   - /api/museums
+   - /api/tours
+   - /api/items
+2) UI derives filtered tour/item lists by museum/search/purchase status.
+3) Preview cards fetch dependent entities (museum/tour/item) and image blobs via /api/assets/:id.
+
+3.2 Editor create-new-tour workflow
+1) editor.js detects /marketplace/editor/new?museum=<id>.
+2) POST /api/tours with minimal draft payload.
+3) POST /api/items to create first draft item.
+4) Redirect to /marketplace/editor/<newTourId>?item=<newItemId>.
+5) Save action patches items then PATCH /api/tours/:id with final items + itemNav arrays.
+
+3.3 Navigator libre tour
+1) libre.vue fetches museums+tours via museumSearch.js.
+2) User selects tour -> /navigator/libre/:id.
+3) tour.vue initializes TourNavigation:
+   - GET /api/tours/:id
+   - GET /api/items?tour=<id>
+4) Additional /api/items/:id for recursive refs expansion.
+
+3.4 Navigator master-guided session orchestration
+1) master.vue creates session:
+   - POST /api/sessions { id, tour }
+2) Master enters /navigator/master/:tourId?session=<id>.
+3) As master changes current item, tour.vue posts:
+   - POST /api/sessions/:id/showItem { itemId }
+4) Guided participants join via guided.vue + tour.vue SSE:
+   - validate with GET /api/sessions/:id
+   - subscribe EventSource /api/sessions/:id/join?username=...
+5) Backend broadcasts showItem/startQuiz/quizAnswer events to all SSE clients.
+
+3.5 Protocol/transport summary
+- REST: JSON over HTTP for CRUD and orchestration commands.
+- Uploads: multipart/form-data for assets.
+- Media retrieval: binary body with Content-Type from asset.datatype.
+- Realtime sync: Server-Sent Events only (no WebSocket).
+
+================================================================================
+4) Maintenance Guidance (debugging + feature onboarding)
+================================================================================
+
+4.1 Fast bug triage map
+- 401/403 issues:
+  - Check ensureAuth + passport session flow in backend/app.ts and backend/mainRouter.ts.
+  - Verify frontend requests include same-origin cookie context.
+- Validation 400 issues:
+  - Compare frontend payload against zod schemas in backend/*/model.ts.
+- "Not found" in guided flows:
+  - Validate session code lifecycle in backend/session/service.ts map storage (in-memory, process-local).
+- Missing realtime updates:
+  - Verify EventSource subscription URL and backend event name exact match.
+  - Inspect sendSessionEvent in backend/session/router.ts.
+
+4.2 Known integration friction points to monitor
+- Path mismatch risk in navigator/tour.vue:
+  - Some quiz calls use /api/session/... (singular) while router mounts /api/sessions/... (plural).
+- Client list shape mismatch risk:
+  - backend/session/service.ts getClients returns ObjectId[]; navigator UI also tries rendering client.username.
+- Session persistence limitation:
+  - Session registry is in-memory Map, so restart drops all active sessions.
+
+4.3 Adding/changing API fields safely
+When changing Tour/Item/Museum/User/Asset shapes:
+1) Update backend model zod validators first.
+2) Update affected frontend wrappers in marketplace/api/*.js.
+3) Update navigator code paths that consume same object fields:
+   - tour.vue, museumSearch.js, libre.vue/master.vue/guided.vue.
+4) Re-check auth expectations for protected routes in routers.
+
+4.4 Cross-reference hotspots by task type
+- Auth/login/profile bugs:
+  - backend/mainRouter.ts, backend/passportConfig.ts, marketplace/userManager.js, navigator/checkLogIn.js
+- Tour navigation bugs:
+  - marketplace/tourNav.js, navigator/tour.vue
+- Guided session bugs:
+  - backend/session/router.ts, backend/session/service.ts, navigator/master.vue, navigator/guided.vue, navigator/tour.vue
+- Asset upload/display bugs:
+  - backend/asset/router.ts, marketplace/api/asset.js, image consumers in marketplace/*.html and navigator/*.vue
+
+4.5 Suggested onboarding reading order
+1) backend/app.ts (global wiring)
+2) backend/mainRouter.ts (all API entrypoints)
+3) backend/<domain>/model.ts for Item/Tour/User/Session
+4) marketplace/tourNav.js + marketplace/api/* (consumer contract)
+5) navigator/tour.vue (mode logic + SSE integration)
+
+End of robots.txt
