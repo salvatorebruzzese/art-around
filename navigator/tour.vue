@@ -689,6 +689,102 @@ export default {
     explanations() {
       this.setBestExplanationIdx()
     },
+    currentSpokenCommand(newVal) {
+      if (!newVal) return
+
+      const command = newVal
+        .trim()
+        .toLowerCase()
+        .replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, '')
+
+      switch (command) {
+        case 'avanti':
+          if (this.canGoNext) this.goNext()
+          break
+
+        case 'indietro':
+          if (this.canGoPrev || this.detachedStack.length > 0) {
+            this.goPrevOrReturn()
+          }
+          break
+
+        case 'opera':
+        case 'spiegami':
+          this.handleExplanationCommand()
+          break
+
+        case 'autoreopera':
+        case 'autore opera':
+        case 'autore':
+          this.handleAuthorCommand()
+          break
+
+        case 'complicaspiegazione':
+        case 'complica spiegazione':
+          this.changeExplanationLevel(1)
+          break
+
+        case 'semplificaspiegazione':
+        case 'semplifica spiegazione':
+          this.changeExplanationLevel(-1)
+          break
+
+        case 'entratamostra':
+        case 'entrata mostra':
+        case 'entrata':
+          this.handleLocationFeedback(
+            this.tour?.entranceLocation || this.tour?.entrance,
+            "L'entrata della mostra si trova all'ingresso principale.",
+          )
+          break
+
+        case 'uscitamostra':
+        case 'uscita mostra':
+        case 'uscita':
+          this.handleLocationFeedback(
+            this.tour?.exitLocation || this.tour?.exit,
+            "L'uscita della mostra si trova al termine del percorso espositivo.",
+          )
+          break
+
+        case 'posizioneopera':
+        case 'posizione opera':
+        case "dove si trova l'opera":
+          this.handleLocationFeedback(
+            this.currentItem?.location || this.currentItem?.position,
+            this.currentItem
+              ? `L'opera ${this.currentItem.name} si trova nella sala corrente.`
+              : 'Nessuna opera selezionata.',
+          )
+          break
+
+        case 'posizionebagno':
+        case 'posizione bagno':
+        case 'bagno':
+        case 'bagni':
+          this.handleLocationFeedback(
+            this.tour?.restroomsLocation || this.tour?.toilets,
+            "I servizi igienici si trovano vicino all'atrio principale.",
+          )
+          break
+
+        case 'posizionereception':
+        case 'posizione reception':
+        case 'reception':
+          this.handleLocationFeedback(
+            this.tour?.receptionLocation || this.tour?.reception,
+            "La reception si trova all'ingresso dell'edificio.",
+          )
+          break
+
+        default:
+          break
+      }
+
+      this.$nextTick(() => {
+        this.currentSpokenCommand = null
+      })
+    },
   },
   created() {
     this.initTour()
@@ -1004,6 +1100,67 @@ export default {
       } finally {
         this.isLoadingClients = false
       }
+    },
+    handleAuthorCommand() {
+      if (!this.currentItem) return
+
+      // Verifica se l'elemento è di tipo opera
+      const isArtwork =
+        !this.currentItem.type ||
+        this.currentItem.type.toLowerCase() === 'artwork'
+
+      if (isArtwork && (this.currentItem.author || this.currentItem.autore)) {
+        const author = this.currentItem.author || this.currentItem.autore
+        const message = `L'autore di quest'opera è ${author}`
+        console.log(message)
+        startSpeechSynthesis(message)
+      } else {
+        const fallback =
+          "Informazione sull'autore non disponibile per questa voce."
+        console.log(fallback)
+        startSpeechSynthesis(fallback)
+      }
+    },
+
+    handleExplanationCommand() {
+      if (!this.currentItem) return
+
+      // Verifica se l'elemento è di tipo opera
+      const isArtwork =
+        !this.currentItem.type ||
+        this.currentItem.type.toLowerCase() === 'artwork'
+
+      if (isArtwork) {
+        console.log(this.selectedExplanation.text)
+        startSpeechSynthesis(this.selectedExplanation.text)
+      } else {
+        const fallback =
+          "Informazione sull'opera non disponibile per questa voce."
+        console.log(fallback)
+        startSpeechSynthesis(fallback)
+      }
+    },
+    changeExplanationLevel(delta) {
+      if (!this.explanations || this.explanations.length <= 1) return
+
+      const nextIdx = this.selectedExplanationIdx + delta
+      if (nextIdx >= 0 && nextIdx < this.explanations.length) {
+        this.selectedExplanationIdx = nextIdx
+        this.onExplanationIdxChange()
+
+        const currentLevel = this.getLevelLabel(this.selectedExplanation.level)
+        startSpeechSynthesis(`Livello impostato su: ${currentLevel}`)
+      }
+    },
+
+    handleLocationFeedback(specificInfo, defaultInfo) {
+      const textToSpeak =
+        typeof specificInfo === 'string' && specificInfo.trim().length > 0
+          ? specificInfo
+          : defaultInfo
+
+      console.log(textToSpeak)
+      startSpeechSynthesis(textToSpeak)
     },
   },
   beforeUnmount() {
