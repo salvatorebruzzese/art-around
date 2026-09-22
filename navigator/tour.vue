@@ -690,6 +690,9 @@ export default {
       this.setBestExplanationIdx()
     },
   },
+  created() {
+    this.initTour()
+  },
   methods: {
     toggleSpeechRecognition() {
       if (this.userIsSpeaking) {
