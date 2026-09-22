@@ -306,10 +306,13 @@
                             >Condividi</a
                           >
                         </li>
-                        <li>
-                          <a class="shared-button-flex-warning shadow-none"
-                            >Elimina</a
+                        <li x-show="user && user._id === tour.author">
+                          <button
+                            class="shared-button-flex-warning shadow-none"
+                            @click="deleteTourHandler(tour)"
                           >
+                            Elimina
+                          </button>
                         </li>
                       </ul>
                     </div>

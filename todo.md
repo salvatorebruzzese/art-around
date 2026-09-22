@@ -3,6 +3,13 @@
       Manca un piccolo container sopra con i metadati della visita
 - [~] Schermata di acquisto della visita.
   Manca l'integrazione con le API e con il marketplace
+- [x] Eliminazione tour
+  - [x] Backend cascade delete (items + user refs)
+  - [x] Frontend API wrapper (deleteTour)
+  - [x] Editor delete handler con confirmation
+  - [x] Marketplace delete handler con confirmation
+  - [x] Authorization check (solo autore può eliminare)
+  - [x] UI: bottone "Elimina" visibile solo per autore
 - [ ] Implementare dropdown dei tour e degli item nel marketplace.
   - [ ] Fork (backend)
 
@@ -57,6 +64,13 @@
 - [ ] settare file a 755 e? 644
 
 # Backend
+- [x] Item deletion with bidirectional ref cleanup
+  - [x] Remove deleted item from all other items' refs arrays
+- [x] Cascade delete tour
+  - [x] Delete all items in tour (hard delete)
+  - [x] Clean up item cross-references
+  - [x] Remove tour from user.authoredTours
+  - [x] Remove tour from user.purchasedTours
 - [ ] Session system (synchro)
   - [x] message passing
   - [ ] collect and elaborate results

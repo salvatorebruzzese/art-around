@@ -79,6 +79,25 @@ document.addEventListener('alpine:init', () => {
         this.user?.authoredTours?.includes(tourId),
       )
     },
+
+    async deleteTourHandler(tour) {
+      try {
+        const confirmed = confirm(
+          'Sei sicuro di voler eliminare questo tour? Tutti gli item associati saranno eliminati. Questa azione non può essere annullata.',
+        )
+        if (!confirmed) return
+
+        const res = await import('./api/tours.js')
+        await res.deleteTour(tour._id)
+        alert('Tour eliminato!')
+        // Rimuovi il tour dalla lista senza riloadare
+        this.allTours = this.allTours.filter((t) => t._id !== tour._id)
+        // Optionally aggiorna anche filteredTours/cartTourse
+      } catch (e) {
+        alert('Errore durante eliminazione: ' + (e.message || e))
+        console.error(e)
+      }
+    },
   }))
 })
 
