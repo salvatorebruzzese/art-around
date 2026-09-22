@@ -18,6 +18,7 @@ import {
   NotFound,
 } from '../shared/errors.js'
 import { User } from '../user/model.js'
+import { Item } from '../item/model.js'
 import { project } from '../shared/utils.js'
 
 async function getTour(
@@ -126,6 +127,28 @@ async function deleteTour(
     return Left(accessDenied())
 
   try {
+    // 1. Find all items in this tour
+    const items = await Item.find({ tour: id }).exec()
+
+    // 2. Delete each item and clean up their bidirectional references
+    for (const item of items) {
+      // Remove this item from all other items' refs arrays
+      await Item.updateMany({ refs: item._id }, { $pull: { refs: item._id } })
+      // Delete the item
+      await item.deleteOne()
+    }
+
+    // 3. Clean user references (remove tour from all users who authored or purchased it)
+    await User.updateMany(
+      { authoredTours: id },
+      { $pull: { authoredTours: id } },
+    )
+    await User.updateMany(
+      { purchasedTours: id },
+      { $pull: { purchasedTours: id } },
+    )
+
+    // 4. Delete the tour
     await tour.deleteOne()
     return Right(project(safeTourFields, tour))
   } catch (e) {
