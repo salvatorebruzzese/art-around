@@ -14,6 +14,7 @@
   - [X] Fork (backend)
   - [ ] modifica ( fork se non authored )
   - [ ] condividit (visita guidata)
+  - [X] elimina solo se autore
 
 ## Quicknav
 - [ ] editor btn (start)
