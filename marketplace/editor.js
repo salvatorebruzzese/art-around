@@ -203,6 +203,20 @@ document.addEventListener('alpine:init', () => {
             console.error('Tour deletion error:', e)
           }
         }
+
+        async forkTour() {
+          try {
+            const { forkTour: apiForkTour } = await import('./api/tours.js')
+            const newTour = await apiForkTour(this.tour._id)
+            alert("Tour clonato! Reindirizzo all'editor...")
+            window.location.href = `/marketplace/editor/${newTour._id}`
+          } catch (e) {
+            alert(
+              'Errore durante il clone: ' + (e && e.message ? e.message : e),
+            )
+            console.error('Tour fork error:', e)
+          }
+        }
       })(),
   )
 })

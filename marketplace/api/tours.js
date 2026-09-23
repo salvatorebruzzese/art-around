@@ -19,3 +19,9 @@ export async function deleteTour(tourId) {
   if (!res.ok) throw new Error('Tour deletion failed')
   return await res.json()
 }
+
+export async function forkTour(tourId) {
+  const res = await fetch(`/api/tours/${tourId}/fork`, { method: 'POST' })
+  if (!res.ok) throw new Error('Tour fork failed')
+  return await res.json()
+}

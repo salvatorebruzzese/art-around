@@ -11,11 +11,14 @@
   - [x] Authorization check (solo autore può eliminare)
   - [x] UI: bottone "Elimina" visibile solo per autore
 - [ ] Implementare dropdown dei tour e degli item nel marketplace.
-  - [ ] Fork (backend)
+  - [X] Fork (backend)
+  - [ ] modifica ( fork se non authored )
+  - [ ] condividit (visita guidata)
 
 ## Quicknav
-- [ ] editor btn
-      Auto new tour from scratch?
+- [ ] editor btn (start)
+      New tour
+      bad request need debugging
 
 ## Editor
 - [x] Bottoni per gestione dell'ordine 
@@ -44,11 +47,11 @@
 - [~] responsivness
 
 ### Bugs
-- [ ] auto set default level
+- [ ] auto set default level explanation
 
 # Navigator
-- [ ] Integrazione API TTS per convertire le descrizioni degli item in audio.
-- [ ] Integrazione comandi vocali mappati da API LLM.
+- [?] Integrazione API TTS per convertire le descrizioni degli item in audio.
+- [?] Integrazione comandi vocali mappati da API LLM.
 - [x] navigator - branch -> GUIDED or FREE
 
 ## Guided
@@ -56,6 +59,7 @@
 - [x] Sistema di sincronizzazione della visita.
   - [x] Utente insegnante server.
   - [x] Utente studente client.
+- [ ] area guide -> come si fa partire?
 
 # Routing
 - [~] No-login solo per market e access

@@ -98,6 +98,18 @@ document.addEventListener('alpine:init', () => {
         console.error(e)
       }
     },
+
+    async forkTourHandler(tour) {
+      try {
+        const res = await import('./api/tours.js')
+        const newTour = await res.forkTour(tour._id)
+        alert("Tour clonato! Reindirizzo all'editor...")
+        window.location.href = `/marketplace/editor/${newTour._id}`
+      } catch (e) {
+        alert('Errore durante il clone: ' + (e.message || e))
+        console.error(e)
+      }
+    },
   }))
 })
 
