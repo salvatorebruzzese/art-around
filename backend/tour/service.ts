@@ -90,13 +90,20 @@ async function patchTour(
 
   if (!checkRole(user.role, 'edit:tour'))
     return Left(accessDenied("Can't edit tours."))
-  // DONE: only allow if user is author; needs loading the Tour (see below)
+
+  // Check author authorization BEFORE updating
+  try {
+    const tourCheck = await Tour.findById(id)
+    if (!tourCheck) return Left(notFound())
+    if (!tourCheck.author.equals(userId) && user.role != Role['Admin'])
+      return Left(accessDenied('You are not the author.'))
+  } catch (e) {
+    return Left(dbError(undefined, () => JSON.stringify(e)))
+  }
 
   try {
     const tour = await Tour.findByIdAndUpdate(id, input, { new: true })
     if (tour) {
-      if (!tour.author.equals(userId) && user.role != Role['Admin'])
-        return Left(accessDenied('You are not the author.'))
       return Right(project(safeTourFields, tour))
     } else return Left(notFound())
   } catch (e) {
@@ -189,6 +196,7 @@ async function forkTour(
       author: userId, // Current user becomes author
       museum: sourceTour.museum,
       thumbnail: sourceTour.thumbnail, // Reference same asset (lazy)
+      map: sourceTour.map, // Reference same asset (lazy)
       items: [], // Will populate
       itemNav: [], // Will populate
       description: sourceTour.description,

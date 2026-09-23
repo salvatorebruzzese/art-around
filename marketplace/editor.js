@@ -105,8 +105,7 @@ document.addEventListener('alpine:init', () => {
             newItems.filter(Boolean).forEach((i) => {
               this.items[i._id] = i
             })
-
-            saveTour({
+            const tour = {
               _id: this.tour._id,
               itemNav: this.itemNav,
               items: Object.values(this.items).map((i) => i._id), // arr of ids
@@ -116,8 +115,10 @@ document.addEventListener('alpine:init', () => {
               tourEntryLocation: this.tour.tourEntryLocation,
               tourExitLocation: this.tour.tourExitLocation,
               thumbnail: this.tour.thumbnail,
+              map: this.tour.map,
               quiz: this.tour.quiz,
-            })
+            }
+            saveTour(tour)
             alert('Modifiche salvate con successo!')
           } catch (e) {
             console.log(e, e.message)

@@ -23,6 +23,7 @@ interface _Tour {
   author: Types.ObjectId
   museum: Types.ObjectId
   thumbnail?: Types.ObjectId
+  map?: Types.ObjectId
   items: Types.ObjectId[]
   itemNav: Types.ObjectId[]
   description?: string
@@ -40,6 +41,7 @@ export const tourSchema = new Schema<ITour>(
     author: { type: Schema.Types.ObjectId, ref: 'User' },
     museum: { type: Schema.Types.ObjectId, ref: 'Museum' },
     thumbnail: { type: Schema.Types.ObjectId, ref: 'Asset' },
+    map: { type: Schema.Types.ObjectId, ref: 'Asset' },
     items: [{ type: Schema.Types.ObjectId, ref: 'Item' }],
     itemNav: [{ type: Schema.Types.ObjectId, ref: 'Item' }],
     description: { type: String },
@@ -74,6 +76,7 @@ const TourInputSchemaZod = z.object({
   items: z.array(objectIdZod),
   itemNav: z.array(objectIdZod),
   thumbnail: objectIdZod.optional(),
+  map: objectIdZod.optional(),
   description: z.string().optional(),
   quiz: z.object({
     questions: z.array(
@@ -96,6 +99,7 @@ const TourQuerySchemaZod = z.object({
   museum: objectIdZod.optional(),
   items: z.array(objectIdZod).optional(),
   thumbnail: objectIdZod.optional(),
+  map: objectIdZod.optional(),
   description: z.string().optional(),
   tourEntryLocation: z.string().optional(),
   tourExitLocation: z.string().optional(),
@@ -121,6 +125,7 @@ export const safeTourFields: (keyof _Tour)[] = [
   'museum',
   'description',
   'thumbnail',
+  'map',
   'tourEntryLocation',
   'tourExitLocation',
 ]

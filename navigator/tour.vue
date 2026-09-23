@@ -154,11 +154,24 @@
       <!-- Map View -->
       <div
         v-else-if="isMapView"
-        class="mx-auto grid w-full max-w-4xl grid-cols-1 md:rounded-3xl md:grid-cols-2 gap-6 bg-p-light rounded-2xl shadow-lg shadow-p-soft p-6 mb-4"
+        class="mx-auto w-full max-w-4xl bg-p-light rounded-2xl md:rounded-3xl shadow-lg shadow-p-soft p-6 mb-4 flex flex-col items-center justify-center gap-4"
       >
-        <div class="text-center">
-          <h2 class="text-2xl font-bold text-p-medium">Mappa del Museo</h2>
-          <p class="text-p-dark mt-2">Visualizzazione del percorso</p>
+        <h2 class="text-2xl font-bold text-p-medium">Mappa del Museo</h2>
+        <figure
+          v-if="tour && tour.map"
+          class="w-full h-full max-h-96 rounded-2xl overflow-hidden"
+        >
+          <img
+            :src="`/api/assets/${tour.map}`"
+            alt="Mappa del museo"
+            class="object-contain w-full h-full"
+          />
+        </figure>
+        <div
+          v-else
+          class="w-full h-64 rounded-2xl border-2 border-dashed border-p-soft bg-p-soft/20 flex items-center justify-center text-p-medium"
+        >
+          <p>Mappa non disponibile</p>
         </div>
       </div>
 
