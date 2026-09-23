@@ -397,14 +397,173 @@
         </section>
         <section x-show="activeTab == 'edit_tour'">
           <template x-if="tour">
-            <div class="flex flex-col gap-6 p-4">
-              <button
-                class="shared-button-full-primary"
-                @click="saveItemsAndTour()"
-              >
-                Salva tour
-              </button>
+            <div
+              class="w-full rounded-tr-3xl rounded-br-3xl rounded-bl-3xl shadow-sm border border-p-soft"
+            >
+              <div class="w-full flex flex-col p-4">
+                <div class="border-b border-p-soft p-4 mb-2">
+                  <h1 class="text-2xl text-p-medium font-bold">
+                    Modifica Tour
+                  </h1>
+                </div>
+                <form
+                  @submit.prevent="saveItemsAndTour()"
+                  class="grid grid-cols-1 md:grid-cols-2 text-p-medium md:p-8 gap-6 mb-6"
+                >
+                  <!-- Nome tour -->
+                  <div class="flex flex-col gap-1 w-full md:col-span-2">
+                    <label class="text-sm font-medium">Nome del tour</label>
+                    <input
+                      type="text"
+                      x-model="tour.name"
+                      required
+                      class="w-full px-4 py-2 rounded-xl border border-p-soft bg-p-light text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium transition-shadow"
+                    />
+                  </div>
 
+                  <!-- Descrizione -->
+                  <div class="flex flex-col gap-1 w-full md:col-span-2">
+                    <label class="text-sm font-medium">Descrizione</label>
+                    <textarea
+                      x-model="tour.description"
+                      rows="3"
+                      class="w-full px-4 py-2 rounded-xl border border-p-soft bg-p-light text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium resize-none"
+                    ></textarea>
+                  </div>
+
+                  <!-- Prezzo -->
+                  <div class="flex flex-col gap-1 w-full">
+                    <label class="text-sm font-medium">Prezzo (€)</label>
+                    <input
+                      type="number"
+                      x-model.number="tour.price"
+                      min="0"
+                      step="0.01"
+                      required
+                      class="w-full px-4 py-2 rounded-xl border border-p-soft bg-p-light text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium"
+                    />
+                  </div>
+
+                  <!-- Location ingresso -->
+                  <div class="flex flex-col gap-1 w-full">
+                    <label class="text-sm font-medium">Location ingresso</label>
+                    <input
+                      type="text"
+                      x-model="tour.tourEntryLocation"
+                      class="w-full px-4 py-2 rounded-xl border border-p-soft bg-p-light text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium"
+                      placeholder="Es. Ingresso principale"
+                    />
+                  </div>
+
+                  <!-- Location uscita -->
+                  <div class="flex flex-col gap-1 w-full">
+                    <label class="text-sm font-medium">Location uscita</label>
+                    <input
+                      type="text"
+                      x-model="tour.tourExitLocation"
+                      class="w-full px-4 py-2 rounded-xl border border-p-soft bg-p-light text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium"
+                      placeholder="Es. Uscita principale"
+                    />
+                  </div>
+
+                  <!-- Salva tour -->
+                  <button
+                    type="submit"
+                    class="shared-button-full-primary md:col-span-2"
+                  >
+                    Salva Modifiche Tour
+                  </button>
+                </form>
+
+                <!-- Thumbnail section -->
+                <div class="border-t border-p-soft pt-6 mb-6">
+                  <h2 class="text-lg font-semibold mb-4">Immagine Copertina</h2>
+                  <div class="flex flex-col md:flex-row gap-4">
+                    <figure class="flex-1">
+                      <div x-data="{dopen: false}" class="relative mb-4">
+                        <button
+                          type="button"
+                          @click.stop="dopen = !dopen"
+                          class="btn btn-sm btn-circle bg-p-light/80 hover:bg-p-light text-p-dark border-none shadow-md backdrop-blur-sm focus:outline-none list-none"
+                        >
+                          <icon-three-dots></icon-three-dots>
+                        </button>
+                        <div
+                          x-show="dopen"
+                          x-transition
+                          @click.outside="dopen = false"
+                        >
+                          <ul class="nav-dropdown-menu dropdown-end p-2">
+                            <li>
+                              <button
+                                type="button"
+                                x-data="OverlayDispatcher('assetUpload')"
+                                class="shared-button-flex-secondary shadow-none"
+                                @click.stop="const res = await mkOverlayRequest({ filetype: 'image/png, image/jpeg' });
+                                      dopen = false;
+                                      if(res.status){
+                                          const res2 = await loadImage(res.file, true, user, tour)
+                                          const obj = await res2.json()
+                                          console.log('thumbnail upload', obj)
+                                          tour.thumbnail = obj._id
+                                      }"
+                              >
+                                Carica
+                              </button>
+                            </li>
+                            <li>
+                              <button
+                                type="button"
+                                x-data="OverlayDispatcher('assetSelection')"
+                                class="shared-button-flex-secondary shadow-none"
+                                @click.stop="const res = await mkOverlayRequest({ tourID: tour._id });
+                                      dopen = false;
+                                      if(res.status){
+                                          tour.thumbnail = res.IDs[0]
+                                      }"
+                              >
+                                Seleziona
+                              </button>
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                      <div
+                        x-data="{
+          imageSrc: '',
+          isLoading: false,
+          setImage(id) {
+              this.isLoading = true;
+              this.imageSrc = id ? '/api/assets/' + id : '';
+          }
+      }"
+                        x-init="setImage(tour.thumbnail)"
+                        x-effect="setImage(tour.thumbnail)"
+                      >
+                        <img
+                          x-show="imageSrc"
+                          :src="isLoading ? 'https://dummyimage.com/300x300/aaa/111&text=Loading' : imageSrc"
+                          @load="isLoading = false"
+                          alt="Thumbnail tour"
+                          class="rounded-xl border border-p-soft"
+                        />
+                        <div
+                          x-show="!imageSrc"
+                          class="w-full h-48 rounded-xl border border-p-soft bg-p-soft flex items-center justify-center text-p-medium"
+                        >
+                          Nessuna immagine
+                        </div>
+                      </div>
+                    </figure>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quiz section -->
+            <div
+              class="w-full rounded-tr-3xl rounded-br-3xl rounded-bl-3xl shadow-sm border border-p-soft p-4 mt-6"
+            >
               <fieldset
                 x-data="{
         questions: tour.quiz?.questions || [],

@@ -110,7 +110,13 @@ document.addEventListener('alpine:init', () => {
               _id: this.tour._id,
               itemNav: this.itemNav,
               items: Object.values(this.items).map((i) => i._id), // arr of ids
-              // will be extended
+              name: this.tour.name,
+              description: this.tour.description,
+              price: this.tour.price,
+              tourEntryLocation: this.tour.tourEntryLocation,
+              tourExitLocation: this.tour.tourExitLocation,
+              thumbnail: this.tour.thumbnail,
+              quiz: this.tour.quiz,
             })
             alert('Modifiche salvate con successo!')
           } catch (e) {

@@ -4,11 +4,11 @@ export async function getTour(tourId) {
   return await res.json()
 }
 
-export async function saveTour({ _id, itemNav, items }) {
-  const res = await fetch(`/api/tours/${_id}`, {
+export async function saveTour(tour) {
+  const res = await fetch(`/api/tours/${tour._id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ itemNav, items }),
+    body: JSON.stringify(tour),
   })
   if (!res.ok) throw new Error('Tour save failed')
   return await res.json()
