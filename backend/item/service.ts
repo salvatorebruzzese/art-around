@@ -20,8 +20,10 @@ import {
   ValidationError,
 } from '../shared/errors.js'
 import { User } from '../user/model.js'
+import { Asset } from '../asset/model.js'
 import { project } from '../shared/utils.js'
 import { Tour } from '../tour/model.js'
+import AssetService from '../asset/service.js'
 
 async function getItem(
   id: Types.ObjectId,
@@ -160,8 +162,31 @@ async function patchItem(
   }
 
   try {
-    const item = await Item.findByIdAndUpdate(id, input, { new: true })
-    if (item) return Right(project(safeItemFields, item))
+    // Lazy clone asset if user is not the original asset author
+    if (input.image && item.image) {
+      const inputImageId = new Types.ObjectId(input.image as unknown as string)
+      if (item.image.toString() !== inputImageId.toString()) {
+        const assetResult = await _getById(item.image, Asset)
+        if (assetResult.isRight()) {
+          const asset = assetResult.unsafeCoerce()
+          // If asset author is not current user, clone it
+          if (!asset.author.equals(userId)) {
+            // Clone the asset for this user
+            const clonedAssetResult = await AssetService.cloneAsset(
+              item.image,
+              userId,
+            )
+            if (clonedAssetResult.isRight()) {
+              const clonedAsset = clonedAssetResult.unsafeCoerce()
+              input.image = clonedAsset._id as unknown as string
+            }
+          }
+        }
+      }
+    }
+
+    const updatedItem = await Item.findByIdAndUpdate(id, input, { new: true })
+    if (updatedItem) return Right(project(safeItemFields, updatedItem))
     else return Left(notFound())
   } catch (e) {
     return Left(dbError(undefined, () => JSON.stringify(e)))

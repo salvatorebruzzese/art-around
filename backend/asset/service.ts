@@ -141,10 +141,37 @@ async function deleteAsset(
     return Left(dbError(undefined, () => JSON.stringify(e)))
   }
 }
+
+async function cloneAsset(
+  assetId: Types.ObjectId,
+  userId: Types.ObjectId,
+): Promise<Either<NotFound | DBError, Partial<IAsset>>> {
+  const assetResult = await _getById(assetId, Asset)
+  if (assetResult.isLeft()) return assetResult
+
+  const originalAsset = assetResult.unsafeCoerce()
+
+  try {
+    const clonedAsset = await Asset.create({
+      author: userId,
+      tour: originalAsset.tour,
+      data: originalAsset.data,
+      datatype: originalAsset.datatype,
+      public: false,
+      miniature: originalAsset.miniature,
+    })
+
+    return Right(project(safeAssetFields, clonedAsset))
+  } catch (e) {
+    return Left(dbError(undefined, () => JSON.stringify(e)))
+  }
+}
+
 export default {
   createAsset,
   getAsset,
   listAssets,
   patchAsset,
   deleteAsset,
+  cloneAsset,
 }

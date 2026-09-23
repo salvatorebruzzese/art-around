@@ -97,4 +97,18 @@ router.delete('/:id', ensureAuth, async (req: Request, res: Response) => {
   })
 })
 
+router.post('/:id/fork', ensureAuth, async (req: Request, res: Response) => {
+  const tourID = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id
+  const userID = req.user!._id
+  if (!mongoose.Types.ObjectId.isValid(tourID))
+    return res.status(400).json({ message: 'Malformed tour ID' })
+
+  const id = new Types.ObjectId(tourID)
+  const result = await TourService.forkTour(id, userID)
+  result.caseOf({
+    Right: (tour) => res.status(201).json(tour),
+    Left: handleLeft(res),
+  })
+})
+
 export default router

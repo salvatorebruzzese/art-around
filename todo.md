@@ -26,7 +26,7 @@
 - [X] Refs
     - [X] Add
     - [X] Remove
-- [ ] Eliminazione item
+- [X] Eliminazione item
     - [X] ui (dropdown -> del -> overlay confirmation)
     - [x] backend (remove from references? or client-side?)
     - [X] UNLINK
