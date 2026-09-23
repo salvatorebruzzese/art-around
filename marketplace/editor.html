@@ -977,52 +977,116 @@
     <div x-data="OverlayListener('assetSelection')" x-cloak>
       <template x-if="open && body">
         <div
-          class="fixed inset-0 items-center justify-center z-60"
+          class="fixed inset-0 flex items-center justify-center z-60"
           style="background-color: rgba(0, 0, 0, 0.8)"
         >
           <div
-            class="bg-p-light rounded-lg p-6 w-screen max-w-full md:w-[50vw] lg:w-[30vw] shadow-xl flex flex-col items-center"
+            class="bg-p-light rounded-lg p-6 w-screen max-w-full md:w-[80vw] lg:w-[70vw] shadow-xl flex flex-col max-h-[80vh]"
           >
-            <header class="flex justify-between">
-              <!-- <h1
-                            class="text-2xl text-p-medium font-bold"
-                            x-text="body.message"
-                          ></h1> -->
-
+            <header class="flex justify-between items-center mb-6">
+              <h1 class="text-2xl text-p-medium font-bold">
+                Seleziona un'immagine
+              </h1>
               <button
-                class="float-right w-[15vw] h-[15vw] md:w-10 md:h-10 rounded-full bg-[var(--color-p-light)] text-[var(--color-p-dark)] text-2xl"
+                class="w-10 h-10 rounded-full bg-p-soft hover:bg-p-medium text-p-dark text-2xl flex items-center justify-center"
                 @click="close(false)"
               >
                 &times;
               </button>
             </header>
-            <ul
+
+            <div
               x-data="{
-                        metaAssets: null,
+                        metaAssets: [],
+                        selectedId: null,
+                        isLoading: true,
                         async init(){
                             const res = await fetch('/api/assets?tour='+body.tourID)
-                        if (res.ok){
-                            this.metaAssets = await res.json()
-                        }
+                            if (res.ok){
+                                this.metaAssets = await res.json()
+                            }
+                            this.isLoading = false
                         }
                        }"
+              class="flex flex-col gap-4 overflow-y-auto flex-1"
             >
-              <template x-for="meta in metaAssets">
-                <template x-if="meta.miniature">
-                  <li>
-                    <img :src="'/api/assets/'+meta.miniature" />
-                    <input
-                      type="checkbox"
-                      @click="if(!body.IDs) {body.IDs = []}
-                            body.IDs.push(meta._id)"
-                    />
-                  </li>
+              <!-- Loading state -->
+              <div
+                x-show="isLoading"
+                class="flex items-center justify-center py-8"
+              >
+                <div class="text-p-medium">Caricamento immagini...</div>
+              </div>
+
+              <!-- Empty state -->
+              <div
+                x-show="!isLoading && metaAssets.length === 0"
+                class="flex items-center justify-center py-8"
+              >
+                <div class="text-p-medium">
+                  Nessuna immagine caricata per questo tour
+                </div>
+              </div>
+
+              <!-- Image grid -->
+              <div
+                x-show="!isLoading && metaAssets.length > 0"
+                class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+              >
+                <template x-for="meta in metaAssets">
+                  <template x-if="meta.miniature">
+                    <div
+                      class="relative group cursor-pointer rounded-lg overflow-hidden border-2 transition-all"
+                      :class="selectedId === meta._id
+                        ? 'border-blue-500 ring-2 ring-blue-400'
+                        : 'border-p-soft hover:border-p-medium'"
+                      @click="selectedId = meta._id"
+                    >
+                      <img
+                        :src="'/api/assets/' + meta.miniature"
+                        :alt="'Asset ' + meta._id"
+                        class="w-full h-40 object-cover"
+                      />
+                      <!-- Checkmark overlay -->
+                      <div
+                        x-show="selectedId === meta._id"
+                        class="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center"
+                      >
+                        <svg
+                          class="w-8 h-8 text-white"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fill-rule="evenodd"
+                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                            clip-rule="evenodd"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                  </template>
                 </template>
-              </template>
-            </ul>
-            <button class="shared-button-primary" @click="close(true)">
-              Ok
-            </button>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex gap-3 mt-6 justify-end">
+              <button
+                class="shared-button-full-secondary px-6"
+                @click="close(false)"
+              >
+                Annulla
+              </button>
+              <button
+                class="shared-button-full-primary px-6"
+                @click="if(selectedId) { if(!body.IDs) {body.IDs = []} body.IDs = [selectedId] } close(true)"
+                :disabled="!selectedId"
+                :class="!selectedId ? 'opacity-50 cursor-not-allowed' : ''"
+              >
+                Seleziona
+              </button>
+            </div>
           </div>
         </div>
       </template>
