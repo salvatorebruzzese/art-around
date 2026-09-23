@@ -168,7 +168,20 @@ router.get('/:id/clients', async (req, res) => {
   const result = SessionService.getClients(req.params.id)
 
   result.caseOf({
-    Right: (clients) => res.json(clients),
+    Right: (clients) => {
+      const safeClients = Array.isArray(clients)
+        ? clients.map((c: any) => ({
+            id:
+              c._id ||
+              c.id ||
+              c.userId ||
+              (typeof c === 'string' ? c : 'unknown'),
+            username:
+              c.username || c.name || (typeof c === 'string' ? c : 'Anonimo'),
+          }))
+        : []
+      return res.json(safeClients)
+    },
     Left: handleLeft(res),
   })
 })

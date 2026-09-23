@@ -1,8 +1,10 @@
 <template>
+  <!-- Tour Navigation View -->
   <div
+    v-if="!isQuizOngoing"
     class="h-dvh flex flex-col justify-between bg-p-light font-serif text-p-dark selection:bg-p-soft overflow-hidden"
   >
-    <!-- Scrollable Main Viewport (Top Half: Detail / Map) -->
+    <!-- Scrollable Main Viewport -->
     <main class="overflow-y-auto min-h-0 max-h-7/10 w-full md:pt-6">
       <!-- Detail View -->
       <div
@@ -10,7 +12,7 @@
         class="mx-auto w-full max-w-4xl bg-p-light rounded-2xl md:rounded-3xl shadow-lg shadow-p-soft p-6 mb-4 flex overflow-x-auto snap-x snap-mandatory md:grid gap-6"
         :class="isMaster ? 'md:grid-cols-1' : 'md:grid-cols-2'"
       >
-        <!-- Slide 1 (Default): Image + Title-->
+        <!-- Slide 1: Media Preview -->
         <section
           class="w-full shrink-0 snap-center flex flex-col items-center justify-center gap-4 md:w-auto md:shrink"
         >
@@ -38,7 +40,7 @@
           </h1>
         </section>
 
-        <!-- Slide 2: Spiegazione (Nascosto in master) -->
+        <!-- Slide 2: Spiegazione (Client/Libre only) -->
         <section
           v-if="!isMaster"
           class="w-full shrink-0 snap-center flex flex-col justify-start md:justify-center gap-4 h-full md:w-auto md:shrink"
@@ -108,7 +110,7 @@
           </div>
         </section>
 
-        <!-- Slide 3: Oggetti correlati (Visibile anche in master) -->
+        <!-- Slide 3: Correlati -->
         <section
           class="w-full shrink-0 snap-center flex flex-col justify-start md:justify-center gap-4 h-full md:w-auto md:shrink"
         >
@@ -175,20 +177,20 @@
         </div>
       </div>
 
+      <!-- Followers / Regia View -->
       <div
         v-else-if="isFollowersView"
-        class="mx-auto grid w-full max-w-4xl grid-cols-1 md:rounded-3xl md:grid-cols-2 gap-6 bg-p-light rounded-2xl shadow-lg shadow-p-soft p-6 mb-4 font-sans"
+        class="mx-auto flex flex-col w-full max-w-4xl gap-6 bg-p-light rounded-2xl md:rounded-3xl shadow-lg shadow-p-soft p-6 mb-4 font-sans"
       >
         <div class="text-center">
           <h2 class="text-2xl font-bold text-p-medium">Utenti connessi</h2>
         </div>
-        <!-- Sezione Partecipanti / Clients -->
-        <div v-if="isMaster" class="w-full max-w-4xl mx-auto p-4">
-          <h3 class="text-xl font-bold text-p-medium mb-3">
+
+        <div v-if="isMaster" class="w-full flex flex-col gap-4">
+          <h3 class="text-lg font-bold text-p-medium">
             Partecipanti Connessi ({{ clients.length }})
           </h3>
 
-          <!-- Stato di caricamento -->
           <div v-if="isLoadingClients" class="text-p-medium/60 text-sm">
             Caricamento partecipanti...
           </div>
@@ -196,37 +198,37 @@
           <ul v-else-if="clients.length" class="flex flex-wrap gap-2">
             <li
               v-for="client in clients"
-              :key="typeof client === 'string' ? client : client._id"
+              :key="client.id || client._id || client"
               class="px-3 py-1 bg-p-light border border-p-soft rounded-full text-sm font-sans shadow-sm flex items-center gap-2"
             >
               <span class="w-2 h-2 rounded-full bg-green-500"></span>
-              <span>{{ client.username || client._id || client }}</span>
+              <span>{{ client.username || client }}</span>
             </li>
           </ul>
 
           <div v-else class="text-p-medium/40 text-sm">
             Nessun partecipante connesso al momento.
           </div>
+
+          <button
+            @click="startQuizSession"
+            class="shared-button-full-primary mt-4 py-3 rounded-xl cursor-pointer font-semibold"
+          >
+            Somministra quiz
+          </button>
         </div>
-        <button
-          @click="fetch('/api/session/' + tourId + '/startQuiz')"
-          class="shared-button-full-primary"
-        >
-          Somministra quiz
-        </button>
       </div>
     </main>
 
-    <!-- Bottom Dock: Navigation -->
+    <!-- Bottom Dock Navigation -->
     <footer
       class="flex-shrink-0 w-full max-w-4xl mx-auto flex flex-col gap-4 items-center px-4 pt-2 pb-[max(1rem,env(safe-area-inset-bottom))]"
     >
-      <!-- Top Layer: Prev / Next Buttons -->
+      <!-- Prev / Next Controls -->
       <div
         v-if="!isMapView && !isGuided"
         class="flex items-center justify-center gap-4 w-full"
       >
-        <!-- Previous Button -->
         <button
           v-if="canGoPrev || detachedStack.length > 0"
           @click="goPrevOrReturn"
@@ -247,7 +249,6 @@
           </svg>
         </button>
 
-        <!-- Next Button -->
         <button
           v-if="canGoNext"
           @click="goNext"
@@ -269,9 +270,8 @@
         </button>
       </div>
 
-      <!-- Bottom Layer: Home, Voice, Map, Followers -->
+      <!-- Action Icons -->
       <div class="flex items-center justify-center gap-4">
-        <!-- Navigator Button -->
         <a
           href="/navigator"
           class="shared-button-flex-secondary rounded-full w-12 h-12 shadow-md border border-p-soft hover:border-transparent flex items-center justify-center text-p-medium hover:text-p-light hover:bg-p-medium transition-colors duration-100 ease-out"
@@ -290,7 +290,6 @@
           </svg>
         </a>
 
-        <!-- Voice Button -->
         <!-- Voice Button -->
         <button
           v-if="!isMaster"
@@ -332,9 +331,8 @@
           </Transition>
         </button>
 
-        <!-- Map Button -->
         <button
-          @click="isMapView = !isMapView"
+          @click="toggleMapView"
           v-if="!isMaster"
           class="shared-button-flex-secondary rounded-full w-12 h-12 shadow-md border border-p-soft hover:border-transparent flex items-center justify-center"
           :class="{ 'bg-p-soft': isMapView }"
@@ -355,10 +353,9 @@
           </svg>
         </button>
 
-        <!-- Followers View Button -->
         <button
           v-if="isMaster"
-          @click="((isFollowersView = !isFollowersView), isSessionReady)"
+          @click="toggleFollowersView"
           class="shared-button-flex-secondary rounded-full w-12 h-12 shadow-md border border-p-soft hover:border-transparent flex items-center justify-center"
           :class="{ 'bg-p-soft': isFollowersView }"
         >
@@ -381,9 +378,174 @@
       </div>
     </footer>
   </div>
+
+  <!-- Quiz View -->
+  <div
+    v-if="isQuizOngoing"
+    class="h-dvh flex flex-col justify-between bg-p-light font-serif text-p-dark selection:bg-p-soft overflow-hidden"
+  >
+    <main
+      class="overflow-y-auto min-h-0 max-h-full w-full p-4 md:py-8 font-sans"
+    >
+      <div
+        class="mx-auto w-full max-w-2xl bg-p-light rounded-2xl md:rounded-3xl shadow-lg shadow-p-soft p-6 flex flex-col gap-6"
+      >
+        <!-- Domanda in corso -->
+        <template v-if="!isQuizCompleted && currentQuizQuestion">
+          <div
+            class="flex items-center justify-between border-b border-p-soft/50 pb-4"
+          >
+            <span
+              class="text-sm font-semibold tracking-wide uppercase text-p-medium/70"
+            >
+              Domanda {{ currentQuizQuestionIdx + 1 }} di
+              {{ quizQuestions.length }}
+            </span>
+            <span
+              class="text-xs px-2.5 py-1 rounded-full bg-p-soft text-p-dark font-medium"
+            >
+              {{
+                Math.round(
+                  (currentQuizQuestionIdx / quizQuestions.length) * 100,
+                )
+              }}% Completato
+            </span>
+          </div>
+
+          <section class="flex flex-col gap-2">
+            <h2
+              class="text-xl md:text-2xl font-bold text-p-dark font-serif leading-snug"
+            >
+              {{
+                currentQuizQuestion.questionText ||
+                currentQuizQuestion.prompt ||
+                currentQuizQuestion.question
+              }}
+            </h2>
+            <p
+              v-if="currentQuizQuestion.hint"
+              class="text-xs text-p-medium/60 italic"
+            >
+              {{ currentQuizQuestion.hint }}
+            </p>
+          </section>
+
+          <div class="flex flex-col gap-3">
+            <button
+              v-for="(option, idx) in currentQuizQuestion.options"
+              :key="idx"
+              type="button"
+              @click="selectQuizOption(idx)"
+              :disabled="isSubmittingQuiz"
+              class="w-full text-left p-4 rounded-xl border transition duration-150 ease-in-out flex items-center justify-between group cursor-pointer"
+              :class="[
+                selectedQuizAnswers[currentQuizQuestionIdx] === idx
+                  ? 'bg-p-soft/40 border-p-medium text-p-dark font-semibold shadow-sm'
+                  : 'border-p-soft bg-p-light hover:bg-p-soft/20 text-p-dark',
+              ]"
+            >
+              <span class="flex items-center gap-3">
+                <span
+                  class="w-7 h-7 rounded-full border flex items-center justify-center text-xs font-mono transition"
+                  :class="
+                    selectedQuizAnswers[currentQuizQuestionIdx] === idx
+                      ? 'bg-p-medium text-white border-p-medium'
+                      : 'border-p-soft text-p-medium group-hover:border-p-medium'
+                  "
+                >
+                  {{ String.fromCharCode(65 + idx) }}
+                </span>
+                <span>{{ option }}</span>
+              </span>
+            </button>
+          </div>
+
+          <div class="flex justify-end gap-3 pt-2">
+            <button
+              v-if="currentQuizQuestionIdx < quizQuestions.length - 1"
+              @click="nextQuizQuestion"
+              :disabled="
+                selectedQuizAnswers[currentQuizQuestionIdx] === undefined
+              "
+              class="shared-button-flex-primary px-6 py-2 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+            >
+              Avanti
+            </button>
+            <button
+              v-else
+              @click="completeQuiz"
+              :disabled="
+                selectedQuizAnswers[currentQuizQuestionIdx] === undefined ||
+                isSubmittingQuiz
+              "
+              class="shared-button-full-primary px-6 py-2 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+            >
+              {{ isSubmittingQuiz ? 'Invio in corso...' : 'Termina Quiz' }}
+            </button>
+          </div>
+        </template>
+
+        <!-- Risultati completati -->
+        <template v-else-if="isQuizCompleted">
+          <div class="text-center flex flex-col items-center gap-4 py-8">
+            <div
+              class="w-16 h-16 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-2xl font-bold"
+            >
+              ✓
+            </div>
+            <h2 class="text-2xl font-bold font-serif text-p-dark">
+              Quiz Completato!
+            </h2>
+            <p class="text-p-medium/80 text-sm max-w-sm">
+              Tutte le risposte sono state registrate con successo.
+            </p>
+
+            <div
+              class="my-2 p-4 rounded-xl bg-p-soft/20 border border-p-soft w-full max-w-xs flex justify-around"
+            >
+              <div class="flex flex-col">
+                <span class="text-xs uppercase text-p-medium/60 font-semibold"
+                  >Punteggio</span
+                >
+                <span class="text-2xl font-extrabold text-p-dark">
+                  {{ calculatedQuizScore }} / {{ quizQuestions.length }}
+                </span>
+              </div>
+              <div class="border-r border-p-soft/50"></div>
+              <div class="flex flex-col">
+                <span class="text-xs uppercase text-p-medium/60 font-semibold"
+                  >Esito</span
+                >
+                <span class="text-2xl font-extrabold text-p-dark">
+                  {{
+                    Math.round(
+                      (calculatedQuizScore / (quizQuestions.length || 1)) * 100,
+                    )
+                  }}%
+                </span>
+              </div>
+            </div>
+
+            <button
+              v-if="isMaster"
+              @click="exitQuiz"
+              class="shared-button-flex-secondary mt-4 px-6 py-2 rounded-lg border border-p-soft cursor-pointer"
+            >
+              Torna al Tour
+            </button>
+          </div>
+        </template>
+
+        <div v-else class="text-center py-12 text-p-medium/40">
+          Nessuna domanda disponibile per questo quiz.
+        </div>
+      </div>
+    </main>
+  </div>
 </template>
+
 <script>
-import { ref, Transition } from 'vue'
+import { Transition } from 'vue'
 import { TourNavigation } from '../marketplace/tourNav.js'
 import { speechRecognizer, startSpeechSynthesis } from './speechSyntesis.js'
 
@@ -459,19 +621,18 @@ class TourController {
 }
 
 class LibreTourController extends TourController {
-  // Navigazione puramente autonoma e locale senza comunicazioni di rete
   constructor(opts = {}) {
     super(opts)
   }
 }
 
 class MasterTourController extends TourController {
-  // Gestisce la regia della sessione effettuando il broadcast verso il server
   constructor({ sessionId, ...opts } = {}) {
     super(opts)
     this.sessionId = sessionId
     this.lastBroadcastItemId = null
     this.abortController = null
+    this.isStartingQuiz = false
   }
 
   emit() {
@@ -494,40 +655,35 @@ class MasterTourController extends TourController {
 
     this.lastBroadcastItemId = itemId
     try {
-      await fetch(
-        `/api/sessions/${encodeURIComponent(this.sessionId)}/showItem`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ itemId }),
-          signal: this.abortController.signal,
-        },
-      )
+      const url = `/api/sessions/${encodeURIComponent(this.sessionId)}/showItem`
+      let res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ itemId }),
+        signal: this.abortController.signal,
+      })
     } catch (e) {
-      if (e.name !== 'AbortError') {
-        // Ignora fallimenti temporanei di rete per non bloccare la UI locale
-      }
+      // Ignora abort
     }
   }
 
   async startQuiz() {
-    if (!this.tourId || this.isStartingQuiz) return
+    if (!this.sessionId || this.isStartingQuiz) return false
 
     this.isStartingQuiz = true
     try {
-      await fetch(
-        `/api/session/${encodeURIComponent(this.sessionId)}/startQuiz`,
+      let res = await fetch(
+        `/api/sessions/${encodeURIComponent(this.sessionId)}/startQuiz`,
         {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
         },
       )
+
+      return res.ok
     } catch (err) {
-      console.error('Errore durante startQuiz:', err)
+      console.error('Errore startQuiz:', err)
+      return false
     } finally {
       this.isStartingQuiz = false
     }
@@ -542,10 +698,11 @@ class MasterTourController extends TourController {
 }
 
 class GuidedTourController extends TourController {
-  constructor({ sessionId, username, ...opts } = {}) {
+  constructor({ sessionId, username, onStartQuiz = null, ...opts } = {}) {
     super(opts)
     this.sessionId = sessionId
     this.username = username
+    this.onStartQuiz = onStartQuiz
     this.eventSource = null
   }
 
@@ -564,13 +721,36 @@ class GuidedTourController extends TourController {
     })()
     const username = this.username || `guided-${randomSuffix}`
     const joinUrl = `/api/sessions/${encodeURIComponent(this.sessionId)}/join?username=${encodeURIComponent(username)}`
+
     this.eventSource = new EventSource(joinUrl)
+
+    this.eventSource.onerror = () => {
+      if (
+        this.eventSource &&
+        this.eventSource.readyState === EventSource.CLOSED
+      ) {
+        const altUrl = `/api/sessions/${encodeURIComponent(this.sessionId)}/join?username=${encodeURIComponent(username)}`
+        this.eventSource = new EventSource(altUrl)
+        this.bindEvents()
+      }
+    }
+
+    this.bindEvents()
+  }
+
+  bindEvents() {
+    if (!this.eventSource) return
+
     this.eventSource.addEventListener('showItem', (event) => {
       try {
         const payload = JSON.parse(event.data || '{}')
         this.showItem(payload.itemId)
-      } catch (_err) {
-        // ignore malformed events
+      } catch (_err) {}
+    })
+
+    this.eventSource.addEventListener('startQuiz', () => {
+      if (typeof this.onStartQuiz === 'function') {
+        this.onStartQuiz()
       }
     })
   }
@@ -618,19 +798,26 @@ export default {
       touch0: null,
       openTouch0: null,
       loadedItemsMap: {},
-      overlayVisible: ref(false),
-      isMapView: ref(false),
-      isFollowersView: ref(false),
+      isMapView: false,
+      isFollowersView: false,
       isLoadingClients: false,
       userIsSpeaking: false,
       currentSpokenCommand: '',
       currentRecognizer: null,
+      clientsInterval: null,
       selectedExplanationIdx: 0,
       userSelectedLevel: null,
       controller: null,
-      controllerMode: 'libre', // 'libre' | 'guided' | 'master'
+      controllerMode: 'libre',
       sessionId: '',
       sessionUsername: '',
+      // Quiz
+      isQuizOngoing: false,
+      isQuizCompleted: false,
+      isSubmittingQuiz: false,
+      currentQuizQuestionIdx: 0,
+      selectedQuizAnswers: {},
+      quizQuestions: [],
     }
   },
   computed: {
@@ -675,6 +862,16 @@ export default {
       if (!exps.length) return {}
       return exps[this.selectedExplanationIdx] || exps[0]
     },
+    currentQuizQuestion() {
+      return this.quizQuestions[this.currentQuizQuestionIdx] || null
+    },
+    calculatedQuizScore() {
+      return this.quizQuestions.reduce((acc, question, idx) => {
+        return (
+          acc + (this.selectedQuizAnswers[idx] === question.correct ? 1 : 0)
+        )
+      }, 0)
+    },
   },
   watch: {
     currentItem: {
@@ -694,9 +891,11 @@ export default {
       },
       immediate: true,
     },
-    isSessionReady(newVal) {
-      if (newVal === true) {
-        this.fetchClients()
+    isFollowersView(newVal) {
+      if (newVal) {
+        this.startClientsPolling()
+      } else {
+        this.stopClientsPolling()
       }
     },
     explanations() {
@@ -823,7 +1022,6 @@ export default {
 
         this.currentRecognizer.onresult = (event) => {
           this.currentSpokenCommand = event.results[0][0].transcript
-          console.log('Comando vocale:', this.currentSpokenCommand)
         }
 
         this.currentRecognizer.onerror = (err) => {
@@ -856,7 +1054,19 @@ export default {
         }
 
         const url = new URL(fullUrl)
-        tourId = url.pathname.split('/').filter(Boolean).at(2)
+        const segments = url.pathname.split('/').filter(Boolean)
+        const hexCandidate = segments.find((s) => /^[0-9a-fA-F]{24}$/.test(s))
+        if (hexCandidate) {
+          tourId = hexCandidate
+        } else if (
+          segments.length >= 2 &&
+          segments[0].toLowerCase().startsWith('tour')
+        ) {
+          const segVal = segments[1]
+          if (!['guided', 'master', 'libre'].includes(segVal.toLowerCase())) {
+            tourId = segVal
+          }
+        }
 
         const urlParams = new URLSearchParams(window.location.search)
         sessionId = urlParams.get('session') || urlParams.get('sessionId') || ''
@@ -865,7 +1075,10 @@ export default {
 
       if (!tourId) {
         tourId =
-          this.$route?.params?.id || this.$route?.query?.tour || 'demo-tour'
+          this.$route?.params?.id ||
+          this.$route?.params?.tourId ||
+          this.$route?.query?.tour ||
+          ''
       }
 
       return { tourId, mode, sessionId, username }
@@ -888,6 +1101,9 @@ export default {
           ...common,
           sessionId: this.sessionId,
           username: this.sessionUsername,
+          onStartQuiz: async () => {
+            await this.handleStartQuizEvent()
+          },
         })
         this.controller.connect()
       } else if (this.controllerMode === 'master' && this.sessionId) {
@@ -907,42 +1123,75 @@ export default {
       this.controllerMode = settings.mode
       this.sessionId = settings.sessionId
       this.sessionUsername = settings.username
+
       try {
-        const nav = new TourNavigation()
-        await nav.initialize(this.tourId, null)
-        this.tour = nav.tour
-        this.itemNav = Array.isArray(this.tour.itemNav)
-          ? this.tour.itemNav.slice()
-          : []
-        let allItemIds = new Set()
-        this.loadedItemsMap = {}
-        const fetchedItems =
-          nav.items && typeof nav.items === 'object' ? nav.items : {}
-        Object.entries(fetchedItems).forEach(([id, item]) => {
-          if (id && item) {
-            allItemIds.add(id)
-            this.loadedItemsMap[id] = item
+        if (this.sessionId && (!this.tourId || this.tourId === 'demo-tour')) {
+          let sRes = await fetch(
+            `/api/sessions/${encodeURIComponent(this.sessionId)}`,
+          )
+          if (sRes.ok) {
+            const sData = await sRes.json()
+            if (sData.tour) {
+              this.tourId =
+                typeof sData.tour === 'object'
+                  ? sData.tour._id || sData.tour.id
+                  : sData.tour
+            }
           }
-        })
-        if (Array.isArray(this.itemNav)) {
-          this.itemNav.forEach(
-            (id) => typeof id === 'string' && allItemIds.add(id),
-          )
         }
-        if (Array.isArray(this.tour.items)) {
-          this.tour.items.forEach(
-            (id) => typeof id === 'string' && allItemIds.add(id),
-          )
+
+        if (this.tourId && this.tourId !== 'demo-tour') {
+          const nav = new TourNavigation()
+          await nav.initialize(this.tourId, null)
+          this.tour = nav.tour
+
+          if (!this.tour?.quiz) {
+            let tRes = await fetch(
+              `/api/tour/${encodeURIComponent(this.tourId)}`,
+            )
+            if (tRes.ok) {
+              const tourFull = await tRes.json()
+              const quizObj = tourFull.quiz || tourFull.tour?.quiz
+              if (quizObj) {
+                this.tour = { ...(this.tour || {}), quiz: quizObj }
+              }
+            }
+          }
+
+          this.itemNav = Array.isArray(this.tour?.itemNav)
+            ? this.tour.itemNav.slice()
+            : []
+          let allItemIds = new Set()
+          this.loadedItemsMap = {}
+          const fetchedItems =
+            nav.items && typeof nav.items === 'object' ? nav.items : {}
+          Object.entries(fetchedItems).forEach(([id, item]) => {
+            if (id && item) {
+              allItemIds.add(id)
+              this.loadedItemsMap[id] = item
+            }
+          })
+          if (Array.isArray(this.itemNav)) {
+            this.itemNav.forEach(
+              (id) => typeof id === 'string' && allItemIds.add(id),
+            )
+          }
+          if (Array.isArray(this.tour?.items)) {
+            this.tour.items.forEach(
+              (id) => typeof id === 'string' && allItemIds.add(id),
+            )
+          }
+          await this.fetchItemIdsRecursive(Array.from(allItemIds))
+          this.items = Array.from(allItemIds)
+            .map((id) => this.loadedItemsMap[id])
+            .filter(Boolean)
         }
-        await this.fetchItemIdsRecursive(Array.from(allItemIds))
-        const itemsArr = Array.from(allItemIds)
-          .map((id) => this.loadedItemsMap[id])
-          .filter(Boolean)
-        this.items = itemsArr
+
         this.curItemIdx = 0
         this.detachedStack = []
         this.setupController()
       } catch (e) {
+        console.error('Errore durante initTour:', e)
         if (this.controller) this.controller.teardown()
         this.controller = null
         this.tour = null
@@ -950,6 +1199,62 @@ export default {
         this.itemNav = []
         this.loadedItemsMap = {}
       }
+    },
+    async loadQuizData() {
+      if (
+        this.tour?.quiz &&
+        Array.isArray(this.tour.quiz.questions) &&
+        this.tour.quiz.questions.length > 0
+      ) {
+        this.quizQuestions = this.tour.quiz.questions
+        return
+      }
+
+      if (!this.tourId && this.sessionId) {
+        try {
+          const sRes = await fetch(
+            `/api/sessions/${encodeURIComponent(this.sessionId)}`,
+          )
+          if (sRes.ok) {
+            const sData = await sRes.json()
+            if (sData.tour) {
+              this.tourId =
+                typeof sData.tour === 'object'
+                  ? sData.tour._id || sData.tour.id
+                  : sData.tour
+            }
+          }
+        } catch (e) {
+          console.error('Errore recupero sessione:', e)
+        }
+      }
+
+      const effectiveTourId = this.tourId || this.tour?._id
+      if (effectiveTourId && effectiveTourId !== 'demo-tour') {
+        try {
+          let res = await fetch(
+            `/api/tours/${encodeURIComponent(effectiveTourId)}`,
+          )
+          if (res.ok) {
+            const data = await res.json()
+            const quizObj = data.quiz || data.tour?.quiz
+            if (
+              quizObj &&
+              Array.isArray(quizObj.questions) &&
+              quizObj.questions.length > 0
+            ) {
+              this.quizQuestions = quizObj.questions
+              if (this.tour) this.tour.quiz = quizObj
+              return
+            }
+          }
+        } catch (err) {
+          console.error('Errore nel recupero del quiz via API:', err)
+        }
+      }
+
+      this.quizQuestions = []
+      console.warn('Nessun dato quiz trovato nel modello del tour.')
     },
     async fetchItemIdsRecursive(ids) {
       const toFetch = ids.filter((id) => id && !this.loadedItemsMap[id])
@@ -1098,12 +1403,35 @@ export default {
       }
       this.selectedExplanationIdx = 0
     },
+    toggleMapView() {
+      this.isMapView = !this.isMapView
+      if (this.isMapView) this.isFollowersView = false
+    },
+    toggleFollowersView() {
+      this.isFollowersView = !this.isFollowersView
+      if (this.isFollowersView) this.isMapView = false
+    },
+    startClientsPolling() {
+      this.fetchClients()
+      this.stopClientsPolling()
+      this.clientsInterval = setInterval(() => {
+        if (this.isFollowersView) {
+          this.fetchClients()
+        }
+      }, 2500)
+    },
+    stopClientsPolling() {
+      if (this.clientsInterval) {
+        clearInterval(this.clientsInterval)
+        this.clientsInterval = null
+      }
+    },
     async fetchClients() {
       if (!this.sessionId || this.isLoadingClients) return
 
       this.isLoadingClients = true
       try {
-        const res = await fetch(
+        let res = await fetch(
           `/api/sessions/${encodeURIComponent(this.sessionId)}/clients`,
         )
         if (!res.ok) throw new Error(`HTTP error: ${res.status}`)
@@ -1117,7 +1445,6 @@ export default {
     handleAuthorCommand() {
       if (!this.currentItem) return
 
-      // Verifica se l'elemento è di tipo opera
       const isArtwork =
         !this.currentItem.type ||
         this.currentItem.type.toLowerCase() === 'artwork'
@@ -1125,31 +1452,25 @@ export default {
       if (isArtwork && (this.currentItem.author || this.currentItem.autore)) {
         const author = this.currentItem.author || this.currentItem.autore
         const message = `L'autore di quest'opera è ${author}`
-        console.log(message)
         startSpeechSynthesis(message)
       } else {
         const fallback =
           "Informazione sull'autore non disponibile per questa voce."
-        console.log(fallback)
         startSpeechSynthesis(fallback)
       }
     },
-
     handleExplanationCommand() {
       if (!this.currentItem) return
 
-      // Verifica se l'elemento è di tipo opera
       const isArtwork =
         !this.currentItem.type ||
         this.currentItem.type.toLowerCase() === 'artwork'
 
       if (isArtwork) {
-        console.log(this.selectedExplanation.text)
         startSpeechSynthesis(this.selectedExplanation.text)
       } else {
         const fallback =
           "Informazione sull'opera non disponibile per questa voce."
-        console.log(fallback)
         startSpeechSynthesis(fallback)
       }
     },
@@ -1165,18 +1486,74 @@ export default {
         startSpeechSynthesis(`Livello impostato su: ${currentLevel}`)
       }
     },
-
     handleLocationFeedback(specificInfo, defaultInfo) {
       const textToSpeak =
         typeof specificInfo === 'string' && specificInfo.trim().length > 0
           ? specificInfo
           : defaultInfo
 
-      console.log(textToSpeak)
       startSpeechSynthesis(textToSpeak)
+    },
+    async startQuizSession() {
+      if (this.controller && typeof this.controller.startQuiz === 'function') {
+        const ok = await this.controller.startQuiz()
+        if (ok) {
+          await this.handleStartQuizEvent()
+        }
+      }
+    },
+    async handleStartQuizEvent() {
+      await this.loadQuizData()
+      this.currentQuizQuestionIdx = 0
+      this.selectedQuizAnswers = {}
+      this.isQuizCompleted = false
+      this.isQuizOngoing = true
+      this.stopAudio()
+      this.stopClientsPolling()
+    },
+    selectQuizOption(optionIdx) {
+      this.selectedQuizAnswers[this.currentQuizQuestionIdx] = optionIdx
+    },
+    nextQuizQuestion() {
+      if (this.currentQuizQuestionIdx < this.quizQuestions.length - 1) {
+        this.currentQuizQuestionIdx++
+      }
+    },
+    async completeQuiz() {
+      this.isSubmittingQuiz = true
+      try {
+        if (this.sessionId) {
+          const answersArray = this.quizQuestions.map((_, idx) =>
+            this.selectedQuizAnswers[idx] !== undefined
+              ? this.selectedQuizAnswers[idx]
+              : -1,
+          )
+
+          let res = await fetch(
+            `/api/session/${encodeURIComponent(this.sessionId)}/submitQuiz`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ answers: answersArray }),
+            },
+          )
+        }
+        this.isQuizCompleted = true
+      } catch (err) {
+        console.error('Errore durante invio risposte quiz:', err)
+      } finally {
+        this.isSubmittingQuiz = false
+      }
+    },
+    exitQuiz() {
+      this.isQuizOngoing = false
+      this.isQuizCompleted = false
+      this.currentQuizQuestionIdx = 0
+      this.selectedQuizAnswers = {}
     },
   },
   beforeUnmount() {
+    this.stopClientsPolling()
     if (this.controller) {
       this.controller.teardown()
       this.controller = null
