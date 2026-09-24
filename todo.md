@@ -56,7 +56,14 @@
 - [x] navigator - branch -> GUIDED or FREE
 
 ## Guided
-- [ ] Schermata navigator per studenti con test a crocette.
+- [x] Schermata navigator per studenti con test a crocette.
+  - [x] UI quiz completa con domande, opzioni multiscelta, punteggio
+  - [x] Master results dashboard per visualizzare punteggi partecipanti
+  - [x] Quiz feedback screen per rivedere risposte corrette/sbagliate
+  - [x] Timer countdown con auto-avanzamento (se configurato)
+  - [x] Normalizzazione campi domande (prompt -> questionText)
+  - [x] Colori dinamici timer (rosso <5s, giallo <10s)
+  - [x] Navigation review risposte (prev/next domande)
 - [x] Sistema di sincronizzazione della visita.
   - [x] Utente insegnante server.
   - [x] Utente studente client.

@@ -395,12 +395,20 @@
           <div
             class="flex items-center justify-between border-b border-p-soft/50 pb-4"
           >
-            <span
-              class="text-sm font-semibold tracking-wide uppercase text-p-medium/70"
-            >
-              Domanda {{ currentQuizQuestionIdx + 1 }} di
-              {{ quizQuestions.length }}
-            </span>
+            <div class="flex flex-col gap-1">
+              <span
+                class="text-sm font-semibold tracking-wide uppercase text-p-medium/70"
+              >
+                Domanda {{ currentQuizQuestionIdx + 1 }} di
+                {{ quizQuestions.length }}
+              </span>
+              <div v-if="currentQuestionTimeLimit" class="text-xs text-p-medium/60">
+                Tempo: 
+                <span :class="timeDisplayColor" class="font-semibold">
+                  {{ quizTimeRemaining }}s
+                </span>
+              </div>
+            </div>
             <span
               class="text-xs px-2.5 py-1 rounded-full bg-p-soft text-p-dark font-medium"
             >
@@ -487,7 +495,8 @@
 
         <!-- Risultati completati -->
         <template v-else-if="isQuizCompleted">
-          <div class="text-center flex flex-col items-center gap-4 py-8">
+          <!-- Participant Results & Review View -->
+          <div v-if="!isMaster && !isQuizReviewMode" class="text-center flex flex-col items-center gap-4 py-8">
             <div
               class="w-16 h-16 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-2xl font-bold"
             >
@@ -527,9 +536,181 @@
             </div>
 
             <button
-              v-if="isMaster"
+              @click="enterQuizReviewMode"
+              class="mt-4 px-6 py-2 rounded-lg border border-p-soft text-p-medium hover:bg-p-soft/10 transition cursor-pointer"
+            >
+              Rivedi Risposte
+            </button>
+          </div>
+
+          <!-- Quiz Review Screen -->
+          <div v-else-if="!isMaster && isQuizReviewMode" class="flex flex-col gap-6">
+            <div class="flex items-center justify-between border-b border-p-soft/50 pb-4">
+              <span class="text-sm font-semibold tracking-wide uppercase text-p-medium/70">
+                Domanda {{ currentQuizQuestionIdx + 1 }} di {{ quizQuestions.length }}
+              </span>
+              <button
+                @click="exitQuizReviewMode"
+                class="text-sm text-p-medium/60 hover:text-p-dark transition"
+              >
+                ✕ Chiudi Revisione
+              </button>
+            </div>
+
+            <section v-if="currentQuizQuestion" class="flex flex-col gap-4">
+              <div>
+                <h2 class="text-lg md:text-xl font-bold text-p-dark font-serif mb-2">
+                  {{ currentQuizQuestion.questionText }}
+                </h2>
+                <p v-if="currentQuizQuestion.hint" class="text-xs text-p-medium/60 italic">
+                  {{ currentQuizQuestion.hint }}
+                </p>
+              </div>
+
+              <!-- Answer Options with Feedback -->
+              <div class="flex flex-col gap-3">
+                <button
+                  v-for="(option, idx) in currentQuizQuestion.options"
+                  :key="idx"
+                  type="button"
+                  disabled
+                  class="w-full text-left p-4 rounded-xl border transition flex items-start justify-between group"
+                  :class="{
+                    'bg-green-50 border-green-300': idx === currentQuizQuestion.correct,
+                    'bg-red-50 border-red-300': idx === selectedQuizAnswers[currentQuizQuestionIdx] && idx !== currentQuizQuestion.correct,
+                    'bg-p-soft/20 border-p-soft': idx !== currentQuizQuestion.correct && idx !== selectedQuizAnswers[currentQuizQuestionIdx],
+                  }"
+                >
+                  <span class="flex items-center gap-3 flex-1">
+                    <span
+                      class="w-7 h-7 rounded-full border flex items-center justify-center text-xs font-mono transition flex-shrink-0"
+                      :class="{
+                        'bg-green-500 text-white border-green-500': idx === currentQuizQuestion.correct,
+                        'bg-red-500 text-white border-red-500': idx === selectedQuizAnswers[currentQuizQuestionIdx] && idx !== currentQuizQuestion.correct,
+                        'border-p-soft text-p-medium': idx !== currentQuizQuestion.correct && idx !== selectedQuizAnswers[currentQuizQuestionIdx],
+                      }"
+                    >
+                      {{ String.fromCharCode(65 + idx) }}
+                    </span>
+                    <span class="text-p-dark">{{ option }}</span>
+                  </span>
+                  <span class="ml-2 text-sm font-semibold flex-shrink-0">
+                    <span v-if="idx === currentQuizQuestion.correct" class="text-green-600">✓ Corretto</span>
+                    <span v-else-if="idx === selectedQuizAnswers[currentQuizQuestionIdx]" class="text-red-600">✗ Sbagliato</span>
+                  </span>
+                </button>
+              </div>
+            </section>
+
+            <!-- Navigation -->
+            <div class="flex justify-between gap-3 pt-2 mt-4">
+              <button
+                @click="prevReviewQuestion"
+                :disabled="currentQuizQuestionIdx === 0"
+                class="px-6 py-2 rounded-lg border border-p-soft text-p-medium disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer hover:bg-p-soft/10 transition"
+              >
+                ← Precedente
+              </button>
+              <button
+                @click="exitQuizReviewMode"
+                class="px-6 py-2 rounded-lg border border-p-soft text-p-medium hover:bg-p-soft/10 transition cursor-pointer"
+              >
+                Chiudi
+              </button>
+              <button
+                @click="nextReviewQuestion"
+                :disabled="currentQuizQuestionIdx === quizQuestions.length - 1"
+                class="px-6 py-2 rounded-lg border border-p-soft text-p-medium disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer hover:bg-p-soft/10 transition"
+              >
+                Prossima →
+              </button>
+            </div>
+          </div>
+
+          <!-- Master Results Dashboard -->
+          <div v-else class="flex flex-col gap-6">
+            <div class="text-center">
+              <h2 class="text-2xl font-bold font-serif text-p-dark mb-2">
+                Risultati Quiz
+              </h2>
+              <p class="text-p-medium/80 text-sm">
+                Risposte ricevute da {{ (quizResults && Object.keys(quizResults).length) || 0 }} 
+                partecipant{{ (quizResults && Object.keys(quizResults).length) !== 1 ? 'i' : 'e' }}
+              </p>
+            </div>
+
+            <!-- Results Table -->
+            <div v-if="quizResults && Object.keys(quizResults).length > 0" class="overflow-x-auto">
+              <table class="w-full text-sm">
+                <thead>
+                  <tr class="border-b-2 border-p-soft">
+                    <th class="text-left py-2 px-3 font-semibold text-p-dark">Partecipante</th>
+                    <th class="text-center py-2 px-3 font-semibold text-p-dark">Punteggio</th>
+                    <th class="text-center py-2 px-3 font-semibold text-p-dark">Percentuale</th>
+                    <th class="text-center py-2 px-3 font-semibold text-p-dark">Invio</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="(result, userId, idx) in quizResults"
+                    :key="userId"
+                    class="border-b border-p-soft/30 hover:bg-p-soft/10 transition"
+                  >
+                    <td class="py-3 px-3 text-p-dark font-medium">
+                      {{ userId }}
+                    </td>
+                    <td class="text-center py-3 px-3 text-p-dark font-semibold">
+                      {{ result.answers.filter(a => a !== -1).reduce((acc, ans, idx) => 
+                        acc + (ans === quizQuestions[idx].correct ? 1 : 0), 0) }} / {{ quizQuestions.length }}
+                    </td>
+                    <td class="text-center py-3 px-3 text-p-dark">
+                      <span
+                        class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold"
+                        :class="{
+                          'bg-green-100 text-green-700': 
+                            Math.round((result.answers.filter(a => a !== -1).reduce((acc, ans, idx) => 
+                              acc + (ans === quizQuestions[idx].correct ? 1 : 0), 0) / quizQuestions.length) * 100) >= 70,
+                          'bg-yellow-100 text-yellow-700': 
+                            Math.round((result.answers.filter(a => a !== -1).reduce((acc, ans, idx) => 
+                              acc + (ans === quizQuestions[idx].correct ? 1 : 0), 0) / quizQuestions.length) * 100) >= 50 &&
+                            Math.round((result.answers.filter(a => a !== -1).reduce((acc, ans, idx) => 
+                              acc + (ans === quizQuestions[idx].correct ? 1 : 0), 0) / quizQuestions.length) * 100) < 70,
+                          'bg-red-100 text-red-700': 
+                            Math.round((result.answers.filter(a => a !== -1).reduce((acc, ans, idx) => 
+                              acc + (ans === quizQuestions[idx].correct ? 1 : 0), 0) / quizQuestions.length) * 100) < 50,
+                        }"
+                      >
+                        {{ Math.round((result.answers.filter(a => a !== -1).reduce((acc, ans, idx) => 
+                          acc + (ans === quizQuestions[idx].correct ? 1 : 0), 0) / quizQuestions.length) * 100) }}%
+                      </span>
+                    </td>
+                    <td class="text-center py-3 px-3 text-p-medium/60 text-xs">
+                      {{ result.submittedAt ? new Date(result.submittedAt).toLocaleTimeString('it-IT') : '—' }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Loading state -->
+            <div v-else-if="isLoadingQuizResults" class="text-center py-8">
+              <p class="text-p-medium/60">Caricamento risultati in corso...</p>
+            </div>
+
+            <!-- No results yet -->
+            <div v-else class="text-center py-8">
+              <p class="text-p-medium/60 text-sm">Nessun risultato ricevuto ancora.</p>
+              <button
+                @click="fetchQuizResults"
+                class="mt-4 px-4 py-2 rounded-lg border border-p-soft text-p-medium hover:bg-p-soft/10 transition text-sm"
+              >
+                Aggiorna Risultati
+              </button>
+            </div>
+
+            <button
               @click="exitQuiz"
-              class="shared-button-flex-secondary mt-4 px-6 py-2 rounded-lg border border-p-soft cursor-pointer"
+              class="shared-button-flex-secondary px-6 py-2 rounded-lg border border-p-soft cursor-pointer"
             >
               Torna al Tour
             </button>
@@ -814,10 +995,15 @@ export default {
       // Quiz
       isQuizOngoing: false,
       isQuizCompleted: false,
+      isQuizReviewMode: false,
       isSubmittingQuiz: false,
       currentQuizQuestionIdx: 0,
       selectedQuizAnswers: {},
       quizQuestions: [],
+      quizResults: null,
+      isLoadingQuizResults: false,
+      quizTimeRemaining: 0,
+      quizTimeInterval: null,
     }
   },
   computed: {
@@ -871,6 +1057,19 @@ export default {
           acc + (this.selectedQuizAnswers[idx] === question.correct ? 1 : 0)
         )
       }, 0)
+    },
+    currentQuestionTimeLimit() {
+      const q = this.currentQuizQuestion
+      return q?.timeLimit || null
+    },
+    isTimeExpired() {
+      return this.quizTimeRemaining !== null && this.quizTimeRemaining <= 0 && this.currentQuestionTimeLimit
+    },
+    timeDisplayColor() {
+      if (!this.currentQuestionTimeLimit) return 'text-p-dark'
+      if (this.quizTimeRemaining <= 5) return 'text-red-600'
+      if (this.quizTimeRemaining <= 10) return 'text-yellow-600'
+      return 'text-p-dark'
     },
   },
   watch: {
@@ -1201,12 +1400,17 @@ export default {
       }
     },
     async loadQuizData() {
+      const normalizeQuestion = (q) => ({
+        ...q,
+        questionText: q.questionText || q.prompt || q.question,
+      })
+
       if (
         this.tour?.quiz &&
         Array.isArray(this.tour.quiz.questions) &&
         this.tour.quiz.questions.length > 0
       ) {
-        this.quizQuestions = this.tour.quiz.questions
+        this.quizQuestions = this.tour.quiz.questions.map(normalizeQuestion)
         return
       }
 
@@ -1243,7 +1447,7 @@ export default {
               Array.isArray(quizObj.questions) &&
               quizObj.questions.length > 0
             ) {
-              this.quizQuestions = quizObj.questions
+              this.quizQuestions = quizObj.questions.map(normalizeQuestion)
               if (this.tour) this.tour.quiz = quizObj
               return
             }
@@ -1507,9 +1711,38 @@ export default {
       this.currentQuizQuestionIdx = 0
       this.selectedQuizAnswers = {}
       this.isQuizCompleted = false
+      this.quizResults = null
       this.isQuizOngoing = true
       this.stopAudio()
       this.stopClientsPolling()
+      this.startQuestionTimer()
+    },
+    startQuestionTimer() {
+      this.stopQuestionTimer()
+      const timeLimit = this.currentQuestionTimeLimit
+      if (!timeLimit) {
+        this.quizTimeRemaining = null
+        return
+      }
+      this.quizTimeRemaining = timeLimit
+      this.quizTimeInterval = setInterval(() => {
+        if (this.quizTimeRemaining > 0) {
+          this.quizTimeRemaining--
+        } else {
+          this.stopQuestionTimer()
+          // Auto-advance to next question when time expires
+          if (this.currentQuizQuestionIdx < this.quizQuestions.length - 1) {
+            this.nextQuizQuestion()
+          }
+        }
+      }, 1000)
+    },
+    stopQuestionTimer() {
+      if (this.quizTimeInterval) {
+        clearInterval(this.quizTimeInterval)
+        this.quizTimeInterval = null
+      }
+      this.quizTimeRemaining = null
     },
     selectQuizOption(optionIdx) {
       this.selectedQuizAnswers[this.currentQuizQuestionIdx] = optionIdx
@@ -1517,6 +1750,7 @@ export default {
     nextQuizQuestion() {
       if (this.currentQuizQuestionIdx < this.quizQuestions.length - 1) {
         this.currentQuizQuestionIdx++
+        this.startQuestionTimer()
       }
     },
     async completeQuiz() {
@@ -1539,20 +1773,67 @@ export default {
           )
         }
         this.isQuizCompleted = true
+        
+        // If master, fetch results after a short delay to let all participants submit
+        if (this.isMaster && this.sessionId) {
+          this.$nextTick(() => {
+            setTimeout(() => {
+              this.fetchQuizResults()
+            }, 1500)
+          })
+        }
       } catch (err) {
         console.error('Errore durante invio risposte quiz:', err)
       } finally {
         this.isSubmittingQuiz = false
       }
     },
+    async fetchQuizResults() {
+      if (!this.sessionId || this.isLoadingQuizResults) return
+      
+      this.isLoadingQuizResults = true
+      try {
+        let res = await fetch(
+          `/api/sessions/${encodeURIComponent(this.sessionId)}/quizResults`,
+        )
+        if (res.ok) {
+          this.quizResults = await res.json()
+        }
+      } catch (err) {
+        console.error('Errore nel caricamento risultati quiz:', err)
+      } finally {
+        this.isLoadingQuizResults = false
+      }
+    },
+    enterQuizReviewMode() {
+      this.isQuizReviewMode = true
+      this.currentQuizQuestionIdx = 0
+    },
+    exitQuizReviewMode() {
+      this.isQuizReviewMode = false
+    },
+    nextReviewQuestion() {
+      if (this.currentQuizQuestionIdx < this.quizQuestions.length - 1) {
+        this.currentQuizQuestionIdx++
+      }
+    },
+    prevReviewQuestion() {
+      if (this.currentQuizQuestionIdx > 0) {
+        this.currentQuizQuestionIdx--
+      }
+    },
     exitQuiz() {
+      this.stopQuestionTimer()
       this.isQuizOngoing = false
       this.isQuizCompleted = false
+      this.isQuizReviewMode = false
       this.currentQuizQuestionIdx = 0
       this.selectedQuizAnswers = {}
+      this.quizResults = null
     },
   },
   beforeUnmount() {
+    this.stopQuestionTimer()
     this.stopClientsPolling()
     if (this.controller) {
       this.controller.teardown()
