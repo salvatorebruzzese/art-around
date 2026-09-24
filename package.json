@@ -19,10 +19,6 @@
     "fix": "find . -type d -name node_modules -prune -o -name package.json -execdir npm audit --no-fund fix \\;",
     "test": "npx vitest run"
   },
-  "lint-staged": {
-    "*.{js,ts,jsx,tsx}": ["eslint --fix", "prettier --write"],
-    "*.{css,scss,html}": ["prettier --write"]
-  },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
     "alpinejs": "^3.16.1",

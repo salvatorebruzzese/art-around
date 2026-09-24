@@ -109,7 +109,12 @@ async function createUser(
 
   try {
     const hashedPassword = await bcrypt.hash(input.password, 10)
-    const newUser = await User.create({ ...input, password: hashedPassword })
+    // Assign 'User' role by default if not specified
+    const newUser = await User.create({
+      ...input,
+      password: hashedPassword,
+      role: 'User',
+    })
     return Right(project(publicUserFields, newUser))
   } catch (e) {
     return Left(dbError(undefined, () => String(e)))

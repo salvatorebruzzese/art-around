@@ -76,7 +76,6 @@ router.patch('/:id', ensureAuth, async (req: Request, res: Response) => {
   }
   const input = validation.unsafeCoerce()
 
-  console.log(input)
   const result = await TourService.patchTour(id, input, userID)
   result.caseOf({
     Right: (tour) => res.json(tour),

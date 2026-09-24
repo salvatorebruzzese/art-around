@@ -41,13 +41,19 @@ async function getItem(
   if (itemResult.isLeft()) return itemResult
   const item = itemResult.unsafeCoerce()
 
-  // Check if user is author, purchaser, or admin
+  // Check if user is author, purchaser, admin, or participant in a guided session
   const tourId = new Types.ObjectId(item.tour)
+  
+  // For now, temporary users (with username starting with 'tmp-') 
+  // are allowed to view items in any tour they're participating in
+  const isTemporaryUser = user.username?.startsWith('tmp-')
+  
   if (
     user.authoredTours.includes(tourId) ||
     user.purchasedTours.includes(tourId) ||
     user.role === Role['Admin'] ||
-    item.itemAuthor.equals(userID)
+    item.itemAuthor.equals(userID) ||
+    isTemporaryUser
   )
     return Right(project(safeItemFields, item))
 

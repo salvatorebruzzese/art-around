@@ -45,19 +45,35 @@ export default {
       this.errorMessage = ''
 
       try {
-        const response = await fetch(
+        // First check if session exists
+        const sessionResponse = await fetch(
           `/api/sessions/${encodeURIComponent(cleanId)}`,
         )
 
-        if (!response.ok) {
+        if (!sessionResponse.ok) {
           this.doesSessionExist = false
           this.errorMessage = 'Sessione non trovata.'
           return
         }
 
-        const session = await response.json()
+        const session = await sessionResponse.json()
         this.doesSessionExist = true
 
+        // Authenticate the temporary user and get session cookie
+        const authResponse = await fetch(
+          `/api/sessions/${encodeURIComponent(cleanId)}/joinAuth?username=${encodeURIComponent(cleanId)}`,
+          {
+            method: 'POST',
+            credentials: 'include',
+          },
+        )
+
+        if (!authResponse.ok) {
+          this.errorMessage = 'Errore di autenticazione.'
+          return
+        }
+
+        // Now redirect with authenticated session cookie
         window.location.href = `/navigator/guided/${encodeURIComponent(session.tour)}/?session=${encodeURIComponent(session.id)}`
       } catch (err) {
         console.error('Errore durante la verifica:', err)

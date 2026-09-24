@@ -5,6 +5,7 @@ import { ensureAuth } from '../accessControl.js'
 import * as SessionService from './service.js'
 import { handleLeft } from '../shared/router.js'
 import UserService from '../user/service.js'
+import { toPrivateUser } from '../user/model.js'
 
 const router = express.Router()
 type Event = 'showItem' | 'startQuiz' | 'quizAnswer'
@@ -39,12 +40,20 @@ router.post('/', ensureAuth, async (req, res) => {
   )
 
   result.caseOf({
-    Right: (session) => res.status(201).json(session),
+    Right: (session) => {
+      const serialized = {
+        ...session,
+        tour: session.tour.toHexString(),
+        owner: session.owner.toHexString(),
+        clients: session.clients.map((c) => c.toHexString()),
+      }
+      return res.status(201).json(serialized)
+    },
     Left: handleLeft(res),
   })
 })
 
-router.get('/:id/join', async (req, res) => {
+router.post('/:id/joinAuth', async (req, res) => {
   const QuerySchema = z.object({
     username: z.string().min(1),
   })
@@ -68,6 +77,49 @@ router.get('/:id/join', async (req, res) => {
 
   const [user, password] = addResult.unsafeCoerce()
   const userId = user._id as Types.ObjectId
+  const privateUser = toPrivateUser(user as any)
+
+  // Autentica l'utente temporaneo tramite Passport
+  req.logIn(privateUser, (err) => {
+    if (err) {
+      console.error('Failed to log in temporary user:', err)
+      return res.status(500).json({ error: 'Authentication failed' })
+    }
+
+    // Ritorna le credenziali e l'utente è ora autenticato nel cookie di sessione
+    res.json({
+      username: privateUser.username,
+      password,
+      user: privateUser,
+    })
+  })
+})
+
+router.get('/:id/join', async (req, res) => {
+  const QuerySchema = z.object({
+    username: z.string().min(1),
+  })
+  const queryParse = QuerySchema.safeParse(req.query)
+  if (!queryParse.success) {
+    return res.status(400).json({ error: queryParse.error })
+  }
+
+  const username = `tmp-${queryParse.data.username}`
+  const sessionId = req.params.id
+
+  const session = SessionService.getSession(sessionId)
+  if (session.isLeft()) {
+    return res.status(404).json({ error: 'Session not found' })
+  }
+
+  const userId = req.user?._id as Types.ObjectId
+  if (!userId) {
+    return res.status(401).json({ error: 'Not authenticated' })
+  }
+
+  // Aggiungi il client al session registry SSE
+  const sseClient = { userId, res }
+  SessionService.joinSessionWithSSE(sessionId, sseClient)
 
   res.set({
     'Cache-Control': 'no-cache',
@@ -77,17 +129,11 @@ router.get('/:id/join', async (req, res) => {
   res.flushHeaders()
   res.write('\n')
 
-  const joinPayload = `event: hasJoined\ndata: ${JSON.stringify({ username: user.username, password })}\n\n`
+  const joinPayload = `event: hasJoined\ndata: ${JSON.stringify({ username })}\n\n`
   res.write(joinPayload)
 
   req.on('close', () => {
     SessionService.removeSSEClient(sessionId, userId)
-    UserService.deleteUser(userId, userId).catch((err) =>
-      console.error(
-        `Failed to delete temporary user ${userId.toHexString()}:`,
-        err,
-      ),
-    )
   })
 })
 
@@ -112,7 +158,13 @@ router.post('/:id/showItem', ensureAuth, async (req, res) => {
   result.caseOf({
     Right: (session) => {
       sendSessionEvent(sessionId, 'showItem', { itemId })
-      return res.json(session)
+      const serialized = {
+        ...session,
+        tour: session.tour.toHexString(),
+        owner: session.owner.toHexString(),
+        clients: session.clients.map((c) => c.toHexString()),
+      }
+      return res.json(serialized)
     },
     Left: handleLeft(res),
   })
@@ -125,7 +177,13 @@ router.post('/:id/startQuiz', ensureAuth, async (req, res) => {
   result.caseOf({
     Right: (session) => {
       sendSessionEvent(sessionId as string, 'startQuiz', {})
-      return res.json(session)
+      const serialized = {
+        ...session,
+        tour: session.tour.toHexString(),
+        owner: session.owner.toHexString(),
+        clients: session.clients.map((c) => c.toHexString()),
+      }
+      return res.json(serialized)
     },
     Left: handleLeft(res),
   })
@@ -159,7 +217,15 @@ router.get('/:id', async (req, res) => {
   const result = SessionService.getSession(req.params.id)
 
   result.caseOf({
-    Right: (session) => res.json(session),
+    Right: (session) => {
+      const serialized = {
+        ...session,
+        tour: session.tour.toHexString(),
+        owner: session.owner.toHexString(),
+        clients: session.clients.map((c) => c.toHexString()),
+      }
+      return res.json(serialized)
+    },
     Left: handleLeft(res),
   })
 })
