@@ -79,6 +79,91 @@ document.addEventListener('alpine:init', () => {
         this.user?.authoredTours?.includes(tourId),
       )
     },
+
+    async deleteTourHandler(tour) {
+      try {
+        const confirmed = confirm(
+          'Sei sicuro di voler eliminare questo tour? Tutti gli item associati saranno eliminati. Questa azione non può essere annullata.',
+        )
+        if (!confirmed) return
+
+        const res = await import('./api/tours.js')
+        await res.deleteTour(tour._id)
+        alert('Tour eliminato!')
+        // Rimuovi il tour dalla lista senza riloadare
+        this.allTours = this.allTours.filter((t) => t._id !== tour._id)
+        // Optionally aggiorna anche filteredTours/cartTourse
+      } catch (e) {
+        alert('Errore durante eliminazione: ' + (e.message || e))
+        console.error(e)
+      }
+    },
+
+    async forkTourHandler(tour) {
+      try {
+        const res = await import('./api/tours.js')
+        const newTour = await res.forkTour(tour._id)
+        alert("Tour clonato! Reindirizzo all'editor...")
+        window.location.href = `/marketplace/editor/${newTour._id}`
+      } catch (e) {
+        alert('Errore durante il clone: ' + (e.message || e))
+        console.error(e)
+      }
+    },
+
+    async modifyTourHandler(tour) {
+      try {
+        // Se l'utente è l'autore, vai direttamente all'editor
+        if (this.user._id === tour.author) {
+          window.location.href = `/marketplace/editor/${tour._id}`
+          return
+        }
+        // Altrimenti fai un fork e vai all'editor del nuovo tour
+        const res = await import('./api/tours.js')
+        const newTour = await res.forkTour(tour._id)
+        alert("Tour clonato! Reindirizzo all'editor...")
+        window.location.href = `/marketplace/editor/${newTour._id}`
+      } catch (e) {
+        alert('Errore durante modifica: ' + (e.message || e))
+        console.error(e)
+      }
+    },
+
+    async modifyItemHandler(item, tour) {
+      try {
+        // Se l'utente è l'autore del tour, vai direttamente all'editor
+        if (this.user._id === tour.author) {
+          window.location.href = `/marketplace/editor/${tour._id}?item=${item._id}`
+          return
+        }
+        // Altrimenti fai un fork del tour e vai all'editor con l'item originale
+        const res = await import('./api/tours.js')
+        const newTour = await res.forkTour(tour._id)
+        alert("Tour clonato! Reindirizzo all'editor...")
+        window.location.href = `/marketplace/editor/${newTour._id}?item=${item._id}`
+      } catch (e) {
+        alert('Errore durante modifica: ' + (e.message || e))
+        console.error(e)
+      }
+    },
+
+    async deleteItemHandler(item) {
+      try {
+        const confirmed = confirm(
+          'Sei sicuro di voler eliminare questo item? Questa azione non può essere annullata.',
+        )
+        if (!confirmed) return
+
+        const res = await import('./api/items.js')
+        await res.deleteItem(item._id)
+        alert('Item eliminato!')
+        // Rimuovi l'item dalla lista senza riloadare
+        this.allItems = this.allItems.filter((i) => i._id !== item._id)
+      } catch (e) {
+        alert('Errore durante eliminazione: ' + (e.message || e))
+        console.error(e)
+      }
+    },
   }))
 })
 

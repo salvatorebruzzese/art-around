@@ -162,9 +162,12 @@
                     />
 
                     <!-- Dropdown Menu Tre Punti -->
-                    <!-- TODO: refactor into template -->
                     <div class="absolute top-3 right-3 z-10">
-                      <div x-data="{open:false}" class="dropdown dropdown-end">
+                      <div
+                        x-data="{open:false, tour: null}"
+                        x-init="fetch('/api/tours/' + item.tour).then(r => r.json()).then(data => { tour = data })"
+                        class="dropdown dropdown-end"
+                      >
                         <button
                           @click="open = !open"
                           class="btn btn-sm btn-circle bg-p-light/80 hover:bg-p-light text-p-dark border-none shadow-md backdrop-blur-sm focus:outline-none list-none"
@@ -186,15 +189,26 @@
                         >
                           <ul class="nav-dropdown-menu dropdown-end p-2">
                             <li>
+                              <button
+                                class="shared-button-flex-secondary shadow-none"
+                                @click="tour && modifyItemHandler(item, tour)"
+                              >
+                                Modifica
+                              </button>
+                            </li>
+                            <li>
                               <a
                                 class="shared-button-flex-secondary shadow-none"
                                 >Condividi</a
                               >
                             </li>
                             <li>
-                              <a class="shared-button-flex-warning shadow-none"
-                                >Elimina</a
+                              <button
+                                class="shared-button-flex-warning shadow-none"
+                                @click="deleteItemHandler(item)"
                               >
+                                Elimina
+                              </button>
                             </li>
                           </ul>
                         </div>
@@ -225,12 +239,6 @@
                         :href="'./' + item.tour + '?item=' + item._id"
                       >
                         Apri
-                      </a>
-                      <a
-                        class="shared-button-full-secondary"
-                        :href="'/marketplace/editor/' + item.tour + '?item=' + item._id"
-                      >
-                        Modifica
                       </a>
                     </div>
                   </div>
@@ -292,24 +300,33 @@
                     >
                       <ul class="nav-dropdown-menu dropdown-end p-4">
                         <li>
-                          <a class="shared-button-flex-secondary shadow-none"
-                            >Modifica</a
+                          <button
+                            class="shared-button-flex-secondary shadow-none"
+                            @click="modifyTourHandler(tour)"
                           >
+                            Modifica
+                          </button>
                         </li>
                         <li>
-                          <a class="shared-button-flex-secondary shadow-none"
-                            >Clona</a
+                          <button
+                            class="shared-button-flex-secondary shadow-none"
+                            @click="forkTourHandler(tour)"
                           >
+                            Clona
+                          </button>
                         </li>
                         <li>
                           <a class="shared-button-flex-secondary shadow-none"
                             >Condividi</a
                           >
                         </li>
-                        <li>
-                          <a class="shared-button-flex-warning shadow-none"
-                            >Elimina</a
+                        <li x-show="user && user._id === tour.author">
+                          <button
+                            class="shared-button-flex-warning shadow-none"
+                            @click="deleteTourHandler(tour)"
                           >
+                            Elimina
+                          </button>
                         </li>
                       </ul>
                     </div>

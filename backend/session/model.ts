@@ -7,6 +7,11 @@ export interface SSEClient {
   userId: Types.ObjectId
 }
 
+export interface QuizSubmission {
+  answers: number[]
+  submittedAt: Date
+}
+
 export interface Session {
   id: string
   tour: Types.ObjectId
@@ -17,6 +22,7 @@ export interface Session {
     | { type: 'quiz' }
     | { type: 'gathering' }
   quizStartedAt?: Date
+  quizAnswers?: Map<string, QuizSubmission> // userId (hex string) -> answers + timestamp
   createdAt: Date
   state: 'waiting' | 'started' | 'quiz'
 }

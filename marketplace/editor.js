@@ -5,7 +5,7 @@ import {
   saveItemPromise,
   deleteItem as apiDeleteItem,
 } from '../marketplace/api/items'
-import { saveTour } from '../marketplace/api/tours'
+import { saveTour, deleteTour as apiDeleteTour } from '../marketplace/api/tours'
 import { loadAsset, loadImage } from './api/asset.js'
 
 import './userManager.js'
@@ -94,6 +94,11 @@ document.addEventListener('alpine:init', () => {
 
         async saveItemsAndTour() {
           try {
+            // Ensure quiz exists (fieldset getter will handle sync automatically)
+            if (!this.tour.quiz) {
+              this.tour.quiz = { questions: [] }
+            }
+
             let newItems = await Promise.all(
               Object.entries(this.items).map(async ([id, i]) => {
                 if (typeof id === 'number') i._id = null // new item
@@ -105,13 +110,21 @@ document.addEventListener('alpine:init', () => {
             newItems.filter(Boolean).forEach((i) => {
               this.items[i._id] = i
             })
-
-            saveTour({
+            const tour = {
               _id: this.tour._id,
               itemNav: this.itemNav,
               items: Object.values(this.items).map((i) => i._id), // arr of ids
-              // will be extended
-            })
+              name: this.tour.name,
+              description: this.tour.description,
+              price: this.tour.price,
+              tourEntryLocation: this.tour.tourEntryLocation,
+              tourExitLocation: this.tour.tourExitLocation,
+              thumbnail: this.tour.thumbnail,
+              map: this.tour.map,
+              quiz: this.tour.quiz,
+            }
+            console.log(tour)
+            saveTour(tour)
             alert('Modifiche salvate con successo!')
           } catch (e) {
             console.log(e, e.message)
@@ -178,6 +191,43 @@ document.addEventListener('alpine:init', () => {
               "Errore durante l'eliminazione: " +
                 (e && e.message ? e.message : e),
             )
+          }
+        }
+
+        async deleteTour() {
+          try {
+            // Confirmation dialog
+            const confirmed = confirm(
+              'Sei sicuro di voler eliminare questo tour? Tutti gli item del tour saranno eliminati e questa azione non può essere annullata.',
+            )
+            if (!confirmed) return
+
+            // Call API to delete tour
+            await apiDeleteTour(this.tour._id)
+
+            // Success: redirect to marketplace
+            alert('Tour eliminato con successo!')
+            window.location.href = '/marketplace'
+          } catch (e) {
+            alert(
+              "Errore durante l'eliminazione del tour: " +
+                (e && e.message ? e.message : e),
+            )
+            console.error('Tour deletion error:', e)
+          }
+        }
+
+        async forkTour() {
+          try {
+            const { forkTour: apiForkTour } = await import('./api/tours.js')
+            const newTour = await apiForkTour(this.tour._id)
+            alert("Tour clonato! Reindirizzo all'editor...")
+            window.location.href = `/marketplace/editor/${newTour._id}`
+          } catch (e) {
+            alert(
+              'Errore durante il clone: ' + (e && e.message ? e.message : e),
+            )
+            console.error('Tour fork error:', e)
           }
         }
       })(),

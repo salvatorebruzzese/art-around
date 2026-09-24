@@ -213,11 +213,11 @@
     <transition name="fade">
       <div
         v-if="showTourConfirmOverlay"
-        class="fixed inset-0 z-50 bg-p-dark/40 backdrop-blur-sm flex items-end"
+        class="fixed inset-0 z-50 bg-p-dark/40 backdrop-blur-sm flex items-end justify-center"
         @click.self="closeTourConfirm"
       >
         <div
-          class="w-full bg-p-light rounded-t-2xl border border-p-soft shadow-2xl p-8"
+          class="w-full bg-p-light max-w-[500px] rounded-t-2xl border border-p-soft shadow-2xl p-8"
         >
           <div class="flex items-center justify-between mb-6">
             <div class="font-bold text-2xl text-p-dark font-serif">

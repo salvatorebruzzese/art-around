@@ -3,12 +3,23 @@
       Manca un piccolo container sopra con i metadati della visita
 - [~] Schermata di acquisto della visita.
   Manca l'integrazione con le API e con il marketplace
+- [x] Eliminazione tour
+  - [x] Backend cascade delete (items + user refs)
+  - [x] Frontend API wrapper (deleteTour)
+  - [x] Editor delete handler con confirmation
+  - [x] Marketplace delete handler con confirmation
+  - [x] Authorization check (solo autore può eliminare)
+  - [x] UI: bottone "Elimina" visibile solo per autore
 - [ ] Implementare dropdown dei tour e degli item nel marketplace.
-  - [ ] Fork (backend)
+  - [X] Fork (backend)
+  - [ ] modifica ( fork se non authored )
+  - [ ] condividit (visita guidata)
+  - [X] elimina solo se autore
 
 ## Quicknav
-- [ ] editor btn
-      Auto new tour from scratch?
+- [ ] editor btn (start)
+      New tour
+      bad request need debugging
 
 ## Editor
 - [x] Bottoni per gestione dell'ordine 
@@ -19,9 +30,9 @@
 - [X] Refs
     - [X] Add
     - [X] Remove
-- [ ] Eliminazione item
+- [X] Eliminazione item
     - [X] ui (dropdown -> del -> overlay confirmation)
-    - [ ] backend (remove from references? or client-side?)
+    - [x] backend (remove from references? or client-side?)
     - [X] UNLINK
 - [~] Upload immagini 
     - [X] fix backend (potrebbe non essere sufficiente quello attuale)
@@ -37,18 +48,26 @@
 - [~] responsivness
 
 ### Bugs
-- [ ] auto set default level
+- [ ] auto set default level explanation
 
 # Navigator
-- [ ] Integrazione API TTS per convertire le descrizioni degli item in audio.
-- [ ] Integrazione comandi vocali mappati da API LLM.
+- [?] Integrazione API TTS per convertire le descrizioni degli item in audio.
+- [?] Integrazione comandi vocali mappati da API LLM.
 - [x] navigator - branch -> GUIDED or FREE
 
 ## Guided
-- [ ] Schermata navigator per studenti con test a crocette.
+- [x] Schermata navigator per studenti con test a crocette.
+  - [x] UI quiz completa con domande, opzioni multiscelta, punteggio
+  - [x] Master results dashboard per visualizzare punteggi partecipanti
+  - [x] Quiz feedback screen per rivedere risposte corrette/sbagliate
+  - [x] Timer countdown con auto-avanzamento (se configurato)
+  - [x] Normalizzazione campi domande (prompt -> questionText)
+  - [x] Colori dinamici timer (rosso <5s, giallo <10s)
+  - [x] Navigation review risposte (prev/next domande)
 - [x] Sistema di sincronizzazione della visita.
   - [x] Utente insegnante server.
   - [x] Utente studente client.
+- [ ] area guide -> come si fa partire?
 
 # Routing
 - [~] No-login solo per market e access
@@ -57,6 +76,13 @@
 - [ ] settare file a 755 e? 644
 
 # Backend
+- [x] Item deletion with bidirectional ref cleanup
+  - [x] Remove deleted item from all other items' refs arrays
+- [x] Cascade delete tour
+  - [x] Delete all items in tour (hard delete)
+  - [x] Clean up item cross-references
+  - [x] Remove tour from user.authoredTours
+  - [x] Remove tour from user.purchasedTours
 - [ ] Session system (synchro)
   - [x] message passing
   - [ ] collect and elaborate results

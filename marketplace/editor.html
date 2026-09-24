@@ -397,165 +397,467 @@
         </section>
         <section x-show="activeTab == 'edit_tour'">
           <template x-if="tour">
-            <div class="flex flex-col gap-6 p-4">
-              <button
-                class="shared-button-full-primary"
-                @click="saveItemsAndTour()"
-              >
-                Salva tour
-              </button>
-
-              <fieldset
-                x-data="{
-        questions: tour.quiz?.questions || [],
-        newQ: { text: '', options: ['', ''], correct: 0, time: 30 },
-        addQuestion() {
-          this.questions.push(JSON.parse(JSON.stringify(this.newQ)))
-          this.newQ = { text: '', options: ['', ''], correct: 0, time: 30 }
-        },
-        removeQuestion(idx) { this.questions.splice(idx,1) }
-      }"
-              >
-                <legend class="text-xl font-semibold">
-                  Domande (Multiple Choice)
-                </legend>
-                <template x-for="(q, idx) in questions">
-                  <div class="mb-6 border-b pb-4">
-                    <div class="flex gap-2 items-center">
-                      <label class="font-bold">Domanda:</label>
-                      <input
-                        x-model="q.text"
-                        type="text"
-                        class="border rounded px-2 py-1 flex-1"
-                        required
-                      />
-                      <button
-                        type="button"
-                        class="shared-button-flex-warning ml-2"
-                        @click="removeQuestion(idx)"
-                      >
-                        &times;
-                      </button>
-                    </div>
-                    <div class="ml-4 mt-2">
-                      <label class="block font-semibold">Opzioni:</label>
-                      <template x-for="(opt, oidx) in q.options">
-                        <div class="flex items-center gap-2 my-1">
-                          <input
-                            type="radio"
-                            :name="'correct-'+idx"
-                            :value="oidx"
-                            x-model="q.correct"
-                          />
-                          <input
-                            x-model="q.options[oidx]"
-                            type="text"
-                            class="border rounded px-2 py-1 flex-1"
-                            required
-                          />
-                          <button
-                            type="button"
-                            class="shared-button-flex-warning"
-                            @click="q.options.splice(oidx,1)"
-                            x-show="q.options.length > 2"
-                          >
-                            &minus;
-                          </button>
-                        </div>
-                      </template>
-                      <button
-                        type="button"
-                        class="shared-button-flex-primary mt-1"
-                        @click="q.options.push('')"
-                      >
-                        + Opzione
-                      </button>
-                    </div>
-                    <div class="ml-4 mt-2">
-                      <label class="font-semibold"
-                        >Tempo per rispondere (s):</label
-                      >
-                      <input
-                        x-model.number="q.time"
-                        type="number"
-                        min="5"
-                        max="300"
-                        class="border rounded px-2 py-1 w-20"
-                      />
-                    </div>
-                  </div>
-                </template>
-
-                <!-- Add New Question -->
-                <div class="border border-p-soft rounded-lg p-4 mt-4">
-                  <label class="font-bold">Nuova domanda:</label>
-                  <input
-                    x-model="newQ.text"
-                    type="text"
-                    class="border rounded px-2 py-1 w-full mt-1 mb-2"
-                    placeholder="Testo domanda"
-                  />
-                  <div class="ml-2">
-                    <label class="block font-semibold">Opzioni:</label>
-                    <template x-for="(opt, oidx) in newQ.options">
-                      <div class="flex items-center gap-2 my-1">
-                        <input
-                          type="radio"
-                          :name="'new-correct'"
-                          :value="oidx"
-                          x-model="newQ.correct"
-                        />
-                        <input
-                          x-model="newQ.options[oidx]"
-                          type="text"
-                          class="border rounded px-2 py-1 flex-1"
-                          required
-                        />
-                        <button
-                          type="button"
-                          class="shared-button-flex-warning"
-                          @click="newQ.options.splice(oidx,1)"
-                          x-show="newQ.options.length > 2"
-                        >
-                          &minus;
-                        </button>
-                      </div>
-                    </template>
-                    <button
-                      type="button"
-                      class="shared-button-flex-primary mt-1"
-                      @click="newQ.options.push('')"
-                    >
-                      + Opzione
-                    </button>
-                  </div>
-                  <div class="ml-2 mt-2 flex items-center">
-                    <label>Tempo (s):</label>
+            <div
+              class="w-full rounded-tr-3xl rounded-br-3xl rounded-bl-3xl shadow-sm border border-p-soft"
+            >
+              <div class="w-full flex flex-col p-4">
+                <div class="border-b border-p-soft p-4 mb-2">
+                  <h1 class="text-2xl text-p-medium font-bold">
+                    Modifica Tour
+                  </h1>
+                </div>
+                <form
+                  @submit.prevent="saveItemsAndTour()"
+                  class="grid grid-cols-1 md:grid-cols-2 text-p-medium md:p-8 gap-6 mb-6"
+                >
+                  <!-- Nome tour -->
+                  <div class="flex flex-col gap-1 w-full md:col-span-2">
+                    <label class="text-sm font-medium">Nome del tour</label>
                     <input
-                      x-model.number="newQ.time"
-                      type="number"
-                      min="5"
-                      max="300"
-                      class="ml-2 border rounded px-2 py-1 w-20"
+                      type="text"
+                      x-model="tour.name"
+                      required
+                      class="w-full px-4 py-2 rounded-xl border border-p-soft bg-p-light text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium transition-shadow"
                     />
                   </div>
+
+                  <!-- Descrizione -->
+                  <div class="flex flex-col gap-1 w-full md:col-span-2">
+                    <label class="text-sm font-medium">Descrizione</label>
+                    <textarea
+                      x-model="tour.description"
+                      rows="3"
+                      class="w-full px-4 py-2 rounded-xl border border-p-soft bg-p-light text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium resize-none"
+                    ></textarea>
+                  </div>
+
+                  <!-- Prezzo -->
+                  <div class="flex flex-col gap-1 w-full">
+                    <label class="text-sm font-medium">Prezzo (€)</label>
+                    <input
+                      type="number"
+                      x-model.number="tour.price"
+                      min="0"
+                      step="0.01"
+                      required
+                      class="w-full px-4 py-2 rounded-xl border border-p-soft bg-p-light text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium"
+                    />
+                  </div>
+
+                  <!-- Location ingresso -->
+                  <div class="flex flex-col gap-1 w-full">
+                    <label class="text-sm font-medium">Location ingresso</label>
+                    <input
+                      type="text"
+                      x-model="tour.tourEntryLocation"
+                      class="w-full px-4 py-2 rounded-xl border border-p-soft bg-p-light text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium"
+                      placeholder="Es. Ingresso principale"
+                    />
+                  </div>
+
+                  <!-- Location uscita -->
+                  <div class="flex flex-col gap-1 w-full">
+                    <label class="text-sm font-medium">Location uscita</label>
+                    <input
+                      type="text"
+                      x-model="tour.tourExitLocation"
+                      class="w-full px-4 py-2 rounded-xl border border-p-soft bg-p-light text-p-dark focus:outline-none focus:ring-2 focus:ring-p-medium"
+                      placeholder="Es. Uscita principale"
+                    />
+                  </div>
+
+                  <!-- Thumbnail section (inside form) -->
+                  <div class="md:col-span-2 border-t border-p-soft pt-6">
+                    <h2 class="text-lg font-semibold mb-4">
+                      Immagine Copertina
+                    </h2>
+                    <div class="flex flex-col md:flex-row gap-4">
+                      <figure class="flex-1">
+                        <div x-data="{dopen: false}" class="relative mb-4">
+                          <button
+                            type="button"
+                            @click.stop="dopen = !dopen"
+                            class="btn btn-sm btn-circle bg-p-light/80 hover:bg-p-light text-p-dark border-none shadow-md backdrop-blur-sm focus:outline-none list-none"
+                          >
+                            <icon-three-dots></icon-three-dots>
+                          </button>
+                          <div
+                            x-show="dopen"
+                            x-transition
+                            @click.outside="dopen = false"
+                          >
+                            <ul class="nav-dropdown-menu dropdown-end p-2">
+                              <li>
+                                <button
+                                  type="button"
+                                  x-data="OverlayDispatcher('assetUpload')"
+                                  class="shared-button-flex-secondary shadow-none"
+                                  @click.stop="const res = await mkOverlayRequest({ filetype: 'image/png, image/jpeg' });
+                                      dopen = false;
+                                      if(res.status){
+                                          const res2 = await loadImage(res.file, true, user, tour)
+                                          const obj = await res2.json()
+                                          console.log('thumbnail upload', obj)
+                                          tour.thumbnail = obj._id
+                                      }"
+                                >
+                                  Carica
+                                </button>
+                              </li>
+                              <li>
+                                <button
+                                  type="button"
+                                  x-data="OverlayDispatcher('assetSelection')"
+                                  class="shared-button-flex-secondary shadow-none"
+                                  @click.stop="const res = await mkOverlayRequest({ tourID: tour._id });
+                                      dopen = false;
+                                      if(res.status){
+                                          tour.thumbnail = res.IDs[0]
+                                      }"
+                                >
+                                  Seleziona
+                                </button>
+                              </li>
+                            </ul>
+                          </div>
+                        </div>
+                        <div
+                          x-data="{
+          imageSrc: '',
+          isLoading: false,
+          setImage(id) {
+              this.isLoading = true;
+              this.imageSrc = id ? '/api/assets/' + id : '';
+          }
+      }"
+                          x-init="setImage(tour.thumbnail)"
+                          x-effect="setImage(tour.thumbnail)"
+                        >
+                          <img
+                            x-show="imageSrc"
+                            :src="isLoading ? 'https://dummyimage.com/300x300/aaa/111&text=Loading' : imageSrc"
+                            @load="isLoading = false"
+                            alt="Thumbnail tour"
+                            class="rounded-xl border border-p-soft"
+                          />
+                          <div
+                            x-show="!imageSrc"
+                            class="w-full h-48 rounded-xl border border-p-soft bg-p-soft flex items-center justify-center text-p-medium"
+                          >
+                            Nessuna immagine
+                          </div>
+                        </div>
+                      </figure>
+                    </div>
+                  </div>
+
+                  <!-- Map section (inside form) -->
+                  <div class="md:col-span-2 border-t border-p-soft pt-6 mb-6">
+                    <h2 class="text-lg font-semibold mb-4">Mappa del Museo</h2>
+                    <div class="flex flex-col md:flex-row gap-4">
+                      <figure class="flex-1">
+                        <div x-data="{dopen: false}" class="relative mb-4">
+                          <button
+                            type="button"
+                            @click.stop="dopen = !dopen"
+                            class="btn btn-sm btn-circle bg-p-light/80 hover:bg-p-light text-p-dark border-none shadow-md backdrop-blur-sm focus:outline-none list-none"
+                          >
+                            <icon-three-dots></icon-three-dots>
+                          </button>
+                          <div
+                            x-show="dopen"
+                            x-transition
+                            @click.outside="dopen = false"
+                          >
+                            <ul class="nav-dropdown-menu dropdown-end p-2">
+                              <li>
+                                <button
+                                  type="button"
+                                  x-data="OverlayDispatcher('assetUpload')"
+                                  class="shared-button-flex-secondary shadow-none"
+                                  @click.stop="const res = await mkOverlayRequest({ filetype: 'image/png, image/jpeg' });
+                                      dopen = false;
+                                      if(res.status){
+                                          const res2 = await loadImage(res.file, true, user, tour)
+                                          const obj = await res2.json()
+                                          console.log('map upload', obj)
+                                          tour.map = obj._id
+                                      }"
+                                >
+                                  Carica
+                                </button>
+                              </li>
+                              <li>
+                                <button
+                                  type="button"
+                                  x-data="OverlayDispatcher('assetSelection')"
+                                  class="shared-button-flex-secondary shadow-none"
+                                  @click.stop="const res = await mkOverlayRequest({ tourID: tour._id });
+                                      dopen = false;
+                                      if(res.status){
+                                          tour.map = res.IDs[0]
+                                      }"
+                                >
+                                  Seleziona
+                                </button>
+                              </li>
+                            </ul>
+                          </div>
+                        </div>
+                        <div
+                          x-data="{
+          imageSrc: '',
+          isLoading: false,
+          setImage(id) {
+              this.isLoading = true;
+              this.imageSrc = id ? '/api/assets/' + id : '';
+          }
+      }"
+                          x-init="setImage(tour.map)"
+                          x-effect="setImage(tour.map)"
+                        >
+                          <img
+                            x-show="imageSrc"
+                            :src="isLoading ? 'https://dummyimage.com/300x300/aaa/111&text=Loading' : imageSrc"
+                            @load="isLoading = false"
+                            alt="Mappa tour"
+                            class="rounded-xl border border-p-soft"
+                          />
+                          <div
+                            x-show="!imageSrc"
+                            class="w-full h-48 rounded-xl border border-p-soft bg-p-soft flex items-center justify-center text-p-medium"
+                          >
+                            Nessuna mappa
+                          </div>
+                        </div>
+                      </figure>
+                    </div>
+                  </div>
+
+                  <!-- Quiz section (inside form) -->
+                  <div class="md:col-span-2 border-t border-p-soft pt-6">
+                    <fieldset
+                      x-data="{
+          questions: [],
+          newQ: { prompt: '', options: ['', ''], correct: 0, timeLimit: 30 },
+          init() {
+            // Initialize from tour.quiz on mount
+            if (tour?.quiz?.questions && Array.isArray(tour.quiz.questions)) {
+              this.questions = JSON.parse(JSON.stringify(tour.quiz.questions))
+            } else {
+              this.questions = []
+            }
+          },
+          addQuestion() {
+            this.questions.push(JSON.parse(JSON.stringify(this.newQ)))
+            this.newQ = { prompt: '', options: ['', ''], correct: 0, timeLimit: 30 }
+            this.syncToTour()
+          },
+          removeQuestion(idx) { 
+            this.questions.splice(idx,1)
+            this.syncToTour()
+          },
+          syncToTour() {
+            if (!tour) return
+            if (!tour.quiz) tour.quiz = { questions: [] }
+            tour.quiz.questions = JSON.parse(JSON.stringify(this.questions))
+          }
+        }"
+                      @change="syncToTour()"
+                    >
+                      <legend class="text-lg font-semibold mb-4">
+                        Domande Quiz (Multiple Choice)
+                      </legend>
+
+                      <!-- Existing Questions -->
+                      <template x-for="(q, idx) in questions">
+                        <div
+                          class="mb-6 p-4 border border-p-soft rounded-lg bg-p-soft/10"
+                        >
+                          <div class="flex gap-2 items-center mb-3">
+                            <label
+                              class="font-semibold text-sm"
+                              x-text="`Domanda ${idx + 1}:`"
+                            ></label>
+                            <input
+                              x-model="q.prompt"
+                              @change="syncToTour()"
+                              type="text"
+                              class="border rounded px-3 py-1 flex-1 bg-p-light focus:outline-none focus:ring-2 focus:ring-p-medium"
+                              required
+                            />
+                            <button
+                              type="button"
+                              class="shared-button-flex-warning"
+                              @click="removeQuestion(idx)"
+                            >
+                              &times;
+                            </button>
+                          </div>
+
+                          <!-- Options -->
+                          <div class="ml-4 mt-3">
+                            <label class="block font-semibold text-sm mb-2"
+                              >Opzioni:</label
+                            >
+                            <template x-for="(opt, oidx) in q.options">
+                              <div class="flex items-center gap-2 my-2">
+                                <input
+                                  type="radio"
+                                  :name="'correct-'+idx"
+                                  :value="oidx"
+                                  x-model.number="q.correct"
+                                  @change="syncToTour()"
+                                  class="cursor-pointer"
+                                />
+                                <input
+                                  x-model="q.options[oidx]"
+                                  @change="syncToTour()"
+                                  type="text"
+                                  class="border rounded px-3 py-1 flex-1 bg-p-light focus:outline-none focus:ring-2 focus:ring-p-medium"
+                                  placeholder="Testo opzione"
+                                  required
+                                />
+                                <button
+                                  type="button"
+                                  class="shared-button-flex-warning"
+                                  @click="q.options.splice(oidx,1)"
+                                  x-show="q.options.length > 2"
+                                >
+                                  −
+                                </button>
+                              </div>
+                            </template>
+                            <button
+                              type="button"
+                              class="shared-button-flex-primary mt-2 text-sm"
+                              @click="q.options.push('')"
+                            >
+                              + Opzione
+                            </button>
+                          </div>
+
+                          <!-- Time Limit -->
+                          <div class="ml-4 mt-3 flex items-center gap-2">
+                            <label class="font-semibold text-sm"
+                              >Tempo limite (s):</label
+                            >
+                            <input
+                              x-model.number="q.timeLimit"
+                              @change="syncToTour()"
+                              type="number"
+                              min="5"
+                              max="300"
+                              class="border rounded px-3 py-1 w-24 bg-p-light focus:outline-none focus:ring-2 focus:ring-p-medium"
+                            />
+                          </div>
+                        </div>
+                      </template>
+
+                      <!-- Add New Question Section -->
+                      <div
+                        class="border-2 border-dashed border-p-soft rounded-lg p-4 mt-4 bg-p-soft/5"
+                      >
+                        <h3 class="font-semibold mb-3">
+                          Aggiungi Nuova Domanda
+                        </h3>
+
+                        <div class="mb-3">
+                          <label class="block text-sm font-medium mb-1"
+                            >Testo domanda:</label
+                          >
+                          <input
+                            x-model="newQ.prompt"
+                            @change="syncToTour()"
+                            type="text"
+                            class="border rounded px-3 py-2 w-full bg-p-light focus:outline-none focus:ring-2 focus:ring-p-medium"
+                            placeholder="Es. Quale artista ha dipinto...?"
+                          />
+                        </div>
+
+                        <div class="mb-3">
+                          <label class="block text-sm font-medium mb-2"
+                            >Opzioni di risposta:</label
+                          >
+                          <template x-for="(opt, oidx) in newQ.options">
+                            <div class="flex items-center gap-2 my-2">
+                              <input
+                                type="radio"
+                                :name="'new-correct'"
+                                :value="oidx"
+                                x-model.number="newQ.correct"
+                                @change="syncToTour()"
+                                class="cursor-pointer"
+                              />
+                              <input
+                                x-model="newQ.options[oidx]"
+                                @change="syncToTour()"
+                                type="text"
+                                class="border rounded px-3 py-1 flex-1 bg-p-light focus:outline-none focus:ring-2 focus:ring-p-medium"
+                                placeholder="Es. Leonardo da Vinci"
+                              />
+                              <button
+                                type="button"
+                                class="shared-button-flex-warning"
+                                @click="newQ.options.splice(oidx,1)"
+                                x-show="newQ.options.length > 2"
+                              >
+                                −
+                              </button>
+                            </div>
+                          </template>
+                          <button
+                            type="button"
+                            class="shared-button-flex-primary mt-2 text-sm"
+                            @click="newQ.options.push('')"
+                          >
+                            + Aggiungi Opzione
+                          </button>
+                        </div>
+
+                        <div class="flex items-center gap-2 mb-3">
+                          <label class="text-sm font-medium"
+                            >Tempo limite (s):</label
+                          >
+                          <input
+                            x-model.number="newQ.timeLimit"
+                            @change="syncToTour()"
+                            type="number"
+                            min="5"
+                            max="300"
+                            value="30"
+                            class="border rounded px-3 py-1 w-24 bg-p-light focus:outline-none focus:ring-2 focus:ring-p-medium"
+                          />
+                        </div>
+
+                        <button
+                          type="button"
+                          class="shared-button-full-primary w-full"
+                          @click="addQuestion()"
+                          :disabled="!newQ.prompt || newQ.options.some(o => !o)"
+                        >
+                          Aggiungi Domanda al Quiz
+                        </button>
+                      </div>
+
+                      <!-- Sync quiz to tour model -->
+                      <div class="mt-4 text-xs text-p-medium/60">
+                        <em
+                          x-text="'Quiz: ' + questions.length + ' domande'"
+                        ></em>
+                      </div>
+                    </fieldset>
+                  </div>
+
+                  <!-- Salva tour (button at end of form) -->
                   <button
-                    type="button"
-                    class="shared-button-full-primary mt-2"
-                    @click="addQuestion()"
-                    :disabled="!newQ.text || newQ.options.some(o => !o)"
+                    type="submit"
+                    class="shared-button-full-primary md:col-span-2"
                   >
-                    Aggiungi domanda
+                    Salva Modifiche Tour + Quiz
                   </button>
-                </div>
-                <!-- Save the questions to tour -->
-                <button
-                  class="shared-button-full-primary mt-6"
-                  @click="if(!tour.quiz?.questions) {tour.quiz = { questions: []}} tour.quiz.questions = questions"
-                >
-                  Salva le domande
-                </button>
-              </fieldset>
+                </form>
+              </div>
             </div>
           </template>
         </section>
@@ -733,52 +1035,116 @@
     <div x-data="OverlayListener('assetSelection')" x-cloak>
       <template x-if="open && body">
         <div
-          class="fixed inset-0 items-center justify-center z-60"
+          class="fixed inset-0 flex items-center justify-center z-60"
           style="background-color: rgba(0, 0, 0, 0.8)"
         >
           <div
-            class="bg-p-light rounded-lg p-6 w-screen max-w-full md:w-[50vw] lg:w-[30vw] shadow-xl flex flex-col items-center"
+            class="bg-p-light rounded-lg p-6 w-screen max-w-full md:w-[80vw] lg:w-[70vw] shadow-xl flex flex-col max-h-[80vh]"
           >
-            <header class="flex justify-between">
-              <!-- <h1
-                            class="text-2xl text-p-medium font-bold"
-                            x-text="body.message"
-                          ></h1> -->
-
+            <header class="flex justify-between items-center mb-6">
+              <h1 class="text-2xl text-p-medium font-bold">
+                Seleziona un'immagine
+              </h1>
               <button
-                class="float-right w-[15vw] h-[15vw] md:w-10 md:h-10 rounded-full bg-[var(--color-p-light)] text-[var(--color-p-dark)] text-2xl"
+                class="w-10 h-10 rounded-full bg-p-soft hover:bg-p-medium text-p-dark text-2xl flex items-center justify-center"
                 @click="close(false)"
               >
                 &times;
               </button>
             </header>
-            <ul
+
+            <div
               x-data="{
-                        metaAssets: null,
+                        metaAssets: [],
+                        selectedId: null,
+                        isLoading: true,
                         async init(){
                             const res = await fetch('/api/assets?tour='+body.tourID)
-                        if (res.ok){
-                            this.metaAssets = await res.json()
-                        }
+                            if (res.ok){
+                                this.metaAssets = await res.json()
+                            }
+                            this.isLoading = false
                         }
                        }"
+              class="flex flex-col gap-4 overflow-y-auto flex-1"
             >
-              <template x-for="meta in metaAssets">
-                <template x-if="meta.miniature">
-                  <li>
-                    <img :src="'/api/assets/'+meta.miniature" />
-                    <input
-                      type="checkbox"
-                      @click="if(!body.IDs) {body.IDs = []}
-                            body.IDs.push(meta._id)"
-                    />
-                  </li>
+              <!-- Loading state -->
+              <div
+                x-show="isLoading"
+                class="flex items-center justify-center py-8"
+              >
+                <div class="text-p-medium">Caricamento immagini...</div>
+              </div>
+
+              <!-- Empty state -->
+              <div
+                x-show="!isLoading && metaAssets.length === 0"
+                class="flex items-center justify-center py-8"
+              >
+                <div class="text-p-medium">
+                  Nessuna immagine caricata per questo tour
+                </div>
+              </div>
+
+              <!-- Image grid -->
+              <div
+                x-show="!isLoading && metaAssets.length > 0"
+                class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+              >
+                <template x-for="meta in metaAssets">
+                  <template x-if="meta.miniature">
+                    <div
+                      class="relative group cursor-pointer rounded-lg overflow-hidden border-2 transition-all"
+                      :class="selectedId === meta._id
+                        ? 'border-blue-500 ring-2 ring-blue-400'
+                        : 'border-p-soft hover:border-p-medium'"
+                      @click="selectedId = meta._id"
+                    >
+                      <img
+                        :src="'/api/assets/' + meta.miniature"
+                        :alt="'Asset ' + meta._id"
+                        class="w-full h-40 object-cover"
+                      />
+                      <!-- Checkmark overlay -->
+                      <div
+                        x-show="selectedId === meta._id"
+                        class="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center"
+                      >
+                        <svg
+                          class="w-8 h-8 text-white"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fill-rule="evenodd"
+                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                            clip-rule="evenodd"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                  </template>
                 </template>
-              </template>
-            </ul>
-            <button class="shared-button-primary" @click="close(true)">
-              Ok
-            </button>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex gap-3 mt-6 justify-end">
+              <button
+                class="shared-button-full-secondary px-6"
+                @click="close(false)"
+              >
+                Annulla
+              </button>
+              <button
+                class="shared-button-full-primary px-6"
+                @click="if(selectedId) { if(!body.IDs) {body.IDs = []} body.IDs = [selectedId] } close(true)"
+                :disabled="!selectedId"
+                :class="!selectedId ? 'opacity-50 cursor-not-allowed' : ''"
+              >
+                Seleziona
+              </button>
+            </div>
           </div>
         </div>
       </template>
