@@ -168,19 +168,25 @@ router.get('/:id/clients', async (req, res) => {
   const result = SessionService.getClients(req.params.id)
 
   result.caseOf({
-    Right: (clients) => {
+    Right: (clients: Types.ObjectId[]) => {
       const safeClients = Array.isArray(clients)
-        ? clients.map((c: any) => ({
-            id:
-              c._id ||
-              c.id ||
-              c.userId ||
-              (typeof c === 'string' ? c : 'unknown'),
-            username:
-              c.username || c.name || (typeof c === 'string' ? c : 'Anonimo'),
+        ? clients.map((c: Types.ObjectId) => ({
+            id: c.toHexString(),
+            username: 'Anonimo',
           }))
         : []
       return res.json(safeClients)
+    },
+    Left: handleLeft(res),
+  })
+})
+
+router.get('/:id/quizResults', async (req, res) => {
+  const result = SessionService.getQuizResults(req.params.id)
+
+  result.caseOf({
+    Right: (results) => {
+      return res.json(results)
     },
     Left: handleLeft(res),
   })

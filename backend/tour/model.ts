@@ -126,6 +126,7 @@ export const safeTourFields: (keyof _Tour)[] = [
   'description',
   'thumbnail',
   'map',
+  'quiz',
   'tourEntryLocation',
   'tourExitLocation',
 ]

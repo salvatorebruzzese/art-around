@@ -129,11 +129,24 @@ export function startQuiz(sessionId: string): Either<NotFound, Session> {
 
 export function submitQuiz(
   sessionId: string,
-  _userId: Types.ObjectId,
-  _answers: number[],
+  userId: Types.ObjectId,
+  answers: number[],
 ): Either<NotFound, Session> {
   const session = sessions.get(sessionId)
   if (!session || session.state !== 'quiz') return Left(notFound())
+
+  // Inizializza quizAnswers se non esiste
+  if (!session.quizAnswers) {
+    session.quizAnswers = new Map()
+  }
+
+  // Salva risposte con timestamp
+  const userIdHex = userId.toHexString()
+  session.quizAnswers.set(userIdHex, {
+    answers,
+    submittedAt: new Date(),
+  })
+
   return Right(session)
 }
 
@@ -146,4 +159,21 @@ export function getClients(
   sessionId: string,
 ): Either<NotFound, Types.ObjectId[]> {
   return getSession(sessionId).map((session) => session.clients)
+}
+
+export function getQuizResults(
+  sessionId: string,
+): Either<NotFound, Record<string, { answers: number[]; submittedAt: Date }>> {
+  const session = sessions.get(sessionId)
+  if (!session) return Left(notFound())
+
+  const results: Record<string, { answers: number[]; submittedAt: Date }> = {}
+
+  if (session.quizAnswers && session.quizAnswers instanceof Map) {
+    session.quizAnswers.forEach((submission, userIdHex) => {
+      results[userIdHex] = submission
+    })
+  }
+
+  return Right(results)
 }

@@ -1530,7 +1530,7 @@ export default {
           )
 
           let res = await fetch(
-            `/api/session/${encodeURIComponent(this.sessionId)}/submitQuiz`,
+            `/api/sessions/${encodeURIComponent(this.sessionId)}/submitQuiz`,
             {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
