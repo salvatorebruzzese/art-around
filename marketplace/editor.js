@@ -94,6 +94,11 @@ document.addEventListener('alpine:init', () => {
 
         async saveItemsAndTour() {
           try {
+            // Ensure quiz exists (fieldset getter will handle sync automatically)
+            if (!this.tour.quiz) {
+              this.tour.quiz = { questions: [] }
+            }
+
             let newItems = await Promise.all(
               Object.entries(this.items).map(async ([id, i]) => {
                 if (typeof id === 'number') i._id = null // new item
@@ -118,6 +123,7 @@ document.addEventListener('alpine:init', () => {
               map: this.tour.map,
               quiz: this.tour.quiz,
             }
+            console.log(tour)
             saveTour(tour)
             alert('Modifiche salvate con successo!')
           } catch (e) {
