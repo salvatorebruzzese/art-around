@@ -840,11 +840,18 @@ class MasterTourController extends TourController {
       let res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ itemId }),
         signal: this.abortController.signal,
       })
+      if (!res.ok) {
+        console.error(`Broadcast showItem failed: ${res.status}`)
+      }
     } catch (e) {
-      // Ignora abort
+      // Ignora abort, ma log altri errori
+      if (e.name !== 'AbortError') {
+        console.error('Errore broadcastShowItem:', e)
+      }
     }
   }
 
@@ -858,9 +865,13 @@ class MasterTourController extends TourController {
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
         },
       )
 
+      if (!res.ok) {
+        console.error(`Start quiz failed: ${res.status}`)
+      }
       return res.ok
     } catch (err) {
       console.error('Errore startQuiz:', err)
@@ -885,6 +896,8 @@ class GuidedTourController extends TourController {
     this.username = username
     this.onStartQuiz = onStartQuiz
     this.eventSource = null
+    this.hasReceivedFirstEvent = false
+    this.refreshScheduled = false
   }
 
   connect() {
@@ -922,14 +935,27 @@ class GuidedTourController extends TourController {
   bindEvents() {
     if (!this.eventSource) return
 
+    // Schedule a refresh check after join - if no real events arrive, reload
+    if (!this.refreshScheduled && typeof window !== 'undefined') {
+      this.refreshScheduled = true
+      setTimeout(() => {
+        // If we haven't received any real event (showItem/startQuiz), refresh
+        if (!this.hasReceivedFirstEvent) {
+          window.location.reload()
+        }
+      }, 2000)
+    }
+
     this.eventSource.addEventListener('showItem', (event) => {
       try {
+        this.hasReceivedFirstEvent = true
         const payload = JSON.parse(event.data || '{}')
         this.showItem(payload.itemId)
       } catch (_err) {}
     })
 
     this.eventSource.addEventListener('startQuiz', () => {
+      this.hasReceivedFirstEvent = true
       if (typeof this.onStartQuiz === 'function') {
         this.onStartQuiz()
       }
@@ -1287,6 +1313,12 @@ export default {
       this.detachedStack = state.detachedStack
     },
     setupController() {
+      // Skip if guided controller already set up early in initTour
+      if (this.controllerMode === 'guided' && this.controller) {
+        this.controller.setItemNav(this.itemNav)
+        return
+      }
+
       if (this.controller) {
         this.controller.teardown()
       }
@@ -1295,17 +1327,7 @@ export default {
         onChange: this.applyControllerState,
       }
 
-      if (this.controllerMode === 'guided' && this.sessionId) {
-        this.controller = new GuidedTourController({
-          ...common,
-          sessionId: this.sessionId,
-          username: this.sessionUsername,
-          onStartQuiz: async () => {
-            await this.handleStartQuizEvent()
-          },
-        })
-        this.controller.connect()
-      } else if (this.controllerMode === 'master' && this.sessionId) {
+      if (this.controllerMode === 'master' && this.sessionId) {
         this.controller = new MasterTourController({
           ...common,
           sessionId: this.sessionId,
@@ -1324,6 +1346,23 @@ export default {
       this.sessionUsername = settings.username
 
       try {
+        // For guided tours, connect to SSE immediately to avoid missing events
+        if (this.controllerMode === 'guided' && this.sessionId) {
+          const common = {
+            itemNav: this.itemNav,
+            onChange: this.applyControllerState,
+          }
+          this.controller = new GuidedTourController({
+            ...common,
+            sessionId: this.sessionId,
+            username: this.sessionUsername,
+            onStartQuiz: async () => {
+              await this.handleStartQuizEvent()
+            },
+          })
+          this.controller.connect()
+        }
+
         if (this.sessionId && (!this.tourId || this.tourId === 'demo-tour')) {
           let sRes = await fetch(
             `/api/sessions/${encodeURIComponent(this.sessionId)}`,
