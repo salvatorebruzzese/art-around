@@ -64,7 +64,7 @@
                       fill="none"
                     ></circle>
                   </svg>
-                  {{ getItemsDuration(tour.items) || '--' }} min
+                  {{ getItemsDuration(tour.items.length) || '--' }} min
                 </span>
                 <span class="flex items-center gap-1">
                   <svg
@@ -277,7 +277,6 @@ const museums = ref([])
 const authors = reactive({})
 const showTourConfirmOverlay = ref(false)
 const selectedTour = ref(null)
-const itemsByTour = ref({})
 
 const showTourConfirm = (tour) => {
   selectedTour.value = tour
@@ -325,35 +324,12 @@ const fetchAuthor = async (authorId) => {
   }
 }
 
-const getItemsDuration = (itemIds) => {
-  if (!Array.isArray(itemIds) || !itemIds.length) return '--'
+const getItemsDuration = (numberOfItems) => {
+  if (!numberOfItems || numberOfItems === 0) return '--'
 
-  let foundItems = []
-  for (const k in itemsByTour.value) {
-    const items = itemsByTour.value[k]
-    if (Array.isArray(items)) {
-      foundItems = foundItems.concat(
-        items.filter((itm) => itemIds.includes(itm._id)),
-      )
-    }
-  }
+  const averageSecondsPerItem = 180 // 3 minutes
 
-  let totalSec = 0
-  for (const itm of foundItems) {
-    if (Array.isArray(itm.explanations) && itm.explanations.length) {
-      let expl =
-        itm.explanations.find((e) => e.level === 'normal') ||
-        itm.explanations[0]
-      if (expl && typeof expl.durationSeconds === 'number')
-        totalSec += expl.durationSeconds
-    }
-  }
-
-  return Math.round(totalSec / 60) || '--'
-}
-
-const openProfile = () => {
-  window.location.href = '/profile'
+  return Math.round((averageSecondsPerItem * numberOfItems) / 60) || '--'
 }
 
 // Watchers
