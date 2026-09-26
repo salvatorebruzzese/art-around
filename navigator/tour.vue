@@ -402,8 +402,11 @@
                 Domanda {{ currentQuizQuestionIdx + 1 }} di
                 {{ quizQuestions.length }}
               </span>
-              <div v-if="currentQuestionTimeLimit" class="text-xs text-p-medium/60">
-                Tempo: 
+              <div
+                v-if="currentQuestionTimeLimit"
+                class="text-xs text-p-medium/60"
+              >
+                Tempo:
                 <span :class="timeDisplayColor" class="font-semibold">
                   {{ quizTimeRemaining }}s
                 </span>
@@ -496,7 +499,10 @@
         <!-- Risultati completati -->
         <template v-else-if="isQuizCompleted">
           <!-- Participant Results & Review View -->
-          <div v-if="!isMaster && !isQuizReviewMode" class="text-center flex flex-col items-center gap-4 py-8">
+          <div
+            v-if="!isMaster && !isQuizReviewMode"
+            class="text-center flex flex-col items-center gap-4 py-8"
+          >
             <div
               class="w-16 h-16 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-2xl font-bold"
             >
@@ -544,10 +550,18 @@
           </div>
 
           <!-- Quiz Review Screen -->
-          <div v-else-if="!isMaster && isQuizReviewMode" class="flex flex-col gap-6">
-            <div class="flex items-center justify-between border-b border-p-soft/50 pb-4">
-              <span class="text-sm font-semibold tracking-wide uppercase text-p-medium/70">
-                Domanda {{ currentQuizQuestionIdx + 1 }} di {{ quizQuestions.length }}
+          <div
+            v-else-if="!isMaster && isQuizReviewMode"
+            class="flex flex-col gap-6"
+          >
+            <div
+              class="flex items-center justify-between border-b border-p-soft/50 pb-4"
+            >
+              <span
+                class="text-sm font-semibold tracking-wide uppercase text-p-medium/70"
+              >
+                Domanda {{ currentQuizQuestionIdx + 1 }} di
+                {{ quizQuestions.length }}
               </span>
               <button
                 @click="exitQuizReviewMode"
@@ -559,10 +573,15 @@
 
             <section v-if="currentQuizQuestion" class="flex flex-col gap-4">
               <div>
-                <h2 class="text-lg md:text-xl font-bold text-p-dark font-serif mb-2">
+                <h2
+                  class="text-lg md:text-xl font-bold text-p-dark font-serif mb-2"
+                >
                   {{ currentQuizQuestion.questionText }}
                 </h2>
-                <p v-if="currentQuizQuestion.hint" class="text-xs text-p-medium/60 italic">
+                <p
+                  v-if="currentQuizQuestion.hint"
+                  class="text-xs text-p-medium/60 italic"
+                >
                   {{ currentQuizQuestion.hint }}
                 </p>
               </div>
@@ -576,18 +595,28 @@
                   disabled
                   class="w-full text-left p-4 rounded-xl border transition flex items-start justify-between group"
                   :class="{
-                    'bg-green-50 border-green-300': idx === currentQuizQuestion.correct,
-                    'bg-red-50 border-red-300': idx === selectedQuizAnswers[currentQuizQuestionIdx] && idx !== currentQuizQuestion.correct,
-                    'bg-p-soft/20 border-p-soft': idx !== currentQuizQuestion.correct && idx !== selectedQuizAnswers[currentQuizQuestionIdx],
+                    'bg-green-50 border-green-300':
+                      idx === currentQuizQuestion.correct,
+                    'bg-red-50 border-red-300':
+                      idx === selectedQuizAnswers[currentQuizQuestionIdx] &&
+                      idx !== currentQuizQuestion.correct,
+                    'bg-p-soft/20 border-p-soft':
+                      idx !== currentQuizQuestion.correct &&
+                      idx !== selectedQuizAnswers[currentQuizQuestionIdx],
                   }"
                 >
                   <span class="flex items-center gap-3 flex-1">
                     <span
                       class="w-7 h-7 rounded-full border flex items-center justify-center text-xs font-mono transition flex-shrink-0"
                       :class="{
-                        'bg-green-500 text-white border-green-500': idx === currentQuizQuestion.correct,
-                        'bg-red-500 text-white border-red-500': idx === selectedQuizAnswers[currentQuizQuestionIdx] && idx !== currentQuizQuestion.correct,
-                        'border-p-soft text-p-medium': idx !== currentQuizQuestion.correct && idx !== selectedQuizAnswers[currentQuizQuestionIdx],
+                        'bg-green-500 text-white border-green-500':
+                          idx === currentQuizQuestion.correct,
+                        'bg-red-500 text-white border-red-500':
+                          idx === selectedQuizAnswers[currentQuizQuestionIdx] &&
+                          idx !== currentQuizQuestion.correct,
+                        'border-p-soft text-p-medium':
+                          idx !== currentQuizQuestion.correct &&
+                          idx !== selectedQuizAnswers[currentQuizQuestionIdx],
                       }"
                     >
                       {{ String.fromCharCode(65 + idx) }}
@@ -595,8 +624,18 @@
                     <span class="text-p-dark">{{ option }}</span>
                   </span>
                   <span class="ml-2 text-sm font-semibold flex-shrink-0">
-                    <span v-if="idx === currentQuizQuestion.correct" class="text-green-600">✓ Corretto</span>
-                    <span v-else-if="idx === selectedQuizAnswers[currentQuizQuestionIdx]" class="text-red-600">✗ Sbagliato</span>
+                    <span
+                      v-if="idx === currentQuizQuestion.correct"
+                      class="text-green-600"
+                      >✓ Corretto</span
+                    >
+                    <span
+                      v-else-if="
+                        idx === selectedQuizAnswers[currentQuizQuestionIdx]
+                      "
+                      class="text-red-600"
+                      >✗ Sbagliato</span
+                    >
                   </span>
                 </button>
               </div>
@@ -634,20 +673,36 @@
                 Risultati Quiz
               </h2>
               <p class="text-p-medium/80 text-sm">
-                Risposte ricevute da {{ (quizResults && Object.keys(quizResults).length) || 0 }} 
-                partecipant{{ (quizResults && Object.keys(quizResults).length) !== 1 ? 'i' : 'e' }}
+                Risposte ricevute da
+                {{ (quizResults && Object.keys(quizResults).length) || 0 }}
+                partecipant{{
+                  (quizResults && Object.keys(quizResults).length) !== 1
+                    ? 'i'
+                    : 'e'
+                }}
               </p>
             </div>
 
             <!-- Results Table -->
-            <div v-if="quizResults && Object.keys(quizResults).length > 0" class="overflow-x-auto">
+            <div
+              v-if="quizResults && Object.keys(quizResults).length > 0"
+              class="overflow-x-auto"
+            >
               <table class="w-full text-sm">
                 <thead>
                   <tr class="border-b-2 border-p-soft">
-                    <th class="text-left py-2 px-3 font-semibold text-p-dark">Partecipante</th>
-                    <th class="text-center py-2 px-3 font-semibold text-p-dark">Punteggio</th>
-                    <th class="text-center py-2 px-3 font-semibold text-p-dark">Percentuale</th>
-                    <th class="text-center py-2 px-3 font-semibold text-p-dark">Invio</th>
+                    <th class="text-left py-2 px-3 font-semibold text-p-dark">
+                      Partecipante
+                    </th>
+                    <th class="text-center py-2 px-3 font-semibold text-p-dark">
+                      Punteggio
+                    </th>
+                    <th class="text-center py-2 px-3 font-semibold text-p-dark">
+                      Percentuale
+                    </th>
+                    <th class="text-center py-2 px-3 font-semibold text-p-dark">
+                      Invio
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -660,32 +715,107 @@
                       {{ userId }}
                     </td>
                     <td class="text-center py-3 px-3 text-p-dark font-semibold">
-                      {{ result.answers.filter(a => a !== -1).reduce((acc, ans, idx) => 
-                        acc + (ans === quizQuestions[idx].correct ? 1 : 0), 0) }} / {{ quizQuestions.length }}
+                      {{
+                        result.answers
+                          .filter((a) => a !== -1)
+                          .reduce(
+                            (acc, ans, idx) =>
+                              acc +
+                              (ans === quizQuestions[idx].correct ? 1 : 0),
+                            0,
+                          )
+                      }}
+                      / {{ quizQuestions.length }}
                     </td>
                     <td class="text-center py-3 px-3 text-p-dark">
                       <span
                         class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold"
                         :class="{
-                          'bg-green-100 text-green-700': 
-                            Math.round((result.answers.filter(a => a !== -1).reduce((acc, ans, idx) => 
-                              acc + (ans === quizQuestions[idx].correct ? 1 : 0), 0) / quizQuestions.length) * 100) >= 70,
-                          'bg-yellow-100 text-yellow-700': 
-                            Math.round((result.answers.filter(a => a !== -1).reduce((acc, ans, idx) => 
-                              acc + (ans === quizQuestions[idx].correct ? 1 : 0), 0) / quizQuestions.length) * 100) >= 50 &&
-                            Math.round((result.answers.filter(a => a !== -1).reduce((acc, ans, idx) => 
-                              acc + (ans === quizQuestions[idx].correct ? 1 : 0), 0) / quizQuestions.length) * 100) < 70,
-                          'bg-red-100 text-red-700': 
-                            Math.round((result.answers.filter(a => a !== -1).reduce((acc, ans, idx) => 
-                              acc + (ans === quizQuestions[idx].correct ? 1 : 0), 0) / quizQuestions.length) * 100) < 50,
+                          'bg-green-100 text-green-700':
+                            Math.round(
+                              (result.answers
+                                .filter((a) => a !== -1)
+                                .reduce(
+                                  (acc, ans, idx) =>
+                                    acc +
+                                    (ans === quizQuestions[idx].correct
+                                      ? 1
+                                      : 0),
+                                  0,
+                                ) /
+                                quizQuestions.length) *
+                                100,
+                            ) >= 70,
+                          'bg-yellow-100 text-yellow-700':
+                            Math.round(
+                              (result.answers
+                                .filter((a) => a !== -1)
+                                .reduce(
+                                  (acc, ans, idx) =>
+                                    acc +
+                                    (ans === quizQuestions[idx].correct
+                                      ? 1
+                                      : 0),
+                                  0,
+                                ) /
+                                quizQuestions.length) *
+                                100,
+                            ) >= 50 &&
+                            Math.round(
+                              (result.answers
+                                .filter((a) => a !== -1)
+                                .reduce(
+                                  (acc, ans, idx) =>
+                                    acc +
+                                    (ans === quizQuestions[idx].correct
+                                      ? 1
+                                      : 0),
+                                  0,
+                                ) /
+                                quizQuestions.length) *
+                                100,
+                            ) < 70,
+                          'bg-red-100 text-red-700':
+                            Math.round(
+                              (result.answers
+                                .filter((a) => a !== -1)
+                                .reduce(
+                                  (acc, ans, idx) =>
+                                    acc +
+                                    (ans === quizQuestions[idx].correct
+                                      ? 1
+                                      : 0),
+                                  0,
+                                ) /
+                                quizQuestions.length) *
+                                100,
+                            ) < 50,
                         }"
                       >
-                        {{ Math.round((result.answers.filter(a => a !== -1).reduce((acc, ans, idx) => 
-                          acc + (ans === quizQuestions[idx].correct ? 1 : 0), 0) / quizQuestions.length) * 100) }}%
+                        {{
+                          Math.round(
+                            (result.answers
+                              .filter((a) => a !== -1)
+                              .reduce(
+                                (acc, ans, idx) =>
+                                  acc +
+                                  (ans === quizQuestions[idx].correct ? 1 : 0),
+                                0,
+                              ) /
+                              quizQuestions.length) *
+                              100,
+                          )
+                        }}%
                       </span>
                     </td>
                     <td class="text-center py-3 px-3 text-p-medium/60 text-xs">
-                      {{ result.submittedAt ? new Date(result.submittedAt).toLocaleTimeString('it-IT') : '—' }}
+                      {{
+                        result.submittedAt
+                          ? new Date(result.submittedAt).toLocaleTimeString(
+                              'it-IT',
+                            )
+                          : '—'
+                      }}
                     </td>
                   </tr>
                 </tbody>
@@ -699,7 +829,9 @@
 
             <!-- No results yet -->
             <div v-else class="text-center py-8">
-              <p class="text-p-medium/60 text-sm">Nessun risultato ricevuto ancora.</p>
+              <p class="text-p-medium/60 text-sm">
+                Nessun risultato ricevuto ancora.
+              </p>
               <button
                 @click="fetchQuizResults"
                 class="mt-4 px-4 py-2 rounded-lg border border-p-soft text-p-medium hover:bg-p-soft/10 transition text-sm"
@@ -1079,7 +1211,11 @@ export default {
       return q?.timeLimit || null
     },
     isTimeExpired() {
-      return this.quizTimeRemaining !== null && this.quizTimeRemaining <= 0 && this.currentQuestionTimeLimit
+      return (
+        this.quizTimeRemaining !== null &&
+        this.quizTimeRemaining <= 0 &&
+        this.currentQuestionTimeLimit
+      )
     },
     timeDisplayColor() {
       if (!this.currentQuestionTimeLimit) return 'text-p-dark'
