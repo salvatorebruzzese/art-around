@@ -1459,7 +1459,7 @@ export default {
         })
       } else {
         this.controllerMode = 'libre'
-        this.controller = new LibreTourController(common)
+        this.controller = new TourController(common)
       }
       this.controller.setItemNav(this.itemNav)
     },
