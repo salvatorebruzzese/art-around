@@ -801,12 +801,6 @@ class TourController {
   teardown() {}
 }
 
-class LibreTourController extends TourController {
-  constructor(opts = {}) {
-    super(opts)
-  }
-}
-
 class MasterTourController extends TourController {
   constructor({ sessionId, ...opts } = {}) {
     super(opts)
@@ -1000,10 +994,6 @@ export default {
       curItemIdx: 0,
       detachedStack: [],
       refsItems: [],
-      bottomOverlay: false,
-      audioPlaying: false,
-      touch0: null,
-      openTouch0: null,
       loadedItemsMap: {},
       isMapView: false,
       isFollowersView: false,
@@ -1111,7 +1101,6 @@ export default {
         } else {
           this.refsItems = []
         }
-        this.stopAudio()
         this.setBestExplanationIdx()
       },
       immediate: true,
@@ -1552,26 +1541,6 @@ export default {
     returnToNav() {
       if (this.controller) this.controller.returnToNav()
     },
-    togglePlay() {
-      if (!this.currentItem || !this.currentItem.audio) return
-      const audioEl = this.$refs.audioEl
-      if (!audioEl) return
-      if (this.audioPlaying) {
-        audioEl.pause()
-        this.audioPlaying = false
-      } else {
-        audioEl.play()
-        this.audioPlaying = true
-      }
-    },
-    stopAudio() {
-      const audioEl = this.$refs.audioEl
-      if (audioEl) {
-        audioEl.pause()
-        audioEl.currentTime = 0
-        this.audioPlaying = false
-      }
-    },
     getLevelLabel(level) {
       if (!level) return 'Descrizione'
       switch (level) {
@@ -1752,7 +1721,6 @@ export default {
       this.isQuizCompleted = false
       this.quizResults = null
       this.isQuizOngoing = true
-      this.stopAudio()
       this.stopClientsPolling()
       this.startQuestionTimer()
     },
@@ -1802,7 +1770,7 @@ export default {
               : -1,
           )
 
-          let res = await fetch(
+          await fetch(
             `/api/sessions/${encodeURIComponent(this.sessionId)}/submitQuiz`,
             {
               method: 'POST',
@@ -1812,7 +1780,7 @@ export default {
           )
         }
         this.isQuizCompleted = true
-        
+
         // If master, fetch results after a short delay to let all participants submit
         if (this.isMaster && this.sessionId) {
           this.$nextTick(() => {
@@ -1829,7 +1797,7 @@ export default {
     },
     async fetchQuizResults() {
       if (!this.sessionId || this.isLoadingQuizResults) return
-      
+
       this.isLoadingQuizResults = true
       try {
         let res = await fetch(
@@ -1878,7 +1846,6 @@ export default {
       this.controller.teardown()
       this.controller = null
     }
-    this.stopAudio()
   },
 }
 </script>
