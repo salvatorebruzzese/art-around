@@ -55,7 +55,7 @@ app.get('/', (_req, res) => {
 })
 
 app.use('/home', homeRouter)
-app.use(['/access', '/credentials', '/login', '/signup'], accessRouter)
+app.use(['/access', '/login', '/signup'], accessRouter)
 app.use(['/marketplace', '/profile'], marketRouter)
 app.use('/navigator', navigatorRouter)
 app.use('/api', mainRouter)
