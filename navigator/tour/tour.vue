@@ -9,8 +9,7 @@
       <!-- Detail View -->
       <div
         v-if="!isMapView && !isFollowersView"
-        class="mx-auto w-full max-w-4xl bg-p-light rounded-2xl md:rounded-3xl shadow-lg shadow-p-soft p-6 mb-4 flex overflow-x-auto snap-x snap-mandatory md:grid gap-6"
-        :class="isMaster ? 'md:grid-cols-1' : 'md:grid-cols-2'"
+        class="mx-auto w-full max-w-4xl bg-p-light rounded-2xl md:rounded-3xl shadow-lg shadow-p-soft p-6 mb-4 flex overflow-x-auto snap-x snap-mandatory md:grid md:grid-cols-2 gap-6"
       >
         <!-- Slide 1: Media Preview -->
         <section
@@ -479,7 +478,7 @@
               :disabled="
                 selectedQuizAnswers[currentQuizQuestionIdx] === undefined
               "
-              class="shared-button-flex-primary px-6 py-2 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              class="shared-button-flex-primary disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Avanti
             </button>
@@ -490,7 +489,7 @@
                 selectedQuizAnswers[currentQuizQuestionIdx] === undefined ||
                 isSubmittingQuiz
               "
-              class="shared-button-full-primary px-6 py-2 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              class="shared-button-full-primary disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {{ isSubmittingQuiz ? 'Invio in corso...' : 'Termina Quiz' }}
             </button>
@@ -544,7 +543,7 @@
 
             <button
               @click="enterQuizReviewMode"
-              class="mt-4 px-6 py-2 rounded-lg border border-p-soft text-p-medium hover:bg-p-soft/10 transition cursor-pointer"
+              class="shared-button-flex-primary"
             >
               Rivedi Risposte
             </button>
@@ -564,12 +563,6 @@
                 Domanda {{ currentQuizQuestionIdx + 1 }} di
                 {{ quizQuestions.length }}
               </span>
-              <button
-                @click="exitQuizReviewMode"
-                class="text-sm text-p-medium/60 hover:text-p-dark transition"
-              >
-                ✕ Chiudi Revisione
-              </button>
             </div>
 
             <section v-if="currentQuizQuestion" class="flex flex-col gap-4">
@@ -647,20 +640,20 @@
               <button
                 @click="prevReviewQuestion"
                 :disabled="currentQuizQuestionIdx === 0"
-                class="px-6 py-2 rounded-lg border border-p-soft text-p-medium disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer hover:bg-p-soft/10 transition"
+                class="shared-button-flex-secondary disabled:cursor-not-allowed disabled:opacity-40"
               >
                 ← Precedente
               </button>
               <button
                 @click="exitQuizReviewMode"
-                class="px-6 py-2 rounded-lg border border-p-soft text-p-medium hover:bg-p-soft/10 transition cursor-pointer"
+                class="shared-button-flex-primary"
               >
                 Chiudi
               </button>
               <button
                 @click="nextReviewQuestion"
                 :disabled="currentQuizQuestionIdx === quizQuestions.length - 1"
-                class="px-6 py-2 rounded-lg border border-p-soft text-p-medium disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer hover:bg-p-soft/10 transition"
+                class="shared-button-flex-secondary disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Prossima →
               </button>
