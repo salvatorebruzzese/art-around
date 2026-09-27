@@ -3,7 +3,11 @@
     class="flex flex-col items-center w-full min-h-screen max-w-screen pb-24 font-serif text-p-dark selection:bg-p-soft"
   >
     <!-- Museums List -->
-    <div v-for="museum in museums" :key="museum._id" class="mb-8 max-w-screen">
+    <div
+      v-for="museum in museums"
+      :key="museum._id"
+      class="mt-2 mb-8 max-w-screen"
+    >
       <h2 class="text-2xl font-semibold mb-3 px-4 font-sans text-p-medium">
         {{ museum.name }}
       </h2>

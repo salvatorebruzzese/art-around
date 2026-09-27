@@ -15,7 +15,7 @@ router.get('/libre', (req, res) => {
 })
 
 router.get('/libre/:id', (req, res) => {
-  res.sendFile(join(rootDir, 'navigator/tour.html'))
+  res.sendFile(join(rootDir, 'navigator/tour/tour.html'))
 })
 
 router.get('/master', (req, res) => {
@@ -23,7 +23,7 @@ router.get('/master', (req, res) => {
 })
 
 router.get('/master/:id', (req, res) => {
-  res.sendFile(join(rootDir, 'navigator/tour.html'))
+  res.sendFile(join(rootDir, 'navigator/tour/tour.html'))
 })
 
 router.get('/guided', (req, res) => {
@@ -31,7 +31,7 @@ router.get('/guided', (req, res) => {
 })
 
 router.get('/guided/:id', (req, res) => {
-  res.sendFile(join(rootDir, 'navigator/tour.html'))
+  res.sendFile(join(rootDir, 'navigator/tour/tour.html'))
 })
 
 export default router

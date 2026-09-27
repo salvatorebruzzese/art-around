@@ -2,10 +2,10 @@
   <!-- Tour Navigation View -->
   <div
     v-if="!isQuizOngoing"
-    class="h-dvh flex flex-col justify-between bg-p-light font-serif text-p-dark selection:bg-p-soft overflow-hidden"
+    class="h-dvh flex flex-col bg-p-light font-serif text-p-dark selection:bg-p-soft overflow-hidden"
   >
     <!-- Scrollable Main Viewport -->
-    <main class="overflow-y-auto min-h-0 max-h-7/10 w-full md:pt-6">
+    <main class="overflow-y-auto min-h-0 flex-1 w-full md:pt-6">
       <!-- Detail View -->
       <div
         v-if="!isMapView && !isFollowersView"
@@ -112,6 +112,7 @@
 
         <!-- Slide 3: Correlati -->
         <section
+          v-if="!isGuided"
           class="w-full shrink-0 snap-center flex flex-col justify-start md:justify-center gap-4 h-full md:w-auto md:shrink"
         >
           <div v-if="refsItems.length" class="mt-6">
@@ -391,7 +392,7 @@
         class="mx-auto w-full max-w-2xl bg-p-light rounded-2xl md:rounded-3xl shadow-lg shadow-p-soft p-6 flex flex-col gap-6"
       >
         <!-- Domanda in corso -->
-        <template v-if="!isQuizCompleted && currentQuizQuestion">
+        <template v-if="!isMaster && !isQuizCompleted && currentQuizQuestion">
           <div
             class="flex items-center justify-between border-b border-p-soft/50 pb-4"
           >
@@ -497,7 +498,7 @@
         </template>
 
         <!-- Risultati completati -->
-        <template v-else-if="isQuizCompleted">
+        <template v-else-if="isMaster || isQuizCompleted">
           <!-- Participant Results & Review View -->
           <div
             v-if="!isMaster && !isQuizReviewMode"
@@ -859,260 +860,13 @@
 
 <script>
 import { Transition } from 'vue'
-import { TourNavigation } from '../marketplace/tourNav.js'
-import { speechRecognizer, startSpeechSynthesis } from './speechSyntesis.js'
-
-class TourController {
-  constructor({ itemNav = [], onChange = null } = {}) {
-    this.itemNav = Array.isArray(itemNav) ? itemNav.slice() : []
-    this.curItemIdx = 0
-    this.detachedStack = []
-    this.onChange = onChange
-  }
-
-  setItemNav(itemNav) {
-    this.itemNav = Array.isArray(itemNav) ? itemNav.slice() : []
-    this.curItemIdx = 0
-    this.detachedStack = []
-    this.emit()
-  }
-
-  getCurrentItemId() {
-    if (this.detachedStack.length > 0) {
-      return this.detachedStack[this.detachedStack.length - 1]
-    }
-    return this.itemNav[this.curItemIdx] || null
-  }
-
-  emit() {
-    if (typeof this.onChange === 'function') {
-      this.onChange({
-        curItemIdx: this.curItemIdx,
-        detachedStack: this.detachedStack.slice(),
-      })
-    }
-  }
-
-  goPrev() {
-    if (this.curItemIdx > 0) {
-      this.curItemIdx--
-      this.emit()
-    }
-  }
-
-  goNext() {
-    if (this.curItemIdx < this.itemNav.length - 1) {
-      this.curItemIdx++
-      this.emit()
-    }
-  }
-
-  openRefItem(itemId) {
-    if (!itemId) return
-    const navIdx = this.itemNav.findIndex((x) => x === itemId)
-    if (navIdx !== -1) {
-      this.curItemIdx = navIdx
-      this.detachedStack = []
-    } else {
-      this.detachedStack.push(itemId)
-    }
-    this.emit()
-  }
-
-  returnToNav() {
-    if (!this.detachedStack.length) return
-    this.detachedStack.pop()
-    this.emit()
-  }
-
-  goPrevOrReturn() {
-    if (this.detachedStack.length) this.returnToNav()
-    else this.goPrev()
-  }
-
-  teardown() {}
-}
-
-class MasterTourController extends TourController {
-  constructor({ sessionId, ...opts } = {}) {
-    super(opts)
-    this.sessionId = sessionId
-    this.lastBroadcastItemId = null
-    this.abortController = null
-    this.isStartingQuiz = false
-  }
-
-  emit() {
-    super.emit()
-    const currentItemId = this.getCurrentItemId()
-    if (currentItemId) {
-      this.broadcastShowItem(currentItemId)
-    }
-  }
-
-  async broadcastShowItem(itemId) {
-    if (!itemId || !this.sessionId || this.lastBroadcastItemId === itemId) {
-      return
-    }
-
-    if (this.abortController) {
-      this.abortController.abort()
-    }
-    this.abortController = new AbortController()
-
-    this.lastBroadcastItemId = itemId
-    try {
-      const url = `/api/sessions/${encodeURIComponent(this.sessionId)}/showItem`
-      let res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ itemId }),
-        signal: this.abortController.signal,
-      })
-      if (!res.ok) {
-        console.error(`Broadcast showItem failed: ${res.status}`)
-      }
-    } catch (e) {
-      // Ignora abort, ma log altri errori
-      if (e.name !== 'AbortError') {
-        console.error('Errore broadcastShowItem:', e)
-      }
-    }
-  }
-
-  async startQuiz() {
-    if (!this.sessionId || this.isStartingQuiz) return false
-
-    this.isStartingQuiz = true
-    try {
-      let res = await fetch(
-        `/api/sessions/${encodeURIComponent(this.sessionId)}/startQuiz`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-        },
-      )
-
-      if (!res.ok) {
-        console.error(`Start quiz failed: ${res.status}`)
-      }
-      return res.ok
-    } catch (err) {
-      console.error('Errore startQuiz:', err)
-      return false
-    } finally {
-      this.isStartingQuiz = false
-    }
-  }
-
-  teardown() {
-    if (this.abortController) {
-      this.abortController.abort()
-      this.abortController = null
-    }
-  }
-}
-
-class GuidedTourController extends TourController {
-  constructor({ sessionId, username, onStartQuiz = null, ...opts } = {}) {
-    super(opts)
-    this.sessionId = sessionId
-    this.username = username
-    this.onStartQuiz = onStartQuiz
-    this.eventSource = null
-    this.hasReceivedFirstEvent = false
-    this.refreshScheduled = false
-  }
-
-  connect() {
-    if (!this.sessionId || typeof window === 'undefined') return
-    const randomSuffix = (() => {
-      const cryptoObj = globalThis.crypto
-      if (!cryptoObj || typeof cryptoObj.getRandomValues !== 'function') {
-        return Date.now().toString(36)
-      }
-      const bytes = new Uint8Array(4)
-      cryptoObj.getRandomValues(bytes)
-      return Array.from(bytes, (byte) =>
-        byte.toString(16).padStart(2, '0'),
-      ).join('')
-    })()
-    const username = this.username || `guided-${randomSuffix}`
-    const joinUrl = `/api/sessions/${encodeURIComponent(this.sessionId)}/join?username=${encodeURIComponent(username)}`
-
-    this.eventSource = new EventSource(joinUrl)
-
-    this.eventSource.onerror = () => {
-      if (
-        this.eventSource &&
-        this.eventSource.readyState === EventSource.CLOSED
-      ) {
-        const altUrl = `/api/sessions/${encodeURIComponent(this.sessionId)}/join?username=${encodeURIComponent(username)}`
-        this.eventSource = new EventSource(altUrl)
-        this.bindEvents()
-      }
-    }
-
-    this.bindEvents()
-  }
-
-  bindEvents() {
-    if (!this.eventSource) return
-
-    // Schedule a refresh check after join - if no real events arrive, reload
-    if (!this.refreshScheduled && typeof window !== 'undefined') {
-      this.refreshScheduled = true
-      setTimeout(() => {
-        // If we haven't received any real event (showItem/startQuiz), refresh
-        if (!this.hasReceivedFirstEvent) {
-          window.location.reload()
-        }
-      }, 2000)
-    }
-
-    this.eventSource.addEventListener('showItem', (event) => {
-      try {
-        this.hasReceivedFirstEvent = true
-        const payload = JSON.parse(event.data || '{}')
-        this.showItem(payload.itemId)
-      } catch (_err) {}
-    })
-
-    this.eventSource.addEventListener('startQuiz', () => {
-      this.hasReceivedFirstEvent = true
-      if (typeof this.onStartQuiz === 'function') {
-        this.onStartQuiz()
-      }
-    })
-  }
-
-  showItem(itemId) {
-    if (!itemId) return
-    const navIdx = this.itemNav.findIndex((x) => x === itemId)
-    if (navIdx !== -1) {
-      this.curItemIdx = navIdx
-      this.detachedStack = []
-    } else {
-      this.detachedStack = [itemId]
-    }
-    this.emit()
-  }
-
-  goPrev() {}
-  goNext() {}
-  openRefItem() {}
-  returnToNav() {}
-  goPrevOrReturn() {}
-
-  teardown() {
-    if (this.eventSource) {
-      this.eventSource.close()
-      this.eventSource = null
-    }
-  }
-}
+import { TourNavigation } from '../../marketplace/tourNav.js'
+import { speechRecognizer, startSpeechSynthesis } from '../speechSyntesis.js'
+import {
+  TourController,
+  MasterTourController,
+  GuidedTourController,
+} from './controllers.js'
 
 export default {
   name: 'TourNavigationMobile',
