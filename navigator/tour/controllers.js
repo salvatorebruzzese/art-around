@@ -187,8 +187,7 @@ export class GuidedTourController extends TourController {
         this.eventSource &&
         this.eventSource.readyState === EventSource.CLOSED
       ) {
-        // CORREZIONE QUI
-        const altUrl = `/api/sessions/\({encodeURIComponent(this.sessionId)}/join?username=\){encodeURIComponent(username)}`
+        const altUrl = `/api/sessions/${encodeURIComponent(this.sessionId)}/join?username=${encodeURIComponent(username)}`
         this.eventSource = new EventSource(altUrl)
         this.bindEvents()
       }
