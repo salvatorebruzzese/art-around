@@ -541,12 +541,20 @@
               </div>
             </div>
 
-            <button
-              @click="enterQuizReviewMode"
-              class="shared-button-flex-primary"
-            >
-              Rivedi Risposte
-            </button>
+            <div class="flex flex-row gap-3">
+              <button
+                @click="exitQuiz"
+                class="shared-button-fit-secondary px-4"
+              >
+                Torna al Tour
+              </button>
+              <button
+                @click="enterQuizReviewMode"
+                class="shared-button-fit-secondary px-4"
+              >
+                Rivedi Risposte
+              </button>
+            </div>
           </div>
 
           <!-- Quiz Review Screen -->
