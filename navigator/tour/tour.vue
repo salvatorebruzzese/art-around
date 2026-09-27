@@ -2,15 +2,14 @@
   <!-- Tour Navigation View -->
   <div
     v-if="!isQuizOngoing"
-    class="h-dvh flex flex-col justify-between bg-p-light font-serif text-p-dark selection:bg-p-soft overflow-hidden"
+    class="h-dvh flex flex-col bg-p-light font-serif text-p-dark selection:bg-p-soft overflow-hidden"
   >
     <!-- Scrollable Main Viewport -->
-    <main class="overflow-y-auto min-h-0 max-h-7/10 w-full md:pt-6">
+    <main class="overflow-y-auto min-h-0 flex-1 w-full md:pt-6">
       <!-- Detail View -->
       <div
         v-if="!isMapView && !isFollowersView"
-        class="mx-auto w-full max-w-4xl bg-p-light rounded-2xl md:rounded-3xl shadow-lg shadow-p-soft p-6 mb-4 flex overflow-x-auto snap-x snap-mandatory md:grid gap-6"
-        :class="isMaster ? 'md:grid-cols-1' : 'md:grid-cols-2'"
+        class="mx-auto w-full max-w-4xl bg-p-light rounded-2xl md:rounded-3xl shadow-lg shadow-p-soft p-6 mb-4 flex overflow-x-auto snap-x snap-mandatory md:grid md:grid-cols-2 gap-6"
       >
         <!-- Slide 1: Media Preview -->
         <section
@@ -112,6 +111,7 @@
 
         <!-- Slide 3: Correlati -->
         <section
+          v-if="!isGuided"
           class="w-full shrink-0 snap-center flex flex-col justify-start md:justify-center gap-4 h-full md:w-auto md:shrink"
         >
           <div v-if="refsItems.length" class="mt-6">
@@ -391,7 +391,7 @@
         class="mx-auto w-full max-w-2xl bg-p-light rounded-2xl md:rounded-3xl shadow-lg shadow-p-soft p-6 flex flex-col gap-6"
       >
         <!-- Domanda in corso -->
-        <template v-if="!isQuizCompleted && currentQuizQuestion">
+        <template v-if="!isMaster && !isQuizCompleted && currentQuizQuestion">
           <div
             class="flex items-center justify-between border-b border-p-soft/50 pb-4"
           >
@@ -402,8 +402,11 @@
                 Domanda {{ currentQuizQuestionIdx + 1 }} di
                 {{ quizQuestions.length }}
               </span>
-              <div v-if="currentQuestionTimeLimit" class="text-xs text-p-medium/60">
-                Tempo: 
+              <div
+                v-if="currentQuestionTimeLimit"
+                class="text-xs text-p-medium/60"
+              >
+                Tempo:
                 <span :class="timeDisplayColor" class="font-semibold">
                   {{ quizTimeRemaining }}s
                 </span>
@@ -475,7 +478,7 @@
               :disabled="
                 selectedQuizAnswers[currentQuizQuestionIdx] === undefined
               "
-              class="shared-button-flex-primary px-6 py-2 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              class="shared-button-flex-primary disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Avanti
             </button>
@@ -486,7 +489,7 @@
                 selectedQuizAnswers[currentQuizQuestionIdx] === undefined ||
                 isSubmittingQuiz
               "
-              class="shared-button-full-primary px-6 py-2 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              class="shared-button-full-primary disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {{ isSubmittingQuiz ? 'Invio in corso...' : 'Termina Quiz' }}
             </button>
@@ -494,9 +497,12 @@
         </template>
 
         <!-- Risultati completati -->
-        <template v-else-if="isQuizCompleted">
+        <template v-else-if="isMaster || isQuizCompleted">
           <!-- Participant Results & Review View -->
-          <div v-if="!isMaster && !isQuizReviewMode" class="text-center flex flex-col items-center gap-4 py-8">
+          <div
+            v-if="!isMaster && !isQuizReviewMode"
+            class="text-center flex flex-col items-center gap-4 py-8"
+          >
             <div
               class="w-16 h-16 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-2xl font-bold"
             >
@@ -535,34 +541,49 @@
               </div>
             </div>
 
-            <button
-              @click="enterQuizReviewMode"
-              class="mt-4 px-6 py-2 rounded-lg border border-p-soft text-p-medium hover:bg-p-soft/10 transition cursor-pointer"
-            >
-              Rivedi Risposte
-            </button>
+            <div class="flex flex-row gap-3">
+              <button
+                @click="exitQuiz"
+                class="shared-button-fit-secondary px-4"
+              >
+                Torna al Tour
+              </button>
+              <button
+                @click="enterQuizReviewMode"
+                class="shared-button-fit-secondary px-4"
+              >
+                Rivedi Risposte
+              </button>
+            </div>
           </div>
 
           <!-- Quiz Review Screen -->
-          <div v-else-if="!isMaster && isQuizReviewMode" class="flex flex-col gap-6">
-            <div class="flex items-center justify-between border-b border-p-soft/50 pb-4">
-              <span class="text-sm font-semibold tracking-wide uppercase text-p-medium/70">
-                Domanda {{ currentQuizQuestionIdx + 1 }} di {{ quizQuestions.length }}
-              </span>
-              <button
-                @click="exitQuizReviewMode"
-                class="text-sm text-p-medium/60 hover:text-p-dark transition"
+          <div
+            v-else-if="!isMaster && isQuizReviewMode"
+            class="flex flex-col gap-6"
+          >
+            <div
+              class="flex items-center justify-between border-b border-p-soft/50 pb-4"
+            >
+              <span
+                class="text-sm font-semibold tracking-wide uppercase text-p-medium/70"
               >
-                ✕ Chiudi Revisione
-              </button>
+                Domanda {{ currentQuizQuestionIdx + 1 }} di
+                {{ quizQuestions.length }}
+              </span>
             </div>
 
             <section v-if="currentQuizQuestion" class="flex flex-col gap-4">
               <div>
-                <h2 class="text-lg md:text-xl font-bold text-p-dark font-serif mb-2">
+                <h2
+                  class="text-lg md:text-xl font-bold text-p-dark font-serif mb-2"
+                >
                   {{ currentQuizQuestion.questionText }}
                 </h2>
-                <p v-if="currentQuizQuestion.hint" class="text-xs text-p-medium/60 italic">
+                <p
+                  v-if="currentQuizQuestion.hint"
+                  class="text-xs text-p-medium/60 italic"
+                >
                   {{ currentQuizQuestion.hint }}
                 </p>
               </div>
@@ -576,18 +597,28 @@
                   disabled
                   class="w-full text-left p-4 rounded-xl border transition flex items-start justify-between group"
                   :class="{
-                    'bg-green-50 border-green-300': idx === currentQuizQuestion.correct,
-                    'bg-red-50 border-red-300': idx === selectedQuizAnswers[currentQuizQuestionIdx] && idx !== currentQuizQuestion.correct,
-                    'bg-p-soft/20 border-p-soft': idx !== currentQuizQuestion.correct && idx !== selectedQuizAnswers[currentQuizQuestionIdx],
+                    'bg-green-50 border-green-300':
+                      idx === currentQuizQuestion.correct,
+                    'bg-red-50 border-red-300':
+                      idx === selectedQuizAnswers[currentQuizQuestionIdx] &&
+                      idx !== currentQuizQuestion.correct,
+                    'bg-p-soft/20 border-p-soft':
+                      idx !== currentQuizQuestion.correct &&
+                      idx !== selectedQuizAnswers[currentQuizQuestionIdx],
                   }"
                 >
                   <span class="flex items-center gap-3 flex-1">
                     <span
                       class="w-7 h-7 rounded-full border flex items-center justify-center text-xs font-mono transition flex-shrink-0"
                       :class="{
-                        'bg-green-500 text-white border-green-500': idx === currentQuizQuestion.correct,
-                        'bg-red-500 text-white border-red-500': idx === selectedQuizAnswers[currentQuizQuestionIdx] && idx !== currentQuizQuestion.correct,
-                        'border-p-soft text-p-medium': idx !== currentQuizQuestion.correct && idx !== selectedQuizAnswers[currentQuizQuestionIdx],
+                        'bg-green-500 text-white border-green-500':
+                          idx === currentQuizQuestion.correct,
+                        'bg-red-500 text-white border-red-500':
+                          idx === selectedQuizAnswers[currentQuizQuestionIdx] &&
+                          idx !== currentQuizQuestion.correct,
+                        'border-p-soft text-p-medium':
+                          idx !== currentQuizQuestion.correct &&
+                          idx !== selectedQuizAnswers[currentQuizQuestionIdx],
                       }"
                     >
                       {{ String.fromCharCode(65 + idx) }}
@@ -595,8 +626,18 @@
                     <span class="text-p-dark">{{ option }}</span>
                   </span>
                   <span class="ml-2 text-sm font-semibold flex-shrink-0">
-                    <span v-if="idx === currentQuizQuestion.correct" class="text-green-600">✓ Corretto</span>
-                    <span v-else-if="idx === selectedQuizAnswers[currentQuizQuestionIdx]" class="text-red-600">✗ Sbagliato</span>
+                    <span
+                      v-if="idx === currentQuizQuestion.correct"
+                      class="text-green-600"
+                      >✓ Corretto</span
+                    >
+                    <span
+                      v-else-if="
+                        idx === selectedQuizAnswers[currentQuizQuestionIdx]
+                      "
+                      class="text-red-600"
+                      >✗ Sbagliato</span
+                    >
                   </span>
                 </button>
               </div>
@@ -607,20 +648,20 @@
               <button
                 @click="prevReviewQuestion"
                 :disabled="currentQuizQuestionIdx === 0"
-                class="px-6 py-2 rounded-lg border border-p-soft text-p-medium disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer hover:bg-p-soft/10 transition"
+                class="shared-button-flex-secondary disabled:cursor-not-allowed disabled:opacity-40"
               >
                 ← Precedente
               </button>
               <button
                 @click="exitQuizReviewMode"
-                class="px-6 py-2 rounded-lg border border-p-soft text-p-medium hover:bg-p-soft/10 transition cursor-pointer"
+                class="shared-button-flex-primary"
               >
                 Chiudi
               </button>
               <button
                 @click="nextReviewQuestion"
                 :disabled="currentQuizQuestionIdx === quizQuestions.length - 1"
-                class="px-6 py-2 rounded-lg border border-p-soft text-p-medium disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer hover:bg-p-soft/10 transition"
+                class="shared-button-flex-secondary disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Prossima →
               </button>
@@ -634,20 +675,36 @@
                 Risultati Quiz
               </h2>
               <p class="text-p-medium/80 text-sm">
-                Risposte ricevute da {{ (quizResults && Object.keys(quizResults).length) || 0 }} 
-                partecipant{{ (quizResults && Object.keys(quizResults).length) !== 1 ? 'i' : 'e' }}
+                Risposte ricevute da
+                {{ (quizResults && Object.keys(quizResults).length) || 0 }}
+                partecipant{{
+                  (quizResults && Object.keys(quizResults).length) !== 1
+                    ? 'i'
+                    : 'e'
+                }}
               </p>
             </div>
 
             <!-- Results Table -->
-            <div v-if="quizResults && Object.keys(quizResults).length > 0" class="overflow-x-auto">
+            <div
+              v-if="quizResults && Object.keys(quizResults).length > 0"
+              class="overflow-x-auto"
+            >
               <table class="w-full text-sm">
                 <thead>
                   <tr class="border-b-2 border-p-soft">
-                    <th class="text-left py-2 px-3 font-semibold text-p-dark">Partecipante</th>
-                    <th class="text-center py-2 px-3 font-semibold text-p-dark">Punteggio</th>
-                    <th class="text-center py-2 px-3 font-semibold text-p-dark">Percentuale</th>
-                    <th class="text-center py-2 px-3 font-semibold text-p-dark">Invio</th>
+                    <th class="text-left py-2 px-3 font-semibold text-p-dark">
+                      Partecipante
+                    </th>
+                    <th class="text-center py-2 px-3 font-semibold text-p-dark">
+                      Punteggio
+                    </th>
+                    <th class="text-center py-2 px-3 font-semibold text-p-dark">
+                      Percentuale
+                    </th>
+                    <th class="text-center py-2 px-3 font-semibold text-p-dark">
+                      Invio
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -660,32 +717,107 @@
                       {{ userId }}
                     </td>
                     <td class="text-center py-3 px-3 text-p-dark font-semibold">
-                      {{ result.answers.filter(a => a !== -1).reduce((acc, ans, idx) => 
-                        acc + (ans === quizQuestions[idx].correct ? 1 : 0), 0) }} / {{ quizQuestions.length }}
+                      {{
+                        result.answers
+                          .filter((a) => a !== -1)
+                          .reduce(
+                            (acc, ans, idx) =>
+                              acc +
+                              (ans === quizQuestions[idx].correct ? 1 : 0),
+                            0,
+                          )
+                      }}
+                      / {{ quizQuestions.length }}
                     </td>
                     <td class="text-center py-3 px-3 text-p-dark">
                       <span
                         class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold"
                         :class="{
-                          'bg-green-100 text-green-700': 
-                            Math.round((result.answers.filter(a => a !== -1).reduce((acc, ans, idx) => 
-                              acc + (ans === quizQuestions[idx].correct ? 1 : 0), 0) / quizQuestions.length) * 100) >= 70,
-                          'bg-yellow-100 text-yellow-700': 
-                            Math.round((result.answers.filter(a => a !== -1).reduce((acc, ans, idx) => 
-                              acc + (ans === quizQuestions[idx].correct ? 1 : 0), 0) / quizQuestions.length) * 100) >= 50 &&
-                            Math.round((result.answers.filter(a => a !== -1).reduce((acc, ans, idx) => 
-                              acc + (ans === quizQuestions[idx].correct ? 1 : 0), 0) / quizQuestions.length) * 100) < 70,
-                          'bg-red-100 text-red-700': 
-                            Math.round((result.answers.filter(a => a !== -1).reduce((acc, ans, idx) => 
-                              acc + (ans === quizQuestions[idx].correct ? 1 : 0), 0) / quizQuestions.length) * 100) < 50,
+                          'bg-green-100 text-green-700':
+                            Math.round(
+                              (result.answers
+                                .filter((a) => a !== -1)
+                                .reduce(
+                                  (acc, ans, idx) =>
+                                    acc +
+                                    (ans === quizQuestions[idx].correct
+                                      ? 1
+                                      : 0),
+                                  0,
+                                ) /
+                                quizQuestions.length) *
+                                100,
+                            ) >= 70,
+                          'bg-yellow-100 text-yellow-700':
+                            Math.round(
+                              (result.answers
+                                .filter((a) => a !== -1)
+                                .reduce(
+                                  (acc, ans, idx) =>
+                                    acc +
+                                    (ans === quizQuestions[idx].correct
+                                      ? 1
+                                      : 0),
+                                  0,
+                                ) /
+                                quizQuestions.length) *
+                                100,
+                            ) >= 50 &&
+                            Math.round(
+                              (result.answers
+                                .filter((a) => a !== -1)
+                                .reduce(
+                                  (acc, ans, idx) =>
+                                    acc +
+                                    (ans === quizQuestions[idx].correct
+                                      ? 1
+                                      : 0),
+                                  0,
+                                ) /
+                                quizQuestions.length) *
+                                100,
+                            ) < 70,
+                          'bg-red-100 text-red-700':
+                            Math.round(
+                              (result.answers
+                                .filter((a) => a !== -1)
+                                .reduce(
+                                  (acc, ans, idx) =>
+                                    acc +
+                                    (ans === quizQuestions[idx].correct
+                                      ? 1
+                                      : 0),
+                                  0,
+                                ) /
+                                quizQuestions.length) *
+                                100,
+                            ) < 50,
                         }"
                       >
-                        {{ Math.round((result.answers.filter(a => a !== -1).reduce((acc, ans, idx) => 
-                          acc + (ans === quizQuestions[idx].correct ? 1 : 0), 0) / quizQuestions.length) * 100) }}%
+                        {{
+                          Math.round(
+                            (result.answers
+                              .filter((a) => a !== -1)
+                              .reduce(
+                                (acc, ans, idx) =>
+                                  acc +
+                                  (ans === quizQuestions[idx].correct ? 1 : 0),
+                                0,
+                              ) /
+                              quizQuestions.length) *
+                              100,
+                          )
+                        }}%
                       </span>
                     </td>
                     <td class="text-center py-3 px-3 text-p-medium/60 text-xs">
-                      {{ result.submittedAt ? new Date(result.submittedAt).toLocaleTimeString('it-IT') : '—' }}
+                      {{
+                        result.submittedAt
+                          ? new Date(result.submittedAt).toLocaleTimeString(
+                              'it-IT',
+                            )
+                          : '—'
+                      }}
                     </td>
                   </tr>
                 </tbody>
@@ -699,7 +831,9 @@
 
             <!-- No results yet -->
             <div v-else class="text-center py-8">
-              <p class="text-p-medium/60 text-sm">Nessun risultato ricevuto ancora.</p>
+              <p class="text-p-medium/60 text-sm">
+                Nessun risultato ricevuto ancora.
+              </p>
               <button
                 @click="fetchQuizResults"
                 class="mt-4 px-4 py-2 rounded-lg border border-p-soft text-p-medium hover:bg-p-soft/10 transition text-sm"
@@ -727,266 +861,13 @@
 
 <script>
 import { Transition } from 'vue'
-import { TourNavigation } from '../marketplace/tourNav.js'
-import { speechRecognizer, startSpeechSynthesis } from './speechSyntesis.js'
-
-class TourController {
-  constructor({ itemNav = [], onChange = null } = {}) {
-    this.itemNav = Array.isArray(itemNav) ? itemNav.slice() : []
-    this.curItemIdx = 0
-    this.detachedStack = []
-    this.onChange = onChange
-  }
-
-  setItemNav(itemNav) {
-    this.itemNav = Array.isArray(itemNav) ? itemNav.slice() : []
-    this.curItemIdx = 0
-    this.detachedStack = []
-    this.emit()
-  }
-
-  getCurrentItemId() {
-    if (this.detachedStack.length > 0) {
-      return this.detachedStack[this.detachedStack.length - 1]
-    }
-    return this.itemNav[this.curItemIdx] || null
-  }
-
-  emit() {
-    if (typeof this.onChange === 'function') {
-      this.onChange({
-        curItemIdx: this.curItemIdx,
-        detachedStack: this.detachedStack.slice(),
-      })
-    }
-  }
-
-  goPrev() {
-    if (this.curItemIdx > 0) {
-      this.curItemIdx--
-      this.emit()
-    }
-  }
-
-  goNext() {
-    if (this.curItemIdx < this.itemNav.length - 1) {
-      this.curItemIdx++
-      this.emit()
-    }
-  }
-
-  openRefItem(itemId) {
-    if (!itemId) return
-    const navIdx = this.itemNav.findIndex((x) => x === itemId)
-    if (navIdx !== -1) {
-      this.curItemIdx = navIdx
-      this.detachedStack = []
-    } else {
-      this.detachedStack.push(itemId)
-    }
-    this.emit()
-  }
-
-  returnToNav() {
-    if (!this.detachedStack.length) return
-    this.detachedStack.pop()
-    this.emit()
-  }
-
-  goPrevOrReturn() {
-    if (this.detachedStack.length) this.returnToNav()
-    else this.goPrev()
-  }
-
-  teardown() {}
-}
-
-class LibreTourController extends TourController {
-  constructor(opts = {}) {
-    super(opts)
-  }
-}
-
-class MasterTourController extends TourController {
-  constructor({ sessionId, ...opts } = {}) {
-    super(opts)
-    this.sessionId = sessionId
-    this.lastBroadcastItemId = null
-    this.abortController = null
-    this.isStartingQuiz = false
-  }
-
-  emit() {
-    super.emit()
-    const currentItemId = this.getCurrentItemId()
-    if (currentItemId) {
-      this.broadcastShowItem(currentItemId)
-    }
-  }
-
-  async broadcastShowItem(itemId) {
-    if (!itemId || !this.sessionId || this.lastBroadcastItemId === itemId) {
-      return
-    }
-
-    if (this.abortController) {
-      this.abortController.abort()
-    }
-    this.abortController = new AbortController()
-
-    this.lastBroadcastItemId = itemId
-    try {
-      const url = `/api/sessions/${encodeURIComponent(this.sessionId)}/showItem`
-      let res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ itemId }),
-        signal: this.abortController.signal,
-      })
-      if (!res.ok) {
-        console.error(`Broadcast showItem failed: ${res.status}`)
-      }
-    } catch (e) {
-      // Ignora abort, ma log altri errori
-      if (e.name !== 'AbortError') {
-        console.error('Errore broadcastShowItem:', e)
-      }
-    }
-  }
-
-  async startQuiz() {
-    if (!this.sessionId || this.isStartingQuiz) return false
-
-    this.isStartingQuiz = true
-    try {
-      let res = await fetch(
-        `/api/sessions/${encodeURIComponent(this.sessionId)}/startQuiz`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-        },
-      )
-
-      if (!res.ok) {
-        console.error(`Start quiz failed: ${res.status}`)
-      }
-      return res.ok
-    } catch (err) {
-      console.error('Errore startQuiz:', err)
-      return false
-    } finally {
-      this.isStartingQuiz = false
-    }
-  }
-
-  teardown() {
-    if (this.abortController) {
-      this.abortController.abort()
-      this.abortController = null
-    }
-  }
-}
-
-class GuidedTourController extends TourController {
-  constructor({ sessionId, username, onStartQuiz = null, ...opts } = {}) {
-    super(opts)
-    this.sessionId = sessionId
-    this.username = username
-    this.onStartQuiz = onStartQuiz
-    this.eventSource = null
-    this.hasReceivedFirstEvent = false
-    this.refreshScheduled = false
-  }
-
-  connect() {
-    if (!this.sessionId || typeof window === 'undefined') return
-    const randomSuffix = (() => {
-      const cryptoObj = globalThis.crypto
-      if (!cryptoObj || typeof cryptoObj.getRandomValues !== 'function') {
-        return Date.now().toString(36)
-      }
-      const bytes = new Uint8Array(4)
-      cryptoObj.getRandomValues(bytes)
-      return Array.from(bytes, (byte) =>
-        byte.toString(16).padStart(2, '0'),
-      ).join('')
-    })()
-    const username = this.username || `guided-${randomSuffix}`
-    const joinUrl = `/api/sessions/${encodeURIComponent(this.sessionId)}/join?username=${encodeURIComponent(username)}`
-
-    this.eventSource = new EventSource(joinUrl)
-
-    this.eventSource.onerror = () => {
-      if (
-        this.eventSource &&
-        this.eventSource.readyState === EventSource.CLOSED
-      ) {
-        const altUrl = `/api/sessions/${encodeURIComponent(this.sessionId)}/join?username=${encodeURIComponent(username)}`
-        this.eventSource = new EventSource(altUrl)
-        this.bindEvents()
-      }
-    }
-
-    this.bindEvents()
-  }
-
-  bindEvents() {
-    if (!this.eventSource) return
-
-    // Schedule a refresh check after join - if no real events arrive, reload
-    if (!this.refreshScheduled && typeof window !== 'undefined') {
-      this.refreshScheduled = true
-      setTimeout(() => {
-        // If we haven't received any real event (showItem/startQuiz), refresh
-        if (!this.hasReceivedFirstEvent) {
-          window.location.reload()
-        }
-      }, 2000)
-    }
-
-    this.eventSource.addEventListener('showItem', (event) => {
-      try {
-        this.hasReceivedFirstEvent = true
-        const payload = JSON.parse(event.data || '{}')
-        this.showItem(payload.itemId)
-      } catch (_err) {}
-    })
-
-    this.eventSource.addEventListener('startQuiz', () => {
-      this.hasReceivedFirstEvent = true
-      if (typeof this.onStartQuiz === 'function') {
-        this.onStartQuiz()
-      }
-    })
-  }
-
-  showItem(itemId) {
-    if (!itemId) return
-    const navIdx = this.itemNav.findIndex((x) => x === itemId)
-    if (navIdx !== -1) {
-      this.curItemIdx = navIdx
-      this.detachedStack = []
-    } else {
-      this.detachedStack = [itemId]
-    }
-    this.emit()
-  }
-
-  goPrev() {}
-  goNext() {}
-  openRefItem() {}
-  returnToNav() {}
-  goPrevOrReturn() {}
-
-  teardown() {
-    if (this.eventSource) {
-      this.eventSource.close()
-      this.eventSource = null
-    }
-  }
-}
+import { TourNavigation } from '../../marketplace/tourNav.js'
+import { speechRecognizer, startSpeechSynthesis } from '../speechSyntesis.js'
+import {
+  TourController,
+  MasterTourController,
+  GuidedTourController,
+} from './controllers.js'
 
 export default {
   name: 'TourNavigationMobile',
@@ -1000,10 +881,6 @@ export default {
       curItemIdx: 0,
       detachedStack: [],
       refsItems: [],
-      bottomOverlay: false,
-      audioPlaying: false,
-      touch0: null,
-      openTouch0: null,
       loadedItemsMap: {},
       isMapView: false,
       isFollowersView: false,
@@ -1089,7 +966,11 @@ export default {
       return q?.timeLimit || null
     },
     isTimeExpired() {
-      return this.quizTimeRemaining !== null && this.quizTimeRemaining <= 0 && this.currentQuestionTimeLimit
+      return (
+        this.quizTimeRemaining !== null &&
+        this.quizTimeRemaining <= 0 &&
+        this.currentQuestionTimeLimit
+      )
     },
     timeDisplayColor() {
       if (!this.currentQuestionTimeLimit) return 'text-p-dark'
@@ -1111,7 +992,6 @@ export default {
         } else {
           this.refsItems = []
         }
-        this.stopAudio()
         this.setBestExplanationIdx()
       },
       immediate: true,
@@ -1334,7 +1214,7 @@ export default {
         })
       } else {
         this.controllerMode = 'libre'
-        this.controller = new LibreTourController(common)
+        this.controller = new TourController(common)
       }
       this.controller.setItemNav(this.itemNav)
     },
@@ -1552,26 +1432,6 @@ export default {
     returnToNav() {
       if (this.controller) this.controller.returnToNav()
     },
-    togglePlay() {
-      if (!this.currentItem || !this.currentItem.audio) return
-      const audioEl = this.$refs.audioEl
-      if (!audioEl) return
-      if (this.audioPlaying) {
-        audioEl.pause()
-        this.audioPlaying = false
-      } else {
-        audioEl.play()
-        this.audioPlaying = true
-      }
-    },
-    stopAudio() {
-      const audioEl = this.$refs.audioEl
-      if (audioEl) {
-        audioEl.pause()
-        audioEl.currentTime = 0
-        this.audioPlaying = false
-      }
-    },
     getLevelLabel(level) {
       if (!level) return 'Descrizione'
       switch (level) {
@@ -1752,7 +1612,6 @@ export default {
       this.isQuizCompleted = false
       this.quizResults = null
       this.isQuizOngoing = true
-      this.stopAudio()
       this.stopClientsPolling()
       this.startQuestionTimer()
     },
@@ -1802,7 +1661,7 @@ export default {
               : -1,
           )
 
-          let res = await fetch(
+          await fetch(
             `/api/sessions/${encodeURIComponent(this.sessionId)}/submitQuiz`,
             {
               method: 'POST',
@@ -1812,7 +1671,7 @@ export default {
           )
         }
         this.isQuizCompleted = true
-        
+
         // If master, fetch results after a short delay to let all participants submit
         if (this.isMaster && this.sessionId) {
           this.$nextTick(() => {
@@ -1829,7 +1688,7 @@ export default {
     },
     async fetchQuizResults() {
       if (!this.sessionId || this.isLoadingQuizResults) return
-      
+
       this.isLoadingQuizResults = true
       try {
         let res = await fetch(
@@ -1878,7 +1737,6 @@ export default {
       this.controller.teardown()
       this.controller = null
     }
-    this.stopAudio()
   },
 }
 </script>
