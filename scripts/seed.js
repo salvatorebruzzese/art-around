@@ -26,7 +26,7 @@ const mongouri = `mongodb://${process.env.MONGO_USR}:${process.env.MONGO_PWD}@${
 const USER_COUNT = 5
 const MUSEUM_COUNT = 5
 const TOURS_PER_MUSEUM = 4
-const ITEMS_PER_TOUR = 8
+const ITEMS_PER_TOUR = 15
 const ASSETS_PER_USER = 30
 
 const sampleMuseumsData = [
@@ -95,9 +95,9 @@ async function seed() {
     // --- USERS ---
     const baseUsers = [
       {
-        username: 'testuser',
+        username: 'visitatore1',
         email: 'me@example.com',
-        password: 'password123',
+        password: '12345678',
         role: Role['User'],
       },
       {
@@ -107,9 +107,21 @@ async function seed() {
         role: Role['Admin'],
       },
       {
-        username: 'anotheruser',
-        email: 'anotheruser@example.com',
-        password: 'user987',
+        username: 'visitatore2',
+        email: 'me@example.com',
+        password: '12345678',
+        role: Role['User'],
+      },
+	{
+        username: 'autore1',
+        email: 'me@example.com',
+        password: '12345678',
+        role: Role['User'],
+      },
+      {
+        username: 'autore2',
+        email: 'me@example.com',
+        password: '12345678',
         role: Role['User'],
       },
     ]
